@@ -262,7 +262,7 @@
     let sortMode = 'latest';
     let localNews = [];
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       // 1. Build Navigation
       try {
         const { navLinks, mobileLinks, statusDot } = buildNav('news');
@@ -271,24 +271,55 @@
         document.getElementById('market-status').innerHTML = statusDot;
       } catch (e) { console.error("Nav build error:", e); }
 
-      // Ensure NEWS_DATA exists, clone it so we don't mutate original
-      if (typeof NEWS_DATA !== 'undefined' && Array.isArray(NEWS_DATA)) {
-        localNews = [...NEWS_DATA];
-      } else {
-        // Fallback dummy data if shared.js doesn't provide enough
-        localNews = [
-          { id: 1, headline: 'Sensex hits new all-time high amid foreign inflows', summary: 'The benchmark index crossed the 75k mark today as FIIs continue their buying spree in the Indian market.', category: 'BSE', sentiment: 'Bullish', time: '1h ago', tags: ['Banking', 'Macro'], ticker: null },
-          { id: 2, headline: 'Infosys Q3 Results: Margins expand, revenue guidance maintained', summary: 'IT major Infosys reported a 5% YoY growth in net profit. Operating margins expanded by 50 bps.', category: 'NSE', sentiment: 'Bullish', time: '2h ago', tags: ['IT'], ticker: 'INFY' },
-          { id: 3, headline: 'RBI keeps repo rate unchanged at 6.5%', summary: 'The Monetary Policy Committee decided to maintain status quo on rates citing inflation concerns in the near term.', category: 'Economy', sentiment: 'Neutral', time: '3h ago', tags: ['Macro', 'Banking'], ticker: null },
-          { id: 4, headline: 'Auto sales see dip in entry-level segment', summary: 'Major automakers report sluggish demand in rural markets for entry-level two-wheelers and passenger vehicles.', category: 'NSE', sentiment: 'Bearish', time: '4h ago', tags: ['Auto'], ticker: 'MARUTI' },
-          { id: 5, headline: 'Sun Pharma receives USFDA approval for new generic', summary: 'The pharmaceutical giant has secured final approval from the US FDA for its Abbreviated New Drug Application.', category: 'BSE', sentiment: 'Bullish', time: '5h ago', tags: ['Pharma'], ticker: 'SUNPHARMA' },
-          { id: 6, headline: 'FMCG sector faces margin pressure due to raw material costs', summary: 'Rising prices of palm oil and crude derivatives are expected to squeeze margins for top FMCG players this quarter.', category: 'NSE', sentiment: 'Bearish', time: '6h ago', tags: ['FMCG'], ticker: 'HINDUNILVR' },
-        ];
+      // 2. Show loading skeletons
+      showNewsSkeletons();
+
+      // 3. Fetch live RapidAPI news from backend
+      try {
+        const response = await fetch('/api/market-news');
+        const data = await response.json();
+        if (data.status === 'SUCCESS' && Array.isArray(data.payload)) {
+          localNews = data.payload;
+        } else {
+          loadMockNews();
+        }
+      } catch (err) {
+        console.error('Failed to fetch live news, falling back to static database:', err);
+        loadMockNews();
       }
 
       initPage();
       updateMiniBar();
     });
+
+    function showNewsSkeletons() {
+      const grid = document.getElementById('news-grid');
+      if (grid) {
+        grid.innerHTML = Array(6).fill(0).map(() => `
+          <div class="glass-panel rounded-2xl p-5 flex flex-col animate-pulse">
+            <div class="flex justify-between mb-3">
+              <div class="h-4 bg-white/10 rounded w-1/4"></div>
+              <div class="h-4 bg-white/10 rounded w-1/12"></div>
+            </div>
+            <div class="h-8 bg-white/10 rounded w-3/4 mb-3"></div>
+            <div class="h-16 bg-white/10 rounded mb-4"></div>
+            <div class="h-6 bg-white/10 rounded w-1/3 mt-auto"></div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function loadMockNews() {
+      if (typeof NEWS_DATA !== 'undefined' && Array.isArray(NEWS_DATA)) {
+        localNews = [...NEWS_DATA];
+      } else {
+        localNews = [
+          { id: 1, headline: 'Sensex hits new all-time high amid foreign inflows', summary: 'The benchmark index crossed the 75k mark today as FIIs continue their buying spree.', category: 'BSE', sentiment: 'Bullish', time: '1h ago', tags: ['Banking', 'Macro'], ticker: null },
+          { id: 2, headline: 'Infosys Q3 Results: Margins expand, revenue guidance maintained', summary: 'IT major Infosys reported a 5% YoY growth in net profit.', category: 'NSE', sentiment: 'Bullish', time: '2h ago', tags: ['IT'], ticker: 'INFY' },
+          { id: 3, headline: 'RBI keeps repo rate unchanged at 6.5%', summary: 'The Monetary Policy Committee decided to maintain status quo on rates.', category: 'Economy', sentiment: 'Neutral', time: '3h ago', tags: ['Macro', 'Banking'], ticker: null }
+        ];
+      }
+    }
 
     document.addEventListener('market:tick', () => {
       updateMiniBar();
@@ -469,7 +500,7 @@
             <span class="material-symbols-outlined text-[14px]">schedule</span>
             ${item.time || 'Just now'}
           </span>
-          <a href="#" class="text-sm font-medium text-primary hover:text-white transition-colors flex items-center gap-1">
+          <a href="${item.url || '#'}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-primary hover:text-white transition-colors flex items-center gap-1">
             Read More
             <span class="material-symbols-outlined text-sm">arrow_forward</span>
           </a>
