@@ -222,19 +222,10 @@
     } catch (err) {
       console.warn('Groww client error:', err.message);
       
-      // Show warning/error banner
-      if (err.message.includes('missing') || err.message.includes('UNAUTHORIZED') || err.message.includes('expired')) {
-        setStatus('SIMULATED');
-        // Restart simulated market simulation since API is not configured
-        if (window.restartSimulation) {
-          window.restartSimulation();
-        }
-      } else {
-        setStatus('ERROR', err.message || 'Server offline');
-        // Restart simulated market simulation as a fallback
-        if (window.restartSimulation) {
-          window.restartSimulation();
-        }
+      // Gracefully fall back to Demo Mode (Simulated Data) on any offline, config, or auth errors
+      setStatus('SIMULATED');
+      if (window.restartSimulation) {
+        window.restartSimulation();
       }
     }
   }
