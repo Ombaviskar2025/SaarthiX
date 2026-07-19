@@ -181,9 +181,13 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`============================================================`);
-  console.log(` SaarthiX Indian Market Proxy Server listening on port ${PORT}`);
-  console.log(` Access Dashboard at: http://localhost:${PORT}/dashboard.html`);
-  console.log(`============================================================`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`============================================================`);
+    console.log(` SaarthiX Indian Market Proxy Server listening on port ${PORT}`);
+    console.log(` Access Dashboard at: http://localhost:${PORT}/dashboard.html`);
+    console.log(`============================================================`);
+  });
+}
+
+module.exports = app;
