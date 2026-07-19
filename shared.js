@@ -14,11 +14,11 @@ const INDICES = {
 
 // ── Stocks Database (50 NSE/BSE stocks) ──────────────────────
 const STOCKS_DB = [
-  { ticker:'RELIANCE',   name:'Reliance Industries Ltd.',      exchange:'NSE', sector:'Energy',        price:2847.65,  change:34.20,   changePct:1.22,  volume:8234567,  mktCap:'19.3L Cr', pe:24.5, high52:3024.90,  low52:2180.45 },
+  { ticker:'RELIANCE',   name:'Reliance Industries Ltd.',      exchange:'NSE', sector:'Energy',        price:1327.20,  change:34.20,   changePct:1.22,  volume:8234567,  mktCap:'19.3L Cr', pe:24.5, high52:3024.90,  low52:2180.45 },
   { ticker:'ONGC',       name:'Oil & Natural Gas Corp.',       exchange:'NSE', sector:'Energy',        price:284.30,   change:-2.15,   changePct:-0.75, volume:12456789, mktCap:'3.6L Cr',  pe:8.2,  high52:345.20,   low52:197.50  },
   { ticker:'BPCL',       name:'Bharat Petroleum Corp.',        exchange:'BSE', sector:'Energy',        price:312.45,   change:4.80,    changePct:1.56,  volume:5678901,  mktCap:'1.4L Cr',  pe:11.4, high52:376.50,   low52:224.80  },
   { ticker:'TCS',        name:'Tata Consultancy Services',     exchange:'NSE', sector:'IT',            price:3921.40,  change:-28.35,  changePct:-0.72, volume:2134892,  mktCap:'14.2L Cr', pe:31.2, high52:4592.25,  low52:3311.80 },
-  { ticker:'INFY',       name:'Infosys Ltd.',                  exchange:'NSE', sector:'IT',            price:1624.55,  change:18.90,   changePct:1.18,  volume:4523781,  mktCap:'6.8L Cr',  pe:27.4, high52:1992.25,  low52:1356.20 },
+  { ticker:'INFY',       name:'Infosys Ltd.',                  exchange:'NSE', sector:'IT',            price:1094.20,  change:18.90,   changePct:1.18,  volume:4523781,  mktCap:'6.8L Cr',  pe:27.4, high52:1992.25,  low52:1356.20 },
   { ticker:'WIPRO',      name:'Wipro Ltd.',                    exchange:'NSE', sector:'IT',            price:538.20,   change:-3.45,   changePct:-0.64, volume:3892456,  mktCap:'2.8L Cr',  pe:22.1, high52:648.80,   low52:424.15  },
   { ticker:'HCLTECH',    name:'HCL Technologies Ltd.',         exchange:'NSE', sector:'IT',            price:1724.30,  change:22.10,   changePct:1.30,  volume:2345678,  mktCap:'4.7L Cr',  pe:25.8, high52:1980.70,  low52:1244.60 },
   { ticker:'TECHM',      name:'Tech Mahindra Ltd.',            exchange:'NSE', sector:'IT',            price:1524.65,  change:15.30,   changePct:1.01,  volume:1234567,  mktCap:'1.5L Cr',  pe:38.5, high52:1765.90,  low52:1097.45 },
