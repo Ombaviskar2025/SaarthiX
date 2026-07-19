@@ -449,7 +449,9 @@
       }
 
       setTimeout(() => {
-        window.location.href = 'dashboard.html';
+        const currentPath = window.location.pathname;
+        const targetPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/dashboard.html';
+        window.location.replace(window.location.origin + targetPath);
       }, 1000);
     }
 
