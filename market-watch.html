@@ -451,13 +451,17 @@
     function renderSnapshot() {
       if (!window.LIVE_INDICES) return;
       const strip = document.getElementById('indices-snapshot');
+      if (!strip) return;
       strip.innerHTML = '';
       
-      LIVE_INDICES.slice(0, 2).forEach(idx => {
+      const indicesToShow = [window.LIVE_INDICES.nifty50, window.LIVE_INDICES.sensex];
+      indicesToShow.forEach(idx => {
+        if (!idx) return;
         const clz = idx.change >= 0 ? 'text-secondary' : 'text-error';
         const sign = idx.change >= 0 ? '+' : '';
         const icon = idx.change >= 0 ? 'arrow_drop_up' : 'arrow_drop_down';
-        const p = typeof fmtPrice === 'function' ? fmtPrice(idx.price) : idx.price.toFixed(2);
+        const p = typeof fmtPrice === 'function' ? fmtPrice(idx.value) : idx.value.toFixed(2);
+        const changePct = typeof idx.changePct === 'number' ? idx.changePct : 0;
         
         strip.innerHTML += `
           <div class="flex items-center gap-1.5 font-medium bg-surface-container/50 px-3 py-1.5 rounded-lg border border-white/5">
@@ -465,7 +469,7 @@
             <span class="text-white">${p}</span>
             <span class="${clz} flex items-center text-xs">
               <span class="material-symbols-outlined text-[16px] -mr-1">${icon}</span>
-              ${idx.pChange.toFixed(2)}%
+              ${sign}${changePct.toFixed(2)}%
             </span>
           </div>
         `;

@@ -475,20 +475,24 @@
     function updateMiniBar() {
       // Needs LIVE_INDICES from shared.js
       if(typeof LIVE_INDICES !== 'undefined') {
-        const nse = LIVE_INDICES.find(i => i.symbol === 'NIFTY 50');
-        const bse = LIVE_INDICES.find(i => i.symbol === 'SENSEX');
+        const nse = LIVE_INDICES.nifty50;
+        const bse = LIVE_INDICES.sensex;
         
         if(nse) {
-          document.getElementById('mini-nifty-price').innerText = typeof fmtPrice === 'function' ? fmtPrice(nse.price) : nse.price;
+          document.getElementById('mini-nifty-price').innerText = typeof fmtPrice === 'function' ? fmtPrice(nse.value) : nse.value;
           const cnifty = document.getElementById('mini-nifty-change');
-          cnifty.innerText = `${nse.change >= 0 ? '+' : ''}${nse.change} (${nse.changePct}%)`;
+          const sign = nse.change >= 0 ? '+' : '';
+          const pctVal = typeof nse.changePct === 'number' ? nse.changePct.toFixed(2) : nse.changePct;
+          cnifty.innerText = `${sign}${nse.change} (${sign}${pctVal}%)`;
           cnifty.className = `text-xs font-medium ${nse.change >= 0 ? 'text-secondary' : 'text-error'}`;
         }
         
         if(bse) {
-          document.getElementById('mini-sensex-price').innerText = typeof fmtPrice === 'function' ? fmtPrice(bse.price) : bse.price;
+          document.getElementById('mini-sensex-price').innerText = typeof fmtPrice === 'function' ? fmtPrice(bse.value) : bse.value;
           const cbse = document.getElementById('mini-sensex-change');
-          cbse.innerText = `${bse.change >= 0 ? '+' : ''}${bse.change} (${bse.changePct}%)`;
+          const sign = bse.change >= 0 ? '+' : '';
+          const pctVal = typeof bse.changePct === 'number' ? bse.changePct.toFixed(2) : bse.changePct;
+          cbse.innerText = `${sign}${bse.change} (${sign}${pctVal}%)`;
           cbse.className = `text-xs font-medium ${bse.change >= 0 ? 'text-secondary' : 'text-error'}`;
         }
       }

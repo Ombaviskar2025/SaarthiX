@@ -398,7 +398,7 @@
       
       for(let i = 0; i < 2; i++) { 
         indices.forEach(idx => {
-          const data = LIVE_INDICES[idx];
+          const data = Object.values(window.LIVE_INDICES).find(item => item.name === idx);
           if(data) {
             const colorClass = changeClass(data.changePct);
             const sign = changeSign(data.changePct);
@@ -475,7 +475,7 @@
         return `
           <tr class="hover:bg-white/5 transition-colors group">
             <td class="py-3 pr-2">
-              <div class="font-semibold text-on-surface group-hover:text-primary transition-colors">${stock.symbol}</div>
+              <div class="font-semibold text-on-surface group-hover:text-primary transition-colors">${stock.ticker}</div>
             </td>
             <td class="py-3 text-right font-mono text-on-surface">${fmtPrice(stock.price)}</td>
             <td class="py-3 text-right font-mono ${color}">${sign}${fmtPrice(Math.abs(stock.change))}</td>
