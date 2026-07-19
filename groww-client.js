@@ -153,6 +153,14 @@
 
         const data = await response.json();
 
+        if (data.status === 'SIMULATED') {
+          setStatus('SIMULATED');
+          if (window.restartSimulation) {
+            window.restartSimulation();
+          }
+          return;
+        }
+
         if (data.status === 'FAILURE') {
           throw new Error(data.error?.message || 'Server error fetching prices');
         }

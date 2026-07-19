@@ -61,6 +61,14 @@ function fetchFromGroww(url) {
 // ── Batch Last Traded Price (LTP) Proxy Route ───────────────
 app.get('/api/ltp', async (req, res) => {
   try {
+    // Intercept missing token to fallback to simulation without throwing HTTP 401 warnings in logs
+    if (!getAccessToken()) {
+      return res.json({
+        status: 'SIMULATED',
+        message: 'GROWW_ACCESS_TOKEN is missing in server environment variables. Operating in demo mode.'
+      });
+    }
+
     const rawSymbols = req.query.symbols;
     if (!rawSymbols) {
       return res.status(400).json({ error: 'Missing required query parameter: symbols' });
@@ -124,6 +132,14 @@ app.get('/api/ltp', async (req, res) => {
 // ── Single Stock Quote Proxy Route ──────────────────────────
 app.get('/api/quote', async (req, res) => {
   try {
+    // Intercept missing token to fallback to simulation without throwing HTTP 401 warnings in logs
+    if (!getAccessToken()) {
+      return res.json({
+        status: 'SIMULATED',
+        message: 'GROWW_ACCESS_TOKEN is missing in server environment variables. Operating in demo mode.'
+      });
+    }
+
     const symbol = req.query.symbol;
     if (!symbol) {
       return res.status(400).json({ error: 'Missing required query parameter: symbol' });
