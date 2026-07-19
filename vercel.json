@@ -7,7 +7,10 @@
       "config": {
         "includeFiles": [
           "*.html",
-          "*.js"
+          "*.js",
+          "*.png",
+          "*.ico",
+          "*.css"
         ]
       }
     }
