@@ -1,16 +1,25 @@
 {
   "version": 2,
-  "redirects": [
+  "builds": [
     {
-      "source": "/",
-      "destination": "/login.html",
-      "permanent": true
+      "src": "api/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "*.html",
+          "*.js"
+        ]
+      }
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/index.js"
+      "src": "/api/(.*)",
+      "dest": "api/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "api/index.js"
     }
   ]
 }
