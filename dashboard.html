@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SaarthiX - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Geist', 'sans-serif'],
+            mono: ['Inter', 'monospace'],
+          },
+          colors: {
+            background: '#0f131c',
+            surface: {
+              container: '#1c1f29',
+              'container-low': '#181b25',
+              'container-high': '#242835',
+            },
+            primary: {
+              DEFAULT: '#adc6ff',
+              container: '#4d8eff',
+            },
+            secondary: {
+              DEFAULT: '#4edea3',
+              container: '#00a572',
+            },
+            error: {
+              DEFAULT: '#ffb4ab',
+              container: '#ff5449',
+            },
+            'on-surface': '#dfe2ef',
+            'on-surface-variant': '#c2c6d6',
+            'on-primary-container': '#ffffff',
+            'on-secondary-container': '#ffffff',
+          },
+          spacing: {
+            'gutter': '1.5rem',
+            'container-padding': '2rem',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Glass panel styles */
+    .glass-panel {
+      background: rgba(28, 31, 41, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1rem;
+    }
+    .glass-input {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #dfe2ef;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .glass-input:focus {
+      border-color: #adc6ff;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    .pulse-button {
+      animation: pulse-border 2s infinite;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    @keyframes pulse-border {
+      0% { box-shadow: 0 0 0 0 rgba(77, 142, 255, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(77, 142, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(77, 142, 255, 0); }
+    }
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.1);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .text-up { color: #4edea3; }
+    .text-down { color: #ffb4ab; }
+    .bg-up { background-color: rgba(78, 222, 163, 0.1); border-color: rgba(78, 222, 163, 0.2); }
+    .bg-down { background-color: rgba(255, 180, 171, 0.1); border-color: rgba(255, 180, 171, 0.2); }
+    
+    .ticker-wrap {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+    }
+    .ticker {
+      display: inline-block;
+      animation: ticker 30s linear infinite;
+    }
+    .ticker:hover {
+      animation-play-state: paused;
+    }
+    @keyframes ticker {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
+    .ticker-item {
+      display: inline-block;
+      padding: 0 2rem;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex font-sans">
+  
+  <!-- Sidebar nav: id="sidebar-nav" -->
+  <nav id="sidebar-nav" class="hidden md:flex flex-col h-full py-container-padding fixed left-0 top-0 w-[280px] border-r border-white/10 bg-surface-container/80 backdrop-blur-xl shadow-2xl z-50">
+    <div class="px-gutter mb-8 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+        <span class="material-symbols-outlined font-bold">show_chart</span>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-white">SaarthiX</h1>
+        <p class="text-xs text-on-surface-variant">Intelligent Trading</p>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1 px-gutter flex-1" id="nav-links"></div>
+    <div class="px-gutter mt-auto mb-6">
+      <a href="portfolio.html" class="block w-full bg-primary-container text-on-primary-container pulse-button">Analyze Portfolio</a>
+    </div>
+    <div class="px-gutter flex flex-col gap-1 pt-4 border-t border-white/10">
+      <a href="support.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors">
+        <span class="material-symbols-outlined">help</span>
+        Support
+      </a>
+      <a href="login.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-error hover:bg-error/10 transition-colors">
+        <span class="material-symbols-outlined">logout</span>
+        Log Out
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col">
+    <!-- Top Bar -->
+    <header class="hidden md:flex items-center justify-between px-container-padding py-4 border-b border-white/10 bg-surface-container-low/50 backdrop-blur-md sticky top-0 z-40">
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+          <input type="text" placeholder="Search stocks, indices..." class="glass-input pl-10 w-64 text-sm" />
+        </div>
+        <div class="px-3 py-1 text-xs font-semibold rounded bg-white/10 border border-white/10 text-on-surface">NSE | BSE</div>
+      </div>
+      
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2">
+          <span id="market-status" class="flex h-3 w-3"></span>
+          <div class="flex flex-col items-end">
+            <span class="text-sm font-medium" id="header-time">00:00:00</span>
+            <span class="text-[10px] text-on-surface-variant uppercase" id="header-market-text">Loading</span>
+          </div>
+        </div>
+        
+        <div class="relative cursor-pointer">
+          <span class="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors">notifications</span>
+          <span class="absolute 1 top-0 right-0 w-2 h-2 rounded-full bg-error"></span>
+        </div>
+        
+        <div class="flex items-center gap-2 cursor-pointer">
+          <img src="https://ui-avatars.com/api/?name=User&background=4d8eff&color=fff" alt="User" class="w-8 h-8 rounded-full" />
+          <span class="material-symbols-outlined text-on-surface-variant">arrow_drop_down</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Index Ticker -->
+    <div class="border-b border-white/5 bg-surface-container-high/50">
+      <div class="ticker-wrap py-2 text-sm" id="ticker-container">
+        <!-- populated by js -->
+      </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="p-4 md:p-container-padding flex-1 space-y-6">
+      
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 class="text-2xl font-bold">Dashboard Overview</h2>
+          <span class="live-timestamp text-xs text-on-surface-variant/60 font-mono"></span>
+        </div>
+        <div class="flex gap-3 w-full sm:w-auto">
+          <a href="portfolio.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-surface-container-high border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors">View Portfolio</a>
+          <a href="market-watch.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-primary-container text-on-primary-container text-sm font-medium hover:bg-primary-container/80 transition-colors">View Market Watch</a>
+        </div>
+      </div>
+
+      <!-- Summary Metrics Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-panel p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-on-surface-variant mb-2">
+            <span class="text-sm font-medium">Nifty 50 Advances</span>
+            <span class="material-symbols-outlined text-secondary">trending_up</span>
+          </div>
+          <div class="text-3xl font-bold text-secondary" id="advances-count">-</div>
+        </div>
+        <div class="glass-panel p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-on-surface-variant mb-2">
+            <span class="text-sm font-medium">Nifty 50 Declines</span>
+            <span class="material-symbols-outlined text-error">trending_down</span>
+          </div>
+          <div class="text-3xl font-bold text-error" id="declines-count">-</div>
+        </div>
+        <div class="glass-panel p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-on-surface-variant mb-2">
+            <span class="text-sm font-medium">Market Breadth</span>
+            <span class="material-symbols-outlined text-primary">analytics</span>
+          </div>
+          <div class="w-full h-3 rounded-full overflow-hidden flex bg-white/10 mt-2" id="breadth-bar">
+            <!-- filled by js -->
+          </div>
+          <div class="flex justify-between text-xs mt-2 text-on-surface-variant" id="breadth-text">
+            <span>Adv 0</span>
+            <span>Dec 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gainers & Losers -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Top Gainers -->
+        <div class="glass-panel p-5 overflow-hidden">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold flex items-center gap-2 text-secondary">
+              <span class="material-symbols-outlined">rocket_launch</span> Top Gainers
+            </h3>
+            <button class="text-xs text-on-surface-variant hover:text-white">View All</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="text-xs text-on-surface-variant border-b border-white/10">
+                <tr>
+                  <th class="pb-2 font-medium">Ticker</th>
+                  <th class="pb-2 font-medium text-right">LTP (₹)</th>
+                  <th class="pb-2 font-medium text-right">Change</th>
+                  <th class="pb-2 font-medium text-right">% Change</th>
+                </tr>
+              </thead>
+              <tbody id="top-gainers-body" class="divide-y divide-white/5">
+                <!-- js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Top Losers -->
+        <div class="glass-panel p-5 overflow-hidden">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold flex items-center gap-2 text-error">
+              <span class="material-symbols-outlined">trending_down</span> Top Losers
+            </h3>
+            <button class="text-xs text-on-surface-variant hover:text-white">View All</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="text-xs text-on-surface-variant border-b border-white/10">
+                <tr>
+                  <th class="pb-2 font-medium">Ticker</th>
+                  <th class="pb-2 font-medium text-right">LTP (₹)</th>
+                  <th class="pb-2 font-medium text-right">Change</th>
+                  <th class="pb-2 font-medium text-right">% Change</th>
+                </tr>
+              </thead>
+              <tbody id="top-losers-body" class="divide-y divide-white/5">
+                <!-- js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sector Heatmap & Mini News -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Sector Heatmap -->
+        <div class="glass-panel p-5 lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold flex items-center gap-2">
+              <span class="material-symbols-outlined">grid_view</span> Sector Heatmap
+            </h3>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="sector-heatmap">
+            <!-- js -->
+          </div>
+        </div>
+        <!-- Mini News Feed -->
+        <div class="glass-panel p-5 flex flex-col h-[400px]">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold flex items-center gap-2">
+              <span class="material-symbols-outlined">newspaper</span> Latest News
+            </h3>
+            <a href="news.html" class="text-xs text-primary hover:underline">View All</a>
+          </div>
+          <div class="flex-1 overflow-y-auto pr-2 space-y-4" id="mini-news">
+            <!-- js -->
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+  
+  <!-- Mobile bottom nav -->
+  <nav id="mobile-nav" class="fixed bottom-0 left-0 w-full bg-surface-container/90 backdrop-blur-xl border-t border-white/10 md:hidden flex justify-around items-center h-16 z-50 px-2 pb-safe"></nav>
+  
+  <script src="shared.js"></script>
+  <script src="groww-client.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if(typeof buildNav === 'undefined') return;
+      const { navLinks, mobileLinks, statusDot } = buildNav('dashboard');
+      
+      const navLinksEl = document.getElementById('nav-links');
+      if (navLinksEl) navLinksEl.innerHTML = navLinks;
+      
+      const mobNavEl = document.getElementById('mobile-nav');
+      if (mobNavEl) mobNavEl.innerHTML = mobileLinks;
+      
+      const statusEl = document.getElementById('market-status');
+      if (statusEl) statusEl.innerHTML = statusDot;
+
+      initPage();
+      startClock();
+    });
+
+    document.addEventListener('market:tick', () => {
+      updateDashboard();
+    });
+
+    function startClock() {
+      const timeEl = document.getElementById('header-time');
+      const textEl = document.getElementById('header-market-text');
+      
+      setInterval(() => {
+        const now = new Date();
+        const istTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
+        let h = istTime.getHours();
+        const m = istTime.getMinutes().toString().padStart(2, '0');
+        const s = istTime.getSeconds().toString().padStart(2, '0');
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12;
+        h = h ? h : 12;
+        
+        if (timeEl) timeEl.textContent = `${h}:${m}:${s} ${ampm} IST`;
+        
+        if(typeof isMarketOpen === 'function') {
+          if (textEl) {
+            textEl.textContent = isMarketOpen() ? 'Market Open' : 'Market Closed';
+          }
+          const statusEl = document.getElementById('market-status');
+          if (statusEl && typeof buildNav === 'function') {
+            statusEl.innerHTML = buildNav('dashboard').statusDot;
+          }
+        }
+      }, 1000);
+    }
+
+    function initPage() {
+      updateDashboard();
+      renderNews();
+    }
+
+    function updateDashboard() {
+      renderTicker();
+      renderSummaryMetrics();
+      renderGainersLosers();
+      renderSectorHeatmap();
+    }
+
+    function renderTicker() {
+      const container = document.getElementById('ticker-container');
+      if(!container || !window.LIVE_INDICES) return;
+      
+      let html = '<div class="ticker">';
+      const indices = ['SENSEX', 'NIFTY 50', 'BANK NIFTY', 'NIFTY IT', 'NIFTY MIDCAP'];
+      
+      for(let i = 0; i < 2; i++) { 
+        indices.forEach(idx => {
+          const data = LIVE_INDICES[idx];
+          if(data) {
+            const colorClass = changeClass(data.changePct);
+            const sign = changeSign(data.changePct);
+            const icon = changeIcon(data.changePct);
+            
+            html += `
+              <div class="ticker-item inline-flex items-center gap-2">
+                <span class="font-semibold text-on-surface">${idx}</span>
+                <span class="font-mono ${colorClass}">${fmtPrice(data.value)}</span>
+                <span class="text-xs ${colorClass} bg-${colorClass.replace('text-', '')}/10 px-1 py-0.5 rounded flex items-center gap-0.5">
+                  <span class="material-symbols-outlined text-[10px]">${icon}</span>
+                  ${sign}${fmtPrice(Math.abs(data.change))} (${sign}${Math.abs(data.changePct).toFixed(2)}%)
+                </span>
+              </div>
+            `;
+          }
+        });
+      }
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function renderSummaryMetrics() {
+      if(typeof getMarketBreadth !== 'function') return;
+      const breadth = getMarketBreadth();
+      
+      const advEl = document.getElementById('advances-count');
+      const decEl = document.getElementById('declines-count');
+      if (advEl) advEl.textContent = breadth.advances;
+      if (decEl) decEl.textContent = breadth.declines;
+
+      const bar = document.getElementById('breadth-bar');
+      const text = document.getElementById('breadth-text');
+      
+      if(bar && breadth.total > 0) {
+        const advPct = (breadth.advances / breadth.total) * 100;
+        const decPct = (breadth.declines / breadth.total) * 100;
+        const unchPct = 100 - advPct - decPct;
+        
+        bar.innerHTML = `
+          <div style="width: ${advPct}%" class="bg-secondary h-full transition-all duration-500"></div>
+          <div style="width: ${unchPct}%" class="bg-yellow-500 h-full transition-all duration-500"></div>
+          <div style="width: ${decPct}%" class="bg-error h-full transition-all duration-500"></div>
+        `;
+        
+        if (text) {
+          text.innerHTML = `
+            <span class="text-secondary font-medium">Adv ${breadth.advances}</span>
+            <span class="text-yellow-500">Unch ${breadth.unchanged}</span>
+            <span class="text-error font-medium">Dec ${breadth.declines}</span>
+          `;
+        }
+      }
+    }
+
+    function renderGainersLosers() {
+      if(typeof getTopGainers !== 'function' || typeof getTopLosers !== 'function') return;
+      
+      const gainers = getTopGainers(5);
+      const losers = getTopLosers(5);
+      
+      const gBody = document.getElementById('top-gainers-body');
+      const lBody = document.getElementById('top-losers-body');
+      
+      if(gBody) gBody.innerHTML = generateTableRows(gainers, 'secondary');
+      if(lBody) lBody.innerHTML = generateTableRows(losers, 'error');
+    }
+
+    function generateTableRows(stocks, colorType) {
+      return stocks.map(stock => {
+        const sign = changeSign(stock.changePct);
+        const color = changeClass(stock.changePct);
+        const icon = changeIcon(stock.changePct);
+        return `
+          <tr class="hover:bg-white/5 transition-colors group">
+            <td class="py-3 pr-2">
+              <div class="font-semibold text-on-surface group-hover:text-primary transition-colors">${stock.symbol}</div>
+            </td>
+            <td class="py-3 text-right font-mono text-on-surface">${fmtPrice(stock.price)}</td>
+            <td class="py-3 text-right font-mono ${color}">${sign}${fmtPrice(Math.abs(stock.change))}</td>
+            <td class="py-3 text-right font-mono ${color}">
+               <div class="flex items-center justify-end gap-1">
+                 <span class="material-symbols-outlined text-[12px]">${icon}</span>
+                 ${sign}${Math.abs(stock.changePct).toFixed(2)}%
+               </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderSectorHeatmap() {
+      if(typeof getSectorSummary !== 'function') return;
+      const sectors = getSectorSummary();
+      const container = document.getElementById('sector-heatmap');
+      if(!container) return;
+      
+      let html = '';
+      sectors.forEach(sec => {
+        const avg = sec.avgChangePct;
+        const sign = avg > 0 ? '+' : (avg < 0 ? '-' : '');
+        const valStr = Math.abs(avg).toFixed(2);
+        
+        let bgClass = 'bg-surface-container-high border-white/10';
+        let textClass = 'text-on-surface';
+        
+        if (avg > 2) {
+          bgClass = 'bg-secondary/20 border-secondary/30';
+          textClass = 'text-secondary';
+        } else if (avg > 0) {
+          bgClass = 'bg-secondary/10 border-secondary/20';
+          textClass = 'text-secondary';
+        } else if (avg < -2) {
+          bgClass = 'bg-error/20 border-error/30';
+          textClass = 'text-error';
+        } else if (avg < 0) {
+          bgClass = 'bg-error/10 border-error/20';
+          textClass = 'text-error';
+        }
+
+        html += `
+          <div class="rounded-lg border p-3 flex flex-col justify-between h-20 transition-all duration-300 ${bgClass}">
+            <div class="text-xs text-on-surface-variant truncate font-medium" title="${sec.sector}">${sec.sector}</div>
+            <div class="flex justify-between items-end">
+              <span class="text-[10px] text-on-surface-variant/70">${sec.count} stocks</span>
+              <span class="font-bold font-mono text-sm ${textClass}">${sign}${valStr}%</span>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function renderNews() {
+      if(!window.NEWS_DATA) return;
+      const container = document.getElementById('mini-news');
+      if(!container) return;
+      
+      const news = NEWS_DATA.slice(0, 4);
+      let html = '';
+      
+      news.forEach(item => {
+        let sentClass = 'bg-white/10 text-on-surface';
+        if (item.sentiment === 'Bullish') sentClass = 'bg-secondary/20 text-secondary';
+        if (item.sentiment === 'Bearish') sentClass = 'bg-error/20 text-error';
+
+        html += `
+          <div class="border-b border-white/5 pb-3 last:border-0 last:pb-0">
+            <div class="flex gap-2 mb-1 items-center">
+              <span class="text-[10px] px-1.5 py-0.5 rounded-sm ${sentClass}">${item.sentiment}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-sm bg-white/5 text-on-surface-variant border border-white/5">${item.category}</span>
+              <span class="text-[10px] text-on-surface-variant ml-auto flex items-center gap-1">
+                <span class="material-symbols-outlined text-[10px]">schedule</span> ${item.time}
+              </span>
+            </div>
+            <a href="#" class="text-sm font-medium text-on-surface hover:text-primary transition-colors line-clamp-2 leading-snug">
+              ${item.headline}
+            </a>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

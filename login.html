@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SaarthiX - Login | NSE &amp; BSE India</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-bright": "#353943",
+            "on-secondary-container": "#00311f",
+            "on-surface-variant": "#c2c6d6",
+            "on-secondary-fixed": "#002113",
+            "tertiary-container": "#ff516a",
+            "primary": "#adc6ff",
+            "on-primary": "#002e6a",
+            "on-error-container": "#ffdad6",
+            "secondary-fixed-dim": "#4edea3",
+            "inverse-primary": "#005ac2",
+            "on-tertiary-fixed-variant": "#92002a",
+            "secondary-fixed": "#6ffbbe",
+            "on-tertiary-container": "#5b0017",
+            "on-background": "#dfe2ef",
+            "surface-container-highest": "#31353f",
+            "error-container": "#93000a",
+            "tertiary": "#ffb2b7",
+            "surface-container-lowest": "#0a0e17",
+            "on-primary-fixed": "#001a42",
+            "surface-container-high": "#262a34",
+            "surface-container-low": "#181b25",
+            "on-primary-fixed-variant": "#004395",
+            "on-tertiary-fixed": "#40000d",
+            "on-secondary-fixed-variant": "#005236",
+            "tertiary-fixed": "#ffdadb",
+            "surface-tint": "#adc6ff",
+            "on-error": "#690005",
+            "primary-container": "#4d8eff",
+            "secondary-container": "#00a572",
+            "inverse-on-surface": "#2c303a",
+            "error": "#ffb4ab",
+            "primary-fixed": "#d8e2ff",
+            "outline-variant": "#424754",
+            "surface-container": "#1c1f29",
+            "background": "#0f131c",
+            "inverse-surface": "#dfe2ef",
+            "surface-variant": "#31353f",
+            "on-tertiary": "#67001b",
+            "on-surface": "#dfe2ef",
+            "surface-dim": "#0f131c",
+            "primary-fixed-dim": "#adc6ff",
+            "secondary": "#4edea3",
+            "surface": "#0f131c",
+            "on-secondary": "#003824",
+            "outline": "#8c909f",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "on-primary-container": "#00285d"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          },
+          spacing: {
+            unit: "4px",
+            "element-gap": "12px",
+            "section-gap": "32px",
+            gutter: "16px",
+            "container-padding": "24px"
+          },
+          fontFamily: {
+            "headline-lg": ["Geist"],
+            "headline-xl": ["Geist"],
+            "body-sm": ["Inter"],
+            "label-sm": ["Geist"],
+            "label-md": ["Geist"],
+            "body-md": ["Inter"],
+            "headline-md": ["Geist"],
+            "body-lg": ["Inter"],
+            "headline-lg-mobile": ["Geist"],
+            "mono-data": ["Geist"]
+          },
+          fontSize: {
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-xl": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "label-sm": ["12px", { lineHeight: "14px", letterSpacing: "0.05em", fontWeight: "500" }],
+            "label-md": ["14px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "500" }],
+            "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+            "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+            "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+            "mono-data": ["14px", { lineHeight: "20px", letterSpacing: "-0.01em", fontWeight: "500" }]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-card {
+      background: rgba(22, 27, 38, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .input-glow:focus {
+      box-shadow: 0 0 15px rgba(105, 251, 190, 0.2);
+      border-color: #6ffbbe;
+      outline: none;
+    }
+
+    .btn-emerald {
+      background-color: #00a572;
+      color: #ffffff;
+      transition: all 0.3s ease;
+    }
+
+    .btn-emerald:hover {
+      box-shadow: 0 0 24px rgba(0, 165, 114, 0.4);
+      background-color: #00875c;
+    }
+
+    .otp-hidden {
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .otp-visible {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Ambient floating particles */
+    @keyframes float-particle {
+      0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.4; }
+      33% { transform: translateY(-20px) translateX(10px); opacity: 0.7; }
+      66% { transform: translateY(-10px) translateX(-8px); opacity: 0.5; }
+    }
+
+    .particle {
+      animation: float-particle 8s ease-in-out infinite;
+    }
+    .particle:nth-child(2) { animation-delay: -2s; }
+    .particle:nth-child(3) { animation-delay: -4s; }
+    .particle:nth-child(4) { animation-delay: -6s; }
+
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(78, 222, 163, 0.3); }
+      70% { box-shadow: 0 0 0 12px rgba(78, 222, 163, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(78, 222, 163, 0); }
+    }
+
+    .timer-badge {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-lowest min-h-screen flex items-center justify-center font-body-md text-on-surface p-gutter relative overflow-hidden">
+
+  <!-- Ambient Background Blobs -->
+  <div class="absolute top-[-10%] left-[-10%] w-[55vw] h-[55vw] rounded-full bg-primary/5 blur-[130px] pointer-events-none"></div>
+  <div class="absolute bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-secondary-container/10 blur-[110px] pointer-events-none"></div>
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30vw] h-[30vw] rounded-full bg-primary-container/5 blur-[80px] pointer-events-none"></div>
+
+  <!-- Floating Particles -->
+  <div class="absolute inset-0 pointer-events-none overflow-hidden">
+    <div class="particle absolute top-[20%] left-[15%] w-1 h-1 rounded-full bg-secondary/40"></div>
+    <div class="particle absolute top-[60%] left-[80%] w-1.5 h-1.5 rounded-full bg-primary/30"></div>
+    <div class="particle absolute top-[80%] left-[25%] w-1 h-1 rounded-full bg-secondary/20"></div>
+    <div class="particle absolute top-[30%] left-[70%] w-1 h-1 rounded-full bg-primary-container/50"></div>
+  </div>
+
+  <!-- Login Container -->
+  <main class="w-full max-w-md z-10">
+    <div class="glass-card rounded-xl p-8 shadow-2xl relative overflow-hidden">
+
+      <!-- Decorative Top Border Glow -->
+      <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-60"></div>
+      <!-- Decorative Bottom Subtle Line -->
+      <div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <!-- Logo Mark -->
+        <div class="relative inline-block mb-6">
+          <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-primary-container/30 to-secondary-container/20 border border-white/10 flex items-center justify-center shadow-xl">
+            <span class="material-symbols-outlined text-4xl text-secondary" style="font-variation-settings: 'FILL' 1, 'wght' 600;">monitoring</span>
+          </div>
+          <!-- Online status dot -->
+          <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-secondary rounded-full border-2 border-surface-container-lowest" style="animation: pulse-ring 2s infinite;"></div>
+        </div>
+
+        <h1 class="font-headline-md text-headline-md text-on-surface mb-2 font-bold tracking-tight">Welcome back, Investor</h1>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Secure access to your AI-powered portfolio insights.</p>
+      </div>
+
+      <!-- ─── Phone Step ─── -->
+      <div class="space-y-6 transition-all duration-300" id="phone-step">
+        <div class="space-y-2">
+          <label class="font-label-sm text-label-sm text-on-surface-variant block uppercase tracking-wider">Phone Number</label>
+          <div class="flex gap-2">
+            <select id="country-code" class="bg-surface-container-low border border-white/10 text-on-surface rounded-lg px-3 py-3 font-mono-data text-mono-data focus:border-secondary focus:ring-1 focus:ring-secondary input-glow w-24 appearance-none text-center">
+              <option value="+1">+1</option>
+              <option value="+44">+44</option>
+              <option value="+91" selected>+91</option>
+              <option value="+61">+61</option>
+              <option value="+49">+49</option>
+              <option value="+81">+81</option>
+            </select>
+            <input id="phone-input" class="bg-surface-container-low border border-white/10 text-on-surface rounded-lg px-4 py-3 font-mono-data text-mono-data w-full input-glow placeholder:text-on-surface-variant/30" placeholder="(555) 123-4567" type="tel"/>
+          </div>
+          <p id="phone-error" class="text-error font-label-sm text-label-sm hidden">Please enter a valid phone number.</p>
+        </div>
+
+        <button
+          class="w-full btn-emerald rounded-lg py-3 font-label-md text-label-md font-bold uppercase tracking-wider flex items-center justify-center gap-2 group"
+          onclick="sendOtp()"
+          id="send-otp-btn"
+        >
+          Send OTP
+          <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </button>
+
+        <p class="text-center font-body-sm text-body-sm text-on-surface-variant/50">
+          By continuing, you agree to our
+          <a href="#" class="text-secondary hover:underline">Terms</a> &amp;
+          <a href="#" class="text-secondary hover:underline">Privacy Policy</a>.
+        </p>
+      </div>
+
+      <!-- ─── OTP Step ─── -->
+      <div class="otp-hidden space-y-6" id="otp-step">
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <label class="font-label-sm text-label-sm text-on-surface-variant block uppercase tracking-wider">Verification Code</label>
+            <button class="text-secondary hover:text-secondary-fixed font-label-sm text-label-sm transition-colors flex items-center gap-1" onclick="showPhoneStep()">
+              <span class="material-symbols-outlined text-[14px]">edit</span>
+              Edit Number
+            </button>
+          </div>
+
+          <!-- Sent-to indicator -->
+          <div class="flex items-center gap-2 bg-secondary-container/10 border border-secondary-container/20 rounded-lg px-3 py-2">
+            <span class="material-symbols-outlined text-secondary text-sm">sms</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Code sent to <span id="display-number" class="text-on-surface font-medium"></span></span>
+          </div>
+
+          <!-- ⚠️ Demo Mode Notice -->
+          <div class="flex items-start gap-2 bg-primary-container/10 border border-primary-container/30 rounded-lg px-3 py-2.5 mt-1">
+            <span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5" style="font-variation-settings:'FILL' 1;">info</span>
+            <div>
+              <p class="font-label-sm text-label-sm text-primary font-semibold">Demo Mode — No real SMS is sent</p>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">This is a UI demo. Use the auto-filled code below or type any 6 digits.</p>
+            </div>
+          </div>
+
+          <!-- 6-digit OTP inputs -->
+          <div class="flex justify-between gap-2 mt-2">
+            <input class="w-12 h-12 bg-surface-container-low border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+            <input class="w-12 h-12 bg-surface-container-low border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+            <input class="w-12 h-12 bg-surface-container-low border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+            <input class="w-12 h-12 bg-surface-container-low border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+            <input class="w-12 h-12 bg-surface-container-low border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+            <input class="w-12 h-12 bg-surface-container-low border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+          </div>
+
+          <!-- Quick-fill helper -->
+          <button onclick="fillDemoOtp()" class="w-full mt-1 py-2 rounded-lg border border-dashed border-secondary/30 text-secondary font-label-sm text-label-sm hover:bg-secondary/5 transition-colors flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-[15px]">bolt</span>
+            Auto-fill Demo Code (1 2 3 4 5 6)
+          </button>
+
+          <div class="flex items-center justify-between mt-1">
+            <p class="font-body-sm text-body-sm text-on-surface-variant/60">
+              Expires in <span id="otp-timer" class="text-secondary timer-badge font-medium">03:00</span>
+            </p>
+            <button id="resend-btn" class="font-label-sm text-label-sm text-on-surface-variant/40 cursor-not-allowed" disabled onclick="resendOtp()">Resend OTP</button>
+          </div>
+        </div>
+
+        <!-- Login CTA -->
+        <button
+          onclick="loginToDashboard()"
+          class="w-full btn-emerald rounded-lg py-3 font-label-md text-label-md font-bold uppercase tracking-wider flex items-center justify-center gap-2 group"
+        >
+          Login to Dashboard
+          <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">login</span>
+        </button>
+      </div>
+
+      <!-- Footer Links -->
+      <div class="mt-8 pt-6 border-t border-white/5 flex justify-center space-x-4 font-label-sm text-label-sm text-on-surface-variant/60">
+        <a class="hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
+        <span>•</span>
+        <a class="hover:text-on-surface transition-colors" href="#">Terms of Service</a>
+        <span>•</span>
+        <a class="hover:text-on-surface transition-colors" href="#">Support</a>
+      </div>
+    </div>
+
+    <!-- Brand tagline below card -->
+    <p class="text-center mt-6 font-label-sm text-label-sm text-on-surface-variant/30 tracking-widest uppercase">
+      NSE &middot; BSE &middot; India &middot; SaarthiX
+    </p>
+  </main>
+
+  <script>
+    let timerInterval = null;
+    let secondsLeft = 180;
+
+    function validatePhone() {
+      const phone = document.getElementById('phone-input').value.trim();
+      const error = document.getElementById('phone-error');
+      if (!phone || phone.replace(/\D/g, '').length < 7) {
+        error.classList.remove('hidden');
+        return false;
+      }
+      error.classList.add('hidden');
+      return true;
+    }
+
+    function sendOtp() {
+      if (!validatePhone()) return;
+
+      const code = document.getElementById('country-code').value;
+      const phone = document.getElementById('phone-input').value.trim();
+      document.getElementById('display-number').textContent = code + ' ' + phone;
+
+      showOtpStep();
+      startTimer();
+    }
+
+    function showOtpStep() {
+      const phoneStep = document.getElementById('phone-step');
+      const otpStep = document.getElementById('otp-step');
+
+      phoneStep.style.opacity = '0';
+      phoneStep.style.transform = 'translateY(-10px)';
+
+      setTimeout(() => {
+        phoneStep.style.display = 'none';
+        otpStep.classList.remove('otp-hidden');
+        otpStep.classList.add('otp-visible');
+
+        // Auto-fill demo OTP after a short delay for effect
+        setTimeout(() => fillDemoOtp(), 400);
+      }, 300);
+    }
+
+    function fillDemoOtp() {
+      const demoCode = '123456';
+      const inputs = document.querySelectorAll('#otp-step input[type="text"]');
+      inputs.forEach((inp, i) => {
+        inp.value = demoCode[i] || '';
+        inp.classList.remove('border-error');
+      });
+      // Focus last input to signal completion
+      inputs[inputs.length - 1].focus();
+    }
+
+    function showPhoneStep() {
+      const phoneStep = document.getElementById('phone-step');
+      const otpStep = document.getElementById('otp-step');
+
+      otpStep.classList.remove('otp-visible');
+      otpStep.classList.add('otp-hidden');
+
+      clearInterval(timerInterval);
+
+      setTimeout(() => {
+        phoneStep.style.display = 'block';
+        requestAnimationFrame(() => {
+          phoneStep.style.opacity = '1';
+          phoneStep.style.transform = 'translateY(0)';
+        });
+      }, 400);
+    }
+
+    function startTimer() {
+      secondsLeft = 180;
+      updateTimerDisplay();
+      clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        secondsLeft--;
+        updateTimerDisplay();
+
+        if (secondsLeft <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('otp-timer').textContent = '00:00';
+          const resendBtn = document.getElementById('resend-btn');
+          resendBtn.disabled = false;
+          resendBtn.classList.remove('text-on-surface-variant/40', 'cursor-not-allowed');
+          resendBtn.classList.add('text-secondary', 'hover:text-secondary-fixed', 'cursor-pointer');
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const m = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+      const s = String(secondsLeft % 60).padStart(2, '0');
+      document.getElementById('otp-timer').textContent = m + ':' + s;
+    }
+
+    function resendOtp() {
+      const resendBtn = document.getElementById('resend-btn');
+      if (resendBtn.disabled) return;
+
+      // Reset OTP inputs
+      document.querySelectorAll('#otp-step input').forEach(i => i.value = '');
+      document.querySelectorAll('#otp-step input')[0].focus();
+
+      resendBtn.disabled = true;
+      resendBtn.classList.add('text-on-surface-variant/40', 'cursor-not-allowed');
+      resendBtn.classList.remove('text-secondary', 'hover:text-secondary-fixed', 'cursor-pointer');
+
+      startTimer();
+    }
+
+    function loginToDashboard() {
+      const inputs = document.querySelectorAll('#otp-step input[type="text"]');
+      const otp = [...inputs].map(i => i.value).join('');
+
+      // In demo mode: accept any 6 digits, or auto-fill if empty
+      if (otp.replace(/\s/g, '').length < 6) {
+        fillDemoOtp();
+        setTimeout(loginToDashboard, 300);
+        return;
+      }
+
+      // Show loading state then navigate
+      const btn = document.querySelector('#otp-step button.btn-emerald');
+      btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Verifying...`;
+      btn.disabled = true;
+
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 1000);
+    }
+
+    // ── OTP input auto-advance & backspace handling ──
+    document.addEventListener('DOMContentLoaded', () => {
+      const otpInputs = document.querySelectorAll('#otp-step input');
+
+      otpInputs.forEach((input, index) => {
+        input.addEventListener('input', function () {
+          // Allow only digits
+          this.value = this.value.replace(/\D/g, '');
+          if (this.value.length === 1 && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+          }
+          // If last filled, remove error border
+          this.classList.remove('border-error');
+        });
+
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+            otpInputs[index - 1].focus();
+          }
+        });
+
+        input.addEventListener('paste', function (e) {
+          e.preventDefault();
+          const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+          [...pasted].forEach((char, i) => {
+            if (otpInputs[index + i]) otpInputs[index + i].value = char;
+          });
+          const nextEmpty = index + pasted.length;
+          if (otpInputs[nextEmpty]) otpInputs[nextEmpty].focus();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

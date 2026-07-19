@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SaarthiX - Market News</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Geist', 'sans-serif'], inter: ['Inter', 'sans-serif'] },
+          colors: {
+            primary: '#adc6ff',
+            'primary-container': '#4d8eff',
+            'on-primary-container': '#ffffff',
+            secondary: '#4edea3',
+            'secondary-container': '#00a572',
+            error: '#ffb4ab',
+            background: '#0f131c',
+            'surface-container': '#1c1f29',
+            'surface-container-low': '#181b25',
+            'on-surface': '#dfe2ef',
+            'on-surface-variant': '#c2c6d6',
+          },
+          spacing: { 'container-padding': '1.5rem', 'gutter': '1rem' },
+          animation: {
+            'marquee': 'marquee 25s linear infinite',
+          },
+          keyframes: {
+            marquee: {
+              '0%': { transform: 'translateX(100%)' },
+              '100%': { transform: 'translateX(-100%)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-panel {
+      background: rgba(28, 31, 41, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .glass-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #dfe2ef;
+    }
+    .glass-input:focus {
+      outline: none;
+      border-color: #adc6ff;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 1px #adc6ff;
+    }
+    .pulse-button {
+      transition: all 0.2s ease;
+    }
+    .pulse-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 15px rgba(77, 142, 255, 0.4);
+    }
+    /* Hide scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    
+    .news-card-hover {
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .news-card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3), 0 0 15px rgba(173, 198, 255, 0.15);
+      border-color: rgba(173, 198, 255, 0.3);
+    }
+    .hide { display: none !important; }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .filter-tab {
+      transition: all 0.2s ease;
+    }
+    .filter-tab.active {
+      background-color: #adc6ff;
+      color: #0f131c;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex font-sans">
+  
+  <!-- Sidebar nav -->
+  <nav id="sidebar-nav" class="hidden md:flex flex-col h-full py-container-padding fixed left-0 top-0 w-[280px] border-r border-white/10 bg-surface-container/80 backdrop-blur-xl shadow-2xl z-50">
+    <div class="px-gutter mb-8 flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-container to-secondary-container flex items-center justify-center font-bold text-white shadow-[0_0_15px_rgba(77,142,255,0.5)]">S</div>
+      <span class="text-xl font-bold tracking-wide text-white">Stocker<span class="text-primary">AI</span></span>
+    </div>
+    <div class="flex flex-col gap-1 px-gutter flex-1" id="nav-links"></div>
+    <div class="px-gutter mt-auto mb-6">
+      <a href="portfolio.html" class="block w-full py-2.5 px-4 rounded-xl bg-primary-container text-on-primary-container text-center font-medium pulse-button shadow-lg">Analyze Portfolio</a>
+    </div>
+    <div class="px-gutter flex flex-col gap-1 pt-4 border-t border-white/10">
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors">
+        <span class="material-symbols-outlined text-lg">support_agent</span>
+        <span class="text-sm font-medium">Support</span>
+      </a>
+      <a href="login.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-error hover:bg-error/10 transition-colors mt-1">
+        <span class="material-symbols-outlined text-lg">logout</span>
+        <span class="text-sm font-medium">Log Out</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col w-full overflow-hidden">
+    
+    <!-- Top header with market status -->
+    <header class="h-16 border-b border-white/10 bg-surface-container/50 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-40 sticky top-0">
+      <div class="flex items-center gap-4">
+        <h1 class="text-xl font-semibold text-white">Market News</h1>
+        <span class="live-timestamp text-xs text-on-surface-variant/60 font-mono"></span>
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-low border border-white/5 text-xs font-medium">
+          <span id="market-status"></span>
+          <span class="text-on-surface-variant">Market Status</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <!-- Live Market Mini-Bar -->
+        <div id="mini-bar" class="hidden lg:flex items-center gap-4 px-4 py-1.5 rounded-lg glass-panel text-sm">
+          <div class="flex items-center gap-2">
+            <span class="text-on-surface-variant font-medium">NIFTY</span>
+            <span id="mini-nifty-price" class="font-bold text-white">--</span>
+            <span id="mini-nifty-change" class="text-xs">--</span>
+          </div>
+          <div class="w-px h-4 bg-white/20"></div>
+          <div class="flex items-center gap-2">
+            <span class="text-on-surface-variant font-medium">SENSEX</span>
+            <span id="mini-sensex-price" class="font-bold text-white">--</span>
+            <span id="mini-sensex-change" class="text-xs">--</span>
+          </div>
+        </div>
+        
+        <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors relative">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+        </button>
+        <div class="w-8 h-8 rounded-full bg-surface-container-low border border-white/10 overflow-hidden ml-1">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=StockerUser" alt="User profile" class="w-full h-full object-cover"/>
+        </div>
+      </div>
+    </header>
+
+    <!-- Breaking News Ticker -->
+    <div class="h-8 bg-primary/10 border-b border-primary/20 flex items-center overflow-hidden relative">
+      <div class="absolute left-0 top-0 bottom-0 z-10 bg-gradient-to-r from-background to-transparent w-24 flex items-center px-4">
+        <span class="text-xs font-bold text-primary tracking-wider uppercase">Breaking</span>
+      </div>
+      <div class="w-full overflow-hidden ml-24">
+        <div id="breaking-ticker" class="whitespace-nowrap animate-marquee flex gap-12 text-sm text-on-surface">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+      <div class="absolute right-0 top-0 bottom-0 z-10 bg-gradient-to-l from-background to-transparent w-12"></div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="p-4 md:p-6 lg:p-container-padding flex-1 overflow-y-auto pb-24">
+      
+      <!-- Sentiment & Controls Bar -->
+      <div class="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center mb-6">
+        
+        <!-- Sentiment Summary -->
+        <div class="flex items-center gap-3 glass-panel px-4 py-2 rounded-xl">
+          <div class="text-sm text-on-surface-variant font-medium mr-2">Market Sentiment:</div>
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary/10 border border-secondary/20">
+            <span class="material-symbols-outlined text-secondary text-sm">trending_up</span>
+            <span id="count-bullish" class="text-sm font-semibold text-secondary">0</span>
+          </div>
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">
+            <span class="material-symbols-outlined text-on-surface-variant text-sm">horizontal_rule</span>
+            <span id="count-neutral" class="text-sm font-semibold text-on-surface-variant">0</span>
+          </div>
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-error/10 border border-error/20">
+            <span class="material-symbols-outlined text-error text-sm">trending_down</span>
+            <span id="count-bearish" class="text-sm font-semibold text-error">0</span>
+          </div>
+        </div>
+
+        <!-- Search & Sort -->
+        <div class="flex items-center gap-3 w-full xl:w-auto">
+          <div class="relative flex-1 xl:w-64">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+            <input type="text" id="search-input" placeholder="Search news..." class="w-full pl-10 pr-4 py-2 rounded-xl glass-input text-sm">
+          </div>
+          <div class="relative">
+            <select id="sort-select" class="appearance-none pl-4 pr-10 py-2 rounded-xl glass-input text-sm focus:ring-0">
+              <option value="latest">Latest</option>
+              <option value="bullish">Bullish First</option>
+              <option value="bearish">Bearish First</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-lg">expand_more</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-2 scrollbar-hide w-full" id="filter-tabs">
+        <button class="filter-tab active px-4 py-1.5 rounded-full text-sm font-medium bg-surface-container-low border border-white/10 whitespace-nowrap" data-filter="All">All News</button>
+        <button class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-surface-container-low border border-white/10 text-on-surface-variant whitespace-nowrap hover:bg-white/5" data-filter="NSE">NSE</button>
+        <button class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-surface-container-low border border-white/10 text-on-surface-variant whitespace-nowrap hover:bg-white/5" data-filter="BSE">BSE</button>
+        <button class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-surface-container-low border border-white/10 text-on-surface-variant whitespace-nowrap hover:bg-white/5" data-filter="Economy">Economy</button>
+        <div class="w-px h-5 bg-white/20 mx-1"></div>
+        <button class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-surface-container-low border border-white/10 text-on-surface-variant whitespace-nowrap hover:bg-white/5" data-filter="IT">IT</button>
+        <button class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-surface-container-low border border-white/10 text-on-surface-variant whitespace-nowrap hover:bg-white/5" data-filter="Banking">Banking</button>
+        <button class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-surface-container-low border border-white/10 text-on-surface-variant whitespace-nowrap hover:bg-white/5" data-filter="Auto">Auto</button>
+        <button class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-surface-container-low border border-white/10 text-on-surface-variant whitespace-nowrap hover:bg-white/5" data-filter="Pharma">Pharma</button>
+        <button class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-surface-container-low border border-white/10 text-on-surface-variant whitespace-nowrap hover:bg-white/5" data-filter="FMCG">FMCG</button>
+      </div>
+
+      <!-- News Grid -->
+      <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <!-- Populated by JS -->
+      </div>
+      
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-center">
+        <span class="material-symbols-outlined text-6xl text-on-surface-variant/50 mb-4">newspaper</span>
+        <h3 class="text-xl font-semibold text-white mb-2">No news found</h3>
+        <p class="text-on-surface-variant">Try adjusting your search or filters.</p>
+        <button id="clear-filters-btn" class="mt-6 px-6 py-2 rounded-lg bg-surface-container border border-white/10 hover:bg-white/10 transition-colors">Clear All Filters</button>
+      </div>
+      
+    </div>
+  </main>
+
+  <!-- Mobile bottom nav -->
+  <nav id="mobile-nav" class="fixed bottom-0 left-0 right-0 glass-panel md:hidden flex justify-around h-16 pb-safe z-50 border-t border-white/10"></nav>
+
+  <!-- Load shared JS data and functions -->
+  <script src="shared.js"></script>
+  <script src="groww-client.js"></script>
+  <script>
+    let activeFilter = 'All';
+    let searchQuery = '';
+    let sortMode = 'latest';
+    let localNews = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Build Navigation
+      try {
+        const { navLinks, mobileLinks, statusDot } = buildNav('news');
+        document.getElementById('nav-links').innerHTML = navLinks;
+        document.getElementById('mobile-nav').innerHTML = mobileLinks;
+        document.getElementById('market-status').innerHTML = statusDot;
+      } catch (e) { console.error("Nav build error:", e); }
+
+      // Ensure NEWS_DATA exists, clone it so we don't mutate original
+      if (typeof NEWS_DATA !== 'undefined' && Array.isArray(NEWS_DATA)) {
+        localNews = [...NEWS_DATA];
+      } else {
+        // Fallback dummy data if shared.js doesn't provide enough
+        localNews = [
+          { id: 1, headline: 'Sensex hits new all-time high amid foreign inflows', summary: 'The benchmark index crossed the 75k mark today as FIIs continue their buying spree in the Indian market.', category: 'BSE', sentiment: 'Bullish', time: '1h ago', tags: ['Banking', 'Macro'], ticker: null },
+          { id: 2, headline: 'Infosys Q3 Results: Margins expand, revenue guidance maintained', summary: 'IT major Infosys reported a 5% YoY growth in net profit. Operating margins expanded by 50 bps.', category: 'NSE', sentiment: 'Bullish', time: '2h ago', tags: ['IT'], ticker: 'INFY' },
+          { id: 3, headline: 'RBI keeps repo rate unchanged at 6.5%', summary: 'The Monetary Policy Committee decided to maintain status quo on rates citing inflation concerns in the near term.', category: 'Economy', sentiment: 'Neutral', time: '3h ago', tags: ['Macro', 'Banking'], ticker: null },
+          { id: 4, headline: 'Auto sales see dip in entry-level segment', summary: 'Major automakers report sluggish demand in rural markets for entry-level two-wheelers and passenger vehicles.', category: 'NSE', sentiment: 'Bearish', time: '4h ago', tags: ['Auto'], ticker: 'MARUTI' },
+          { id: 5, headline: 'Sun Pharma receives USFDA approval for new generic', summary: 'The pharmaceutical giant has secured final approval from the US FDA for its Abbreviated New Drug Application.', category: 'BSE', sentiment: 'Bullish', time: '5h ago', tags: ['Pharma'], ticker: 'SUNPHARMA' },
+          { id: 6, headline: 'FMCG sector faces margin pressure due to raw material costs', summary: 'Rising prices of palm oil and crude derivatives are expected to squeeze margins for top FMCG players this quarter.', category: 'NSE', sentiment: 'Bearish', time: '6h ago', tags: ['FMCG'], ticker: 'HINDUNILVR' },
+        ];
+      }
+
+      initPage();
+      updateMiniBar();
+    });
+
+    document.addEventListener('market:tick', () => {
+      updateMiniBar();
+    });
+
+    function initPage() {
+      // Calc Sentiments
+      let bullCount = 0; let bearCount = 0; let neutCount = 0;
+      localNews.forEach(n => {
+        const s = (n.sentiment || '').toLowerCase();
+        if (s.includes('bull')) bullCount++;
+        else if (s.includes('bear')) bearCount++;
+        else neutCount++;
+      });
+      document.getElementById('count-bullish').innerText = bullCount;
+      document.getElementById('count-bearish').innerText = bearCount;
+      document.getElementById('count-neutral').innerText = neutCount;
+
+      // Populate Ticker (Bullish only)
+      const tickerEl = document.getElementById('breaking-ticker');
+      const bullishNews = localNews.filter(n => (n.sentiment || '').toLowerCase().includes('bull'));
+      let tickerHtml = '';
+      bullishNews.forEach(n => {
+        tickerHtml += `<span class="mx-8">• ${n.headline}</span>`;
+      });
+      // duplicate for seamless marquee
+      tickerEl.innerHTML = tickerHtml + tickerHtml + tickerHtml;
+
+      // Attach Event Listeners
+      const tabs = document.querySelectorAll('.filter-tab');
+      tabs.forEach(t => {
+        t.addEventListener('click', (e) => {
+          tabs.forEach(tab => {
+            tab.classList.remove('active', 'bg-primary', 'text-[#0f131c]');
+            tab.classList.add('text-on-surface-variant', 'bg-surface-container-low');
+          });
+          e.target.classList.remove('text-on-surface-variant', 'bg-surface-container-low');
+          e.target.classList.add('active', 'bg-primary', 'text-[#0f131c]');
+          activeFilter = e.target.dataset.filter;
+          renderGrid();
+        });
+      });
+
+      document.getElementById('search-input').addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase();
+        renderGrid();
+      });
+
+      document.getElementById('sort-select').addEventListener('change', (e) => {
+        sortMode = e.target.value;
+        renderGrid();
+      });
+
+      document.getElementById('clear-filters-btn').addEventListener('click', () => {
+        document.getElementById('search-input').value = '';
+        searchQuery = '';
+        document.getElementById('sort-select').value = 'latest';
+        sortMode = 'latest';
+        document.querySelector('.filter-tab[data-filter="All"]').click();
+      });
+
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('news-grid');
+      const emptyState = document.getElementById('empty-state');
+      
+      let filtered = localNews.filter(item => {
+        // Search match
+        const matchesSearch = !searchQuery || 
+          item.headline.toLowerCase().includes(searchQuery) || 
+          (item.summary && item.summary.toLowerCase().includes(searchQuery));
+        
+        // Tab match
+        let matchesTab = false;
+        if (activeFilter === 'All') matchesTab = true;
+        else if (item.category && item.category.includes(activeFilter)) matchesTab = true;
+        else if (item.tags && (Array.isArray(item.tags) ? item.tags.includes(activeFilter) : item.tags.includes(activeFilter))) matchesTab = true;
+        // Check legacy tag string if present
+        else if (item.tag && item.tag.includes(activeFilter)) matchesTab = true;
+
+        return matchesSearch && matchesTab;
+      });
+
+      // Sort
+      if (sortMode === 'bullish') {
+        filtered.sort((a, b) => {
+          const sA = (a.sentiment||'').toLowerCase();
+          const sB = (b.sentiment||'').toLowerCase();
+          if (sA.includes('bull') && !sB.includes('bull')) return -1;
+          if (!sA.includes('bull') && sB.includes('bull')) return 1;
+          return 0; // fallback to original order
+        });
+      } else if (sortMode === 'bearish') {
+        filtered.sort((a, b) => {
+          const sA = (a.sentiment||'').toLowerCase();
+          const sB = (b.sentiment||'').toLowerCase();
+          if (sA.includes('bear') && !sB.includes('bear')) return -1;
+          if (!sA.includes('bear') && sB.includes('bear')) return 1;
+          return 0;
+        });
+      }
+      // 'latest' relies on array order assuming original array is newest first
+
+      grid.innerHTML = '';
+      
+      if (filtered.length === 0) {
+        grid.classList.add('hide');
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        return;
+      }
+      
+      grid.classList.remove('hide');
+      emptyState.classList.add('hidden');
+      emptyState.classList.remove('flex');
+
+      filtered.forEach((item, index) => {
+        const isFeatured = (index === 0 && activeFilter === 'All' && !searchQuery && sortMode === 'latest');
+        grid.appendChild(buildCardHtml(item, isFeatured));
+      });
+    }
+
+    function buildCardHtml(item, isFeatured) {
+      const el = document.createElement('div');
+      el.className = `glass-panel rounded-2xl p-5 flex flex-col news-card-hover fade-in ${isFeatured ? 'md:col-span-2 xl:col-span-2 bg-gradient-to-br from-surface-container to-surface-container-low border-primary/20' : ''}`;
+      
+      // Badges
+      let catColor = 'bg-surface-container border-white/10 text-on-surface-variant';
+      if(item.category) {
+        if (item.category.includes('NSE')) catColor = 'bg-secondary/10 border-secondary/30 text-secondary';
+        else if (item.category.includes('BSE')) catColor = 'bg-primary/10 border-primary/30 text-primary';
+        else if (item.category.includes('Economy')) catColor = 'bg-purple-500/10 border-purple-500/30 text-purple-400';
+      }
+
+      let sentIcon = 'horizontal_rule';
+      let sentColor = 'text-on-surface-variant';
+      let sentLabel = 'Neutral';
+      if(item.sentiment) {
+        const s = item.sentiment.toLowerCase();
+        if(s.includes('bull')) { sentIcon = 'trending_up'; sentColor = 'text-secondary'; sentLabel = 'Bullish'; }
+        else if(s.includes('bear')) { sentIcon = 'trending_down'; sentColor = 'text-error'; sentLabel = 'Bearish'; }
+      }
+
+      // Tags & Ticker string
+      let tagsArr = [];
+      if (Array.isArray(item.tags)) tagsArr = item.tags;
+      else if (item.tags) tagsArr = [item.tags];
+      else if (item.tag) tagsArr = [item.tag];
+      
+      const tagHtml = tagsArr.length > 0 ? `<span class="px-2 py-0.5 rounded text-xs font-medium bg-white/5 text-on-surface-variant">${tagsArr[0]}</span>` : '';
+      const tickerHtml = item.ticker ? `<span class="px-2 py-0.5 rounded text-xs font-bold bg-primary-container text-on-primary-container">${item.ticker}</span>` : '';
+
+      el.innerHTML = `
+        <div class="flex justify-between items-start mb-3">
+          <div class="flex gap-2 items-center">
+            <span class="px-2 py-0.5 rounded text-xs font-semibold border ${catColor}">${item.category || 'News'}</span>
+            ${tagHtml}
+            ${tickerHtml}
+          </div>
+          <div class="flex items-center gap-1" title="${sentLabel}">
+            <span class="material-symbols-outlined text-sm ${sentColor}">${sentIcon}</span>
+            <span class="w-2 h-2 rounded-full ${sentColor.replace('text-', 'bg-')}"></span>
+          </div>
+        </div>
+        
+        <h3 class="${isFeatured ? 'text-2xl mb-3' : 'text-lg mb-2'} font-bold text-white leading-tight">
+          ${item.headline}
+        </h3>
+        
+        <p class="text-sm text-on-surface-variant ${isFeatured ? 'mb-6 line-clamp-3' : 'mb-4 line-clamp-2'} flex-1">
+          ${item.summary || 'Click to read full story...'}
+        </p>
+        
+        <div class="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
+          <span class="text-xs text-on-surface-variant/70 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">schedule</span>
+            ${item.time || 'Just now'}
+          </span>
+          <a href="#" class="text-sm font-medium text-primary hover:text-white transition-colors flex items-center gap-1">
+            Read More
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </a>
+        </div>
+      `;
+      return el;
+    }
+
+    function updateMiniBar() {
+      // Needs LIVE_INDICES from shared.js
+      if(typeof LIVE_INDICES !== 'undefined') {
+        const nse = LIVE_INDICES.find(i => i.symbol === 'NIFTY 50');
+        const bse = LIVE_INDICES.find(i => i.symbol === 'SENSEX');
+        
+        if(nse) {
+          document.getElementById('mini-nifty-price').innerText = typeof fmtPrice === 'function' ? fmtPrice(nse.price) : nse.price;
+          const cnifty = document.getElementById('mini-nifty-change');
+          cnifty.innerText = `${nse.change >= 0 ? '+' : ''}${nse.change} (${nse.changePct}%)`;
+          cnifty.className = `text-xs font-medium ${nse.change >= 0 ? 'text-secondary' : 'text-error'}`;
+        }
+        
+        if(bse) {
+          document.getElementById('mini-sensex-price').innerText = typeof fmtPrice === 'function' ? fmtPrice(bse.price) : bse.price;
+          const cbse = document.getElementById('mini-sensex-change');
+          cbse.innerText = `${bse.change >= 0 ? '+' : ''}${bse.change} (${bse.changePct}%)`;
+          cbse.className = `text-xs font-medium ${bse.change >= 0 ? 'text-secondary' : 'text-error'}`;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
