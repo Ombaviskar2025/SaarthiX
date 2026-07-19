@@ -292,6 +292,7 @@
 
         <!-- Login CTA -->
         <button
+          id="login-btn"
           onclick="loginToDashboard()"
           class="w-full btn-emerald rounded-lg py-3 font-label-md text-label-md font-bold uppercase tracking-wider flex items-center justify-center gap-2 group"
         >
@@ -441,9 +442,11 @@
       }
 
       // Show loading state then navigate
-      const btn = document.querySelector('#otp-step button.btn-emerald');
-      btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Verifying...`;
-      btn.disabled = true;
+      const btn = document.getElementById('login-btn');
+      if (btn) {
+        btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Verifying...`;
+        btn.disabled = true;
+      }
 
       setTimeout(() => {
         window.location.href = 'dashboard.html';
