@@ -285,7 +285,8 @@ app.get('/api/debug-env', (req, res) => {
     DHAN_ACCESS_TOKEN: mask(process.env.DHAN_ACCESS_TOKEN),
     DHAN_CLIENT_ID: mask(process.env.DHAN_CLIENT_ID),
     DHAN_API_KEY: mask(process.env.DHAN_API_KEY),
-    DHAN_API_SECRET: mask(process.env.DHAN_API_SECRET)
+    DHAN_API_SECRET: mask(process.env.DHAN_API_SECRET),
+    FINNHUB_API_KEY: mask(process.env.FINNHUB_API_KEY)
   });
 });
 
