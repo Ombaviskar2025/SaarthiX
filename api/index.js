@@ -101,10 +101,15 @@ function postToDhan(path, body) {
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          if (res.statusCode >= 400 || parsed.status === 'failure') {
+          if (res.statusCode >= 400 || parsed.status === 'failure' || parsed.status === 'failed') {
+            let errorMsg = parsed.remarks || parsed.message;
+            if (!errorMsg && parsed.data && typeof parsed.data === 'object') {
+              const values = Object.values(parsed.data);
+              if (values.length > 0) errorMsg = values[0];
+            }
             reject({
               status: res.statusCode || 500,
-              message: parsed.remarks || parsed.message || `Dhan API error (HTTP ${res.statusCode})`
+              message: errorMsg || `Dhan API error (HTTP ${res.statusCode})`
             });
           } else {
             resolve(parsed);
