@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
-  ],
   "redirects": [
     {
       "source": "/",
@@ -13,14 +7,10 @@
       "permanent": true
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "$1"
+      "source": "/api/:path*",
+      "destination": "/api/index.js"
     }
   ]
 }
