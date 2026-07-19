@@ -267,6 +267,23 @@ app.get('/api/quote', async (req, res) => {
   }
 });
 
+// ── Debug environment variables securely (only show lengths and partial values) ──
+app.get('/api/debug-env', (req, res) => {
+  const mask = (val) => {
+    if (!val) return 'not defined / empty';
+    const trimmed = val.trim();
+    if (trimmed.length <= 8) return `defined (len: ${trimmed.length}, value: "${trimmed}")`;
+    return `defined (len: ${trimmed.length}, start: "${trimmed.substring(0, 4)}...", end: "...${trimmed.substring(trimmed.length - 4)}")`;
+  };
+
+  res.json({
+    DHAN_ACCESS_TOKEN: mask(process.env.DHAN_ACCESS_TOKEN),
+    DHAN_CLIENT_ID: mask(process.env.DHAN_CLIENT_ID),
+    DHAN_API_KEY: mask(process.env.DHAN_API_KEY),
+    DHAN_API_SECRET: mask(process.env.DHAN_API_SECRET)
+  });
+});
+
 // Fallback to serve login page
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'login.html'));
