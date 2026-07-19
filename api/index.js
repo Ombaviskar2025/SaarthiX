@@ -14,56 +14,252 @@ app.use(express.static(path.join(__dirname, '..')));
 
 // ── Dhan Symbol Security ID & Baseline Price Mapping ─────────
 const DHAN_SYMBOL_MAP = {
-  "BAJFINANCE": { "securityId": "317", "exchangeSegment": "NSE_EQ", "basePrice": 6892.30 },
-  "CIPLA": { "securityId": "694", "exchangeSegment": "NSE_EQ", "basePrice": 1612.30 },
-  "SBIN": { "securityId": "3045", "exchangeSegment": "NSE_EQ", "basePrice": 824.35 },
-  "DRREDDY": { "securityId": "881", "exchangeSegment": "NSE_EQ", "basePrice": 6824.35 },
-  "HDFCBANK": { "securityId": "1333", "exchangeSegment": "NSE_EQ", "basePrice": 1783.25 },
-  "HEROMOTOCO": { "securityId": "1348", "exchangeSegment": "NSE_EQ", "basePrice": 4812.30 },
-  "INFY": { "securityId": "1594", "exchangeSegment": "NSE_EQ", "basePrice": 1094.20 },
-  "JSWSTEEL": { "securityId": "11723", "exchangeSegment": "NSE_EQ", "basePrice": 924.30 },
-  "KOTAKBANK": { "securityId": "1922", "exchangeSegment": "NSE_EQ", "basePrice": 1892.15 },
-  "GRASIM": { "securityId": "1232", "exchangeSegment": "NSE_EQ", "basePrice": 2812.65 },
-  "ONGC": { "securityId": "2475", "exchangeSegment": "NSE_EQ", "basePrice": 284.30 },
-  "RELIANCE": { "securityId": "2885", "exchangeSegment": "NSE_EQ", "basePrice": 1327.20 },
-  "HINDALCO": { "securityId": "1363", "exchangeSegment": "NSE_EQ", "basePrice": 712.45 },
-  "TATASTEEL": { "securityId": "3499", "exchangeSegment": "NSE_EQ", "basePrice": 162.45 },
-  "LT": { "securityId": "11483", "exchangeSegment": "NSE_EQ", "basePrice": 3412.65 },
-  "M&M": { "securityId": "2031", "exchangeSegment": "NSE_EQ", "basePrice": 2812.40 },
-  "BPCL": { "securityId": "526", "exchangeSegment": "NSE_EQ", "basePrice": 312.45 },
-  "HINDUNILVR": { "securityId": "1394", "exchangeSegment": "NSE_EQ", "basePrice": 2456.80 },
-  "NESTLEIND": { "securityId": "17963", "exchangeSegment": "NSE_EQ", "basePrice": 2312.65 },
-  "TATACONSUM": { "securityId": "3432", "exchangeSegment": "NSE_EQ", "basePrice": 1212.45 },
-  "BRITANNIA": { "securityId": "547", "exchangeSegment": "NSE_EQ", "basePrice": 5412.30 },
-  "ITC": { "securityId": "1660", "exchangeSegment": "NSE_EQ", "basePrice": 468.25 },
-  "EICHERMOT": { "securityId": "910", "exchangeSegment": "NSE_EQ", "basePrice": 5412.65 },
-  "WIPRO": { "securityId": "3787", "exchangeSegment": "NSE_EQ", "basePrice": 538.20 },
-  "APOLLOHOSP": { "securityId": "157", "exchangeSegment": "NSE_EQ", "basePrice": 7212.45 },
-  "ADANIENT": { "securityId": "25", "exchangeSegment": "NSE_EQ", "basePrice": 2912.45 },
-  "SUNPHARMA": { "securityId": "3351", "exchangeSegment": "NSE_EQ", "basePrice": 1892.45 },
-  "ICICIBANK": { "securityId": "4963", "exchangeSegment": "NSE_EQ", "basePrice": 1238.60 },
-  "INDUSINDBK": { "securityId": "5258", "exchangeSegment": "NSE_EQ", "basePrice": 1012.45 },
-  "AXISBANK": { "securityId": "5900", "exchangeSegment": "NSE_EQ", "basePrice": 1156.40 },
-  "HCLTECH": { "securityId": "7229", "exchangeSegment": "NSE_EQ", "basePrice": 1724.30 },
-  "BHARTIARTL": { "securityId": "10604", "exchangeSegment": "NSE_EQ", "basePrice": 1634.25 },
-  "DIVISLAB": { "securityId": "10940", "exchangeSegment": "NSE_EQ", "basePrice": 4812.65 },
-  "MARUTI": { "securityId": "10999", "exchangeSegment": "NSE_EQ", "basePrice": 11245.60 },
-  "ULTRACEMCO": { "securityId": "11532", "exchangeSegment": "NSE_EQ", "basePrice": 11824.35 },
-  "TCS": { "securityId": "11536", "exchangeSegment": "NSE_EQ", "basePrice": 3921.40 },
-  "NTPC": { "securityId": "11630", "exchangeSegment": "NSE_EQ", "basePrice": 412.30 },
-  "TECHM": { "securityId": "13538", "exchangeSegment": "NSE_EQ", "basePrice": 1524.65 },
-  "POWERGRID": { "securityId": "14977", "exchangeSegment": "NSE_EQ", "basePrice": 342.45 },
-  "ADANIPORTS": { "securityId": "15083", "exchangeSegment": "NSE_EQ", "basePrice": 1412.65 },
-  "BAJAJ-AUTO": { "securityId": "16669", "exchangeSegment": "NSE_EQ", "basePrice": 8924.30 },
-  "BAJAJFINSV": { "securityId": "16675", "exchangeSegment": "NSE_EQ", "basePrice": 1712.40 },
-  "COALINDIA": { "securityId": "20374", "exchangeSegment": "NSE_EQ", "basePrice": 524.30 },
-  "TATAMOTORS": { "securityId": "3456", "exchangeSegment": "NSE_EQ", "basePrice": 812.45 },
-  "NIFTY 50": { "securityId": "13", "exchangeSegment": "NSE_IDX", "basePrice": 24398.15 },
-  "SENSEX": { "securityId": "1", "exchangeSegment": "BSE_IDX", "basePrice": 80423.72 },
-  "BANK NIFTY": { "securityId": "25", "exchangeSegment": "NSE_IDX", "basePrice": 52841.60 },
-  "NIFTY IT": { "securityId": "15", "exchangeSegment": "NSE_IDX", "basePrice": 38924.30 },
-  "NIFTY MIDCAP": { "securityId": "21", "exchangeSegment": "NSE_IDX", "basePrice": 56234.80 }
-};
+  "BAJFINANCE": {
+    "securityId": "317",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1055.3
+  },
+  "CIPLA": {
+    "securityId": "694",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1419.5
+  },
+  "SBIN": {
+    "securityId": "3045",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1043.2
+  },
+  "DRREDDY": {
+    "securityId": "881",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1210.3
+  },
+  "HDFCBANK": {
+    "securityId": "1333",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 820.8
+  },
+  "HEROMOTOCO": {
+    "securityId": "1348",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 4906
+  },
+  "INFY": {
+    "securityId": "1594",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1094.2
+  },
+  "JSWSTEEL": {
+    "securityId": "11723",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1235
+  },
+  "KOTAKBANK": {
+    "securityId": "1922",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 390.7
+  },
+  "GRASIM": {
+    "securityId": "1232",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 3111.5
+  },
+  "ONGC": {
+    "securityId": "2475",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 247.27
+  },
+  "RELIANCE": {
+    "securityId": "2885",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1328.8
+  },
+  "HINDALCO": {
+    "securityId": "1363",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 945.05
+  },
+  "TATASTEEL": {
+    "securityId": "3499",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 185.75
+  },
+  "LT": {
+    "securityId": "11483",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 3817.9
+  },
+  "M&M": {
+    "securityId": "2031",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 3178.9
+  },
+  "BPCL": {
+    "securityId": "526",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 315
+  },
+  "HINDUNILVR": {
+    "securityId": "1394",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 2140
+  },
+  "NESTLEIND": {
+    "securityId": "17963",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1427.8
+  },
+  "TATACONSUM": {
+    "securityId": "3432",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1088.8
+  },
+  "BRITANNIA": {
+    "securityId": "547",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 5415
+  },
+  "ITC": {
+    "securityId": "1660",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 280.5
+  },
+  "EICHERMOT": {
+    "securityId": "910",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 7556
+  },
+  "WIPRO": {
+    "securityId": "3787",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 175.9
+  },
+  "APOLLOHOSP": {
+    "securityId": "157",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 8820
+  },
+  "ADANIENT": {
+    "securityId": "25",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 3155
+  },
+  "SUNPHARMA": {
+    "securityId": "3351",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1934
+  },
+  "ICICIBANK": {
+    "securityId": "4963",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1454
+  },
+  "INDUSINDBK": {
+    "securityId": "5258",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1026.1
+  },
+  "AXISBANK": {
+    "securityId": "5900",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1329.4
+  },
+  "HCLTECH": {
+    "securityId": "7229",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1203.9
+  },
+  "BHARTIARTL": {
+    "securityId": "10604",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1908
+  },
+  "DIVISLAB": {
+    "securityId": "10940",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 7247.5
+  },
+  "MARUTI": {
+    "securityId": "10999",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 13824
+  },
+  "ULTRACEMCO": {
+    "securityId": "11532",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 11685
+  },
+  "TCS": {
+    "securityId": "11536",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 2266
+  },
+  "NTPC": {
+    "securityId": "11630",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 341.9
+  },
+  "TECHM": {
+    "securityId": "13538",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1572.9
+  },
+  "POWERGRID": {
+    "securityId": "14977",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 283.2
+  },
+  "ADANIPORTS": {
+    "securityId": "15083",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1836.5
+  },
+  "BAJAJ-AUTO": {
+    "securityId": "16669",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 10439.5
+  },
+  "BAJAJFINSV": {
+    "securityId": "16675",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 1854
+  },
+  "COALINDIA": {
+    "securityId": "20374",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 427.6
+  },
+  "TATAMOTORS": {
+    "securityId": "3456",
+    "exchangeSegment": "NSE_EQ",
+    "basePrice": 912.45
+  },
+  "NIFTY 50": {
+    "securityId": "13",
+    "exchangeSegment": "NSE_IDX",
+    "basePrice": 24398.15
+  },
+  "SENSEX": {
+    "securityId": "1",
+    "exchangeSegment": "BSE_IDX",
+    "basePrice": 80423.72
+  },
+  "BANK NIFTY": {
+    "securityId": "25",
+    "exchangeSegment": "NSE_IDX",
+    "basePrice": 52841.6
+  },
+  "NIFTY IT": {
+    "securityId": "15",
+    "exchangeSegment": "NSE_IDX",
+    "basePrice": 38924.3
+  },
+  "NIFTY MIDCAP": {
+    "securityId": "21",
+    "exchangeSegment": "NSE_IDX",
+    "basePrice": 56234.8
+  }
+}
 
 // ── Auth Token Verification ───────────────────────────
 function isDhanConfigured() {
@@ -163,7 +359,8 @@ function fetchLivePriceFromGoogle(ticker, exchange) {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5'
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Cookie': 'CONSENT=YES+cb.20210328-17-p0.en+FX+981'
           }
         };
 
@@ -177,17 +374,7 @@ function fetchLivePriceFromGoogle(ticker, exchange) {
           res.on('data', (chunk) => { data += chunk; });
           res.on('end', () => {
             try {
-              let firstMatch = null;
               let specificMatch = null;
-
-              // Find all jsname="Pdsbrc" occurrences
-              const regex = /<span[^>]*jsname="Pdsbrc"[^>]*>(?:<span[^>]*>)?([^<]+)(?:<\/span>)?<\/span>/g;
-              let match;
-              let count = 0;
-              while ((match = regex.exec(data)) !== null) {
-                count++;
-                if (count === 1) firstMatch = match[1];
-              }
 
               // Try matching N6SYTe container which surrounds the main price
               const mainQuoteRegex = /class="[A-Za-z0-9\s]*N6SYTe"[^>]*>.*?<span[^>]*jsname="Pdsbrc"[^>]*>(?:<span[^>]*>)?([^<]+)/s;
@@ -196,7 +383,7 @@ function fetchLivePriceFromGoogle(ticker, exchange) {
                 specificMatch = mainMatch[1];
               }
 
-              const finalPriceStr = specificMatch || firstMatch;
+              const finalPriceStr = specificMatch;
               if (finalPriceStr) {
                 let priceStr = finalPriceStr.replace(/[^\d\.]/g, '');
                 const price = parseFloat(priceStr);
