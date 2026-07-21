@@ -361,6 +361,11 @@
   <script src="shared.js"></script>
   <script src="groww-client.js"></script>
   <script>
+    function fmtINR(val) {
+      if (val === undefined || val === null || isNaN(val)) return '₹0.00';
+      return '₹' + Number(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     // ── Pie colours ──────────────────────────────────────────
     const PIE_COLORS = ['#4d8eff','#4edea3','#ff516a','#ffb2b7','#adc6ff','#6ffbbe','#c2c6d6','#353943'];
 

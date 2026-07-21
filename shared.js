@@ -178,6 +178,11 @@ function fmtVol(num) {
   return num.toString();
 }
 
+function fmtINR(val) {
+  if (val === undefined || val === null || isNaN(val)) return '₹0.00';
+  return '₹' + Number(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function changeClass(val) {
   if (val > 0) return 'text-secondary';
   if (val < 0) return 'text-error';
