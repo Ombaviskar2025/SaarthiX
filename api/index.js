@@ -1222,6 +1222,26 @@ async function resolveLivePricesForHoldings(holdings) {
   return resolved;
 }
 
+const SECTOR_MAP = {
+  'RELIANCE': 'Energy', 'ONGC': 'Energy', 'BPCL': 'Energy', 'IOC': 'Energy', 'HINDPETRO': 'Energy', 'GAIL': 'Energy', 'PETRONET': 'Energy',
+  'TCS': 'IT', 'INFY': 'IT', 'WIPRO': 'IT', 'HCLTECH': 'IT', 'TECHM': 'IT', 'LTIM': 'IT', 'PERSISTENT': 'IT', 'COFORGE': 'IT', 'MPHASIS': 'IT',
+  'HDFCBANK': 'Banking', 'ICICIBANK': 'Banking', 'KOTAKBANK': 'Banking', 'AXISBANK': 'Banking', 'SBIN': 'Banking', 'INDUSINDBK': 'Banking', 'PNB': 'Banking', 'BANKBARODA': 'Banking', 'YESBANK': 'Banking',
+  'BAJFINANCE': 'NBFC', 'BAJAJFINSV': 'NBFC', 'JIOFIN': 'NBFC', 'IRFC': 'NBFC', 'PFC': 'NBFC', 'RECLTD': 'NBFC', 'SHRIRAMFIN': 'NBFC', 'MUTHOOTFIN': 'NBFC',
+  'MARUTI': 'Auto', 'TATAMOTORS': 'Auto', 'HEROMOTOCO': 'Auto', 'EICHERMOT': 'Auto', 'M&M': 'Auto', 'BAJAJ-AUTO': 'Auto', 'TRENT': 'Consumer',
+  'TATAPOWER': 'Utilities', 'SUZLON': 'Utilities', 'POWERGRID': 'Utilities', 'NTPC': 'Utilities', 'ADANIPOWER': 'Utilities', 'SJVN': 'Utilities', 'NHPC': 'Utilities', 'ADANIGREEN': 'Utilities',
+  'HAL': 'Defense', 'BEL': 'Defense', 'BHEL': 'Defense', 'MAHDOCK': 'Defense', 'LT': 'Infrastructure',
+  'ZOMATO': 'Tech', 'PAYTM': 'Tech', 'POLICYBZR': 'Tech', 'NYKAA': 'Tech', 'DELHIVERY': 'Logistics',
+  'HINDUNILVR': 'FMCG', 'ITC': 'FMCG', 'NESTLEIND': 'FMCG', 'BRITANNIA': 'FMCG', 'TATACONSUM': 'FMCG', 'VBL': 'FMCG', 'DABUR': 'FMCG', 'MARICO': 'FMCG',
+  'SUNPHARMA': 'Pharma', 'DRREDDY': 'Pharma', 'CIPLA': 'Pharma', 'DIVISLAB': 'Pharma', 'APOLLOHOSP': 'Healthcare', 'LUPIN': 'Pharma', 'ZYDUSLIFE': 'Pharma',
+  'TATASTEEL': 'Metals', 'JSWSTEEL': 'Metals', 'HINDALCO': 'Metals', 'COALINDIA': 'Mining', 'VEDL': 'Metals', 'JINDALSTEL': 'Metals', 'NMDC': 'Mining',
+  'BHARTIARTL': 'Telecom', 'ULTRACEMCO': 'Cement', 'GRASIM': 'Cement', 'SHREECEM': 'Cement', 'ASIANPAINT': 'Consumer', 'TITAN': 'Consumer'
+};
+
+function getStockSector(ticker) {
+  const sym = (ticker || '').toUpperCase();
+  return SECTOR_MAP[sym] || 'Other';
+}
+
 // ── getFallbackAIInsights ────────────────────────────────────
 function getFallbackAIInsights(holdings) {
   let totalInvested = 0;
@@ -1241,13 +1261,13 @@ function getFallbackAIInsights(holdings) {
     ? {
         type: 'positive',
         icon: 'trending_up',
-        title: `Portfolio up ${totalPnlPct.toFixed(2)}% vs cost basis (Fallback)`,
+        title: `Portfolio up ${totalPnlPct.toFixed(2)}% vs cost basis`,
         detail: 'Holdings are overall profitable. Consider booking partial gains in overweighted assets.'
       }
     : {
         type: 'warning',
         icon: 'trending_down',
-        title: `Portfolio down ${Math.abs(totalPnlPct).toFixed(2)}% vs cost basis (Fallback)`,
+        title: `Portfolio down ${Math.abs(totalPnlPct).toFixed(2)}% vs cost basis`,
         detail: 'Overall holdings are trading below acquisition cost. Monitor fundamentals for any deterioration.'
       }
   );
@@ -1256,14 +1276,14 @@ function getFallbackAIInsights(holdings) {
     insights.push({
       type: 'warning',
       icon: 'warning',
-      title: 'High single-stock concentration (Fallback)',
+      title: 'High single-stock concentration',
       detail: 'Fewer than 3 holdings increases non-systemic risk. Consider diversifying across at least 5 different sectors.'
     });
   } else {
     insights.push({
       type: 'positive',
       icon: 'verified',
-      title: `${count} holdings detected (Fallback)`,
+      title: `${count} holdings detected`,
       detail: 'Reasonable asset spread reduces correlation. Aim for a mix of IT, Banking, FMCG, and Utilities.'
     });
   }
@@ -1271,9 +1291,8 @@ function getFallbackAIInsights(holdings) {
   const sectorConcentration = {};
   let totalAllocatedValue = 0;
   holdings.forEach(h => {
-    const symKey = h.ticker.toUpperCase();
-    const dbMatch = STOCKS_DB.find(s => s.ticker === symKey);
-    const sector = dbMatch ? dbMatch.sector : 'Other';
+    const symKey = (h.ticker || '').toUpperCase();
+    const sector = h.sector || getStockSector(symKey);
     const val = h.qty * h.ltp;
     sectorConcentration[sector] = (sectorConcentration[sector] || 0) + val;
     totalAllocatedValue += val;

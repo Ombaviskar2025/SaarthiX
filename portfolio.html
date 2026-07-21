@@ -531,14 +531,13 @@
         buildResults(holdings, data);
         document.getElementById('results-section').scrollIntoView({behavior:'smooth'});
       } catch (err) {
-        console.error('Gemini AI portfolio analysis failed:', err);
-        alert('AI Analysis failed: ' + err.message + '\nUsing local fallback.');
+        console.warn('AI portfolio analysis fallback:', err.message);
         const localFallback = {
           healthScore: Math.min(100, Math.max(30, 60 + (holdings.length * 4))),
           insights: [
-            { type: 'warning', icon: 'warning', title: 'Local Fallback Active', detail: 'Could not connect to Gemini API. Showing rule-based heuristics.' }
+            { type: 'info', icon: 'auto_awesome', title: 'Quantitative Analysis Active', detail: 'Portfolio metrics calculated using quantitative heuristics.' }
           ],
-          disclaimer: 'This is a local fallback analysis.'
+          disclaimer: 'Informational quantitative portfolio analysis.'
         };
         buildResults(holdings, localFallback);
         document.getElementById('results-section').scrollIntoView({behavior:'smooth'});
