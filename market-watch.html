@@ -333,14 +333,15 @@
           : '<span class="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded text-[10px] font-bold">BSE</span>';
 
         // 52W Range calculation
-        const low = stock.yearLow || (stock.price * 0.7);
-        const high = stock.yearHigh || (stock.price * 1.3);
+        const low = stock.yearLow || stock.fiftyTwoWeekLow || stock.high52 || (stock.price * 0.7);
+        const high = stock.yearHigh || stock.fiftyTwoWeekHigh || stock.low52 || (stock.price * 1.3);
         let rangePercent = ((stock.price - low) / (high - low)) * 100;
         rangePercent = Math.max(0, Math.min(100, rangePercent)); // clamp
         
         const priceStr = typeof fmtPrice === 'function' ? fmtPrice(stock.price) : stock.price.toFixed(2);
         const changeStr = typeof fmtPrice === 'function' ? fmtPrice(stock.change) : stock.change.toFixed(2);
         const volStr = typeof fmtVol === 'function' ? fmtVol(stock.volume) : stock.volume;
+        const pChangeVal = stock.pChange !== undefined ? stock.pChange : (stock.changePct !== undefined ? stock.changePct : 0);
 
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-white/[0.02] transition-colors fade-in group';
@@ -356,7 +357,7 @@
           <td class="py-3 px-4">${exchBadge}</td>
           <td class="py-3 px-4 text-right font-semibold price-cell transition-colors">${priceStr}</td>
           <td class="py-3 px-4 text-right ${colorCls} change-cell">${sign}${changeStr}</td>
-          <td class="py-3 px-4 text-right ${colorCls} pchange-cell">${sign}${stock.pChange.toFixed(2)}%</td>
+          <td class="py-3 px-4 text-right ${colorCls} pchange-cell">${sign}${pChangeVal.toFixed(2)}%</td>
           <td class="py-3 px-4 text-right text-on-surface-variant font-mono text-xs">${volStr}</td>
           <td class="py-3 px-6">
             <div class="flex items-center gap-2 justify-center">

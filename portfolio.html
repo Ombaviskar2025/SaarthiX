@@ -448,15 +448,50 @@
     }
 
     // ── Run Analysis ──────────────────────────────────────────
-    function runAnalysis() {
+    async function runAnalysis() {
       const holdings = collectHoldings();
       if (!holdings.length) { alert('Please add at least one holding with quantity and price.'); return; }
+      
+      // Save current holdings in localStorage
+      localStorage.setItem('saarthix_holdings', JSON.stringify(holdings));
+
       document.getElementById('loading-overlay').style.display='flex';
-      setTimeout(()=>{ document.getElementById('loading-overlay').style.display='none'; buildResults(holdings); document.getElementById('results-section').scrollIntoView({behavior:'smooth'}); }, 2000);
+      try {
+        const res = await fetch('/api/ai-insights', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ holdings })
+        });
+        const data = await res.json();
+
+        if (!res.ok || data.status !== 'SUCCESS') {
+          throw new Error(data.error || 'Failed to fetch AI insights');
+        }
+
+        // Cache insights
+        localStorage.setItem('saarthix_insights_cache', JSON.stringify(data));
+
+        buildResults(holdings, data);
+        document.getElementById('results-section').scrollIntoView({behavior:'smooth'});
+      } catch (err) {
+        console.error('Gemini AI portfolio analysis failed:', err);
+        alert('AI Analysis failed: ' + err.message + '\nUsing local fallback.');
+        const localFallback = {
+          healthScore: Math.min(100, Math.max(30, 60 + (holdings.length * 4))),
+          insights: [
+            { type: 'warning', icon: 'warning', title: 'Local Fallback Active', detail: 'Could not connect to Gemini API. Showing rule-based heuristics.' }
+          ],
+          disclaimer: 'This is a local fallback analysis.'
+        };
+        buildResults(holdings, localFallback);
+        document.getElementById('results-section').scrollIntoView({behavior:'smooth'});
+      } finally {
+        document.getElementById('loading-overlay').style.display='none';
+      }
     }
 
     // ── Build Results ─────────────────────────────────────────
-    function buildResults(holdings) {
+    function buildResults(holdings, aiData = null) {
       const COLORS = PIE_COLORS;
       let totalInvested=0, totalValue=0;
 
@@ -475,7 +510,7 @@
       const gainsPnl    = enriched.filter(h=>h.pnl>0).reduce((s,h)=>s+h.pnl,0);
       const stcg        = gainsPnl * 0.20;
       const ltcg        = Math.max(0,(gainsPnl - 125000)) * 0.125;
-      const aiScore     = Math.min(100, Math.max(30, 60 + (holdings.length * 4) + (parseFloat(totalPnlPct) > 0 ? 10 : -5)));
+      const aiScore     = aiData ? aiData.healthScore : Math.min(100, Math.max(30, 60 + (holdings.length * 4) + (parseFloat(totalPnlPct) > 0 ? 10 : -5)));
 
       // Summary
       document.getElementById('res-total-value').textContent = fmtINR(totalValue);
@@ -517,11 +552,16 @@
       }).join('');
 
       // AI Insights
-      const insights = generateInsights(enriched, totalPnlPct, holdings.length);
-      document.getElementById('ai-insights-list').innerHTML = insights.map(ins => {
+      const insights = aiData ? aiData.insights : generateInsights(enriched, totalPnlPct, holdings.length);
+      let insightsHtml = insights.map(ins => {
         const ic = ins.type==='positive'?'text-secondary bg-secondary-container/10 border-secondary-container/20':ins.type==='warning'?'text-tertiary bg-tertiary/10 border-tertiary/20':'text-primary bg-primary-container/10 border-primary-container/20';
         return `<div class="flex gap-3 p-3 rounded-lg border ${ic}"><span class="material-symbols-outlined ${ins.type==='positive'?'text-secondary':ins.type==='warning'?'text-tertiary':'text-primary'} text-[20px] flex-shrink-0 mt-0.5" style="font-variation-settings:'FILL' 1">${ins.icon}</span><div><p class="font-label-md text-label-md text-on-surface font-semibold">${ins.title}</p><p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">${ins.detail}</p></div></div>`;
       }).join('');
+
+      if (aiData && aiData.disclaimer) {
+        insightsHtml += `<div class="text-[11px] text-on-surface-variant/50 border-t border-white/5 pt-3 mt-2 font-mono-data">${aiData.disclaimer}</div>`;
+      }
+      document.getElementById('ai-insights-list').innerHTML = insightsHtml;
 
       // Holdings table
       document.getElementById('holdings-body').innerHTML = enriched.map(h => {

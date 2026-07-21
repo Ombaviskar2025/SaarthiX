@@ -6,10 +6,23 @@ const cors = require('cors');
 const path = require('path');
 const https = require('https');
 require('dotenv').config();
+const fs = require('fs');
+const envLocalPath = path.join(__dirname, '../.env.local');
+if (fs.existsSync(envLocalPath)) {
+  try {
+    const envLocal = require('dotenv').parse(fs.readFileSync(envLocalPath));
+    for (const k in envLocal) {
+      process.env[k] = envLocal[k];
+    }
+  } catch (e) {
+    console.warn('Failed to parse .env.local:', e.message);
+  }
+}
 
 const app = express();
 
 app.use(cors());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, '..')));
 
 // ── Dhan Symbol Security ID & Baseline Price Mapping ─────────
@@ -775,6 +788,12 @@ async function callGrowwApi(apiPath, queryParams, retryCount = 0) {
       let data = '';
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', async () => {
+        // ── Handle 429 Rate Limit from Groww ──────────────────
+        if (res.statusCode === 429) {
+          return reject(Object.assign(new Error('Groww API rate limit exceeded. Back off and retry later.'), { statusCode: 429 }));
+        }
+
+        // ── Handle expired/invalid token (401): refresh once & retry ──
         if (res.statusCode === 401 && retryCount < 1) {
           cachedGrowwToken = null;
           cachedGrowwTokenExpiry = 0;
@@ -782,6 +801,21 @@ async function callGrowwApi(apiPath, queryParams, retryCount = 0) {
             const retried = await callGrowwApi(apiPath, queryParams, retryCount + 1);
             return resolve(retried);
           } catch (err) {
+            return reject(err);
+          }
+        }
+
+        // ── Handle other non-2xx errors from Groww ────────────
+        if (res.statusCode >= 400) {
+          try {
+            const errJson = JSON.parse(data);
+            const msg = errJson.message || errJson.error || `Groww API returned HTTP ${res.statusCode}`;
+            const err = new Error(msg);
+            err.statusCode = res.statusCode;
+            return reject(err);
+          } catch (_) {
+            const err = new Error(`Groww API returned HTTP ${res.statusCode}: ${data.substring(0, 200)}`);
+            err.statusCode = res.statusCode;
             return reject(err);
           }
         }
@@ -868,10 +902,12 @@ app.get('/api/market-data', async (req, res) => {
     return res.status(400).json({ error: 'Invalid or missing query parameter: type. Must be "quote", "ltp", or "ohlc".' });
   } catch (error) {
     console.error('Market Data Proxy Error:', error);
-    res.status(500).json({
+    // Propagate Groww rate-limit (429) directly so the frontend can back off
+    const httpStatus = error.statusCode === 429 ? 429 : 500;
+    res.status(httpStatus).json({
       status: 'FAILURE',
       error: {
-        code: 'PROXY_ERROR',
+        code: error.statusCode === 429 ? 'RATE_LIMITED' : 'PROXY_ERROR',
         message: error.message || 'Internal Proxy Server Error'
       }
     });
@@ -1071,6 +1107,629 @@ function getMockNews() {
   ];
 }
 
+// ── ATB Stock Analysis API Proxy ─────────────────────────────
+// Supported tools: stock-thesis, earnings-analysis, valuation-snapshot, bear-vs-bull, insider-signal
+const ATB_API_BASE = 'api.atb.money';
+const ATB_TOOLS = new Set(['stock-thesis', 'earnings-analysis', 'valuation-snapshot', 'bear-vs-bull', 'insider-signal']);
+
+function callAtbTool(tool, ticker) {
+  return new Promise((resolve, reject) => {
+    const apiKey = process.env.ATB_API_KEY;
+    if (!apiKey) {
+      return reject({ status: 401, message: 'ATB_API_KEY is not configured in environment variables.' });
+    }
+
+    const payload = JSON.stringify({ ticker: ticker.toUpperCase() });
+    const options = {
+      hostname: ATB_API_BASE,
+      port: 443,
+      path: `/api/tools/${tool}`,
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (res.statusCode >= 400) {
+            return reject({
+              status: res.statusCode,
+              message: parsed.error || parsed.message || `ATB API error (HTTP ${res.statusCode})`
+            });
+          }
+          resolve(parsed);
+        } catch (e) {
+          reject({ status: 500, message: 'Failed to parse ATB API response.' });
+        }
+      });
+    });
+
+    req.on('error', (err) => {
+      reject({ status: 502, message: `Failed to connect to ATB API: ${err.message}` });
+    });
+
+    req.write(payload);
+    req.end();
+  });
+}
+
+// POST /api/stock-analysis  — body: { tool, ticker }
+app.post('/api/stock-analysis', async (req, res) => {
+  try {
+    const { tool, ticker } = req.body;
+
+    if (!tool || !ticker) {
+      return res.status(400).json({ status: 'FAILURE', error: 'Missing required fields: tool and ticker' });
+    }
+    if (!ATB_TOOLS.has(tool)) {
+      return res.status(400).json({
+        status: 'FAILURE',
+        error: `Invalid tool. Must be one of: ${[...ATB_TOOLS].join(', ')}`
+      });
+    }
+
+    const result = await callAtbTool(tool, ticker);
+    res.json({ status: 'SUCCESS', tool, ticker: ticker.toUpperCase(), payload: result });
+  } catch (err) {
+    console.error('ATB Stock Analysis Proxy Error:', err);
+    res.status(err.status || 500).json({
+      status: 'FAILURE',
+      error: err.message || 'Internal proxy error while calling ATB API'
+    });
+  }
+});
+
+// ── resolveLivePricesForHoldings ─────────────────────────────
+async function resolveLivePricesForHoldings(holdings) {
+  const resolved = [];
+  for (const h of holdings) {
+    const symKey = h.ticker.toUpperCase();
+    let ltp = null;
+    const mapping = DHAN_SYMBOL_MAP[symKey];
+    const exchange = h.exchange || (mapping ? (mapping.exchangeSegment.includes('BSE') ? 'BSE' : 'NSE') : 'NSE');
+    try {
+      ltp = await getLivePriceWithCache(symKey, exchange);
+    } catch (e) {
+      console.warn(`Failed to fetch live price for ${symKey}:`, e.message);
+    }
+    
+    if (ltp === null) {
+      if (mapping) {
+        ltp = mapping.basePrice;
+      } else {
+        ltp = h.price;
+      }
+    }
+    resolved.push({
+      ...h,
+      ltp: parseFloat(ltp.toFixed(2))
+    });
+  }
+  return resolved;
+}
+
+// ── getFallbackAIInsights ────────────────────────────────────
+function getFallbackAIInsights(holdings) {
+  let totalInvested = 0;
+  let totalValue = 0;
+  holdings.forEach(h => {
+    totalInvested += h.qty * h.price;
+    totalValue += h.qty * h.ltp;
+  });
+  const totalPnl = totalValue - totalInvested;
+  const totalPnlPct = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
+
+  const count = holdings.length;
+  const healthScore = Math.min(100, Math.max(30, 60 + (count * 4) + (totalPnlPct > 0 ? 10 : -5)));
+
+  const insights = [];
+  insights.push(totalPnlPct >= 0
+    ? {
+        type: 'positive',
+        icon: 'trending_up',
+        title: `Portfolio up ${totalPnlPct.toFixed(2)}% vs cost basis (Fallback)`,
+        detail: 'Holdings are overall profitable. Consider booking partial gains in overweighted assets.'
+      }
+    : {
+        type: 'warning',
+        icon: 'trending_down',
+        title: `Portfolio down ${Math.abs(totalPnlPct).toFixed(2)}% vs cost basis (Fallback)`,
+        detail: 'Overall holdings are trading below acquisition cost. Monitor fundamentals for any deterioration.'
+      }
+  );
+
+  if (count < 3) {
+    insights.push({
+      type: 'warning',
+      icon: 'warning',
+      title: 'High single-stock concentration (Fallback)',
+      detail: 'Fewer than 3 holdings increases non-systemic risk. Consider diversifying across at least 5 different sectors.'
+    });
+  } else {
+    insights.push({
+      type: 'positive',
+      icon: 'verified',
+      title: `${count} holdings detected (Fallback)`,
+      detail: 'Reasonable asset spread reduces correlation. Aim for a mix of IT, Banking, FMCG, and Utilities.'
+    });
+  }
+
+  const sectorConcentration = {};
+  let totalAllocatedValue = 0;
+  holdings.forEach(h => {
+    const symKey = h.ticker.toUpperCase();
+    const dbMatch = STOCKS_DB.find(s => s.ticker === symKey);
+    const sector = dbMatch ? dbMatch.sector : 'Other';
+    const val = h.qty * h.ltp;
+    sectorConcentration[sector] = (sectorConcentration[sector] || 0) + val;
+    totalAllocatedValue += val;
+  });
+
+  for (const sector in sectorConcentration) {
+    if (totalAllocatedValue > 0) {
+      sectorConcentration[sector] = parseFloat(((sectorConcentration[sector] / totalAllocatedValue) * 100).toFixed(1));
+    }
+  }
+
+  const riskFlags = [];
+  if (count < 3) {
+    riskFlags.push('High concentration risk: Portfolio contains fewer than 3 stocks.');
+  }
+  for (const sector in sectorConcentration) {
+    if (sectorConcentration[sector] > 40) {
+      riskFlags.push(`Sector exposure warning: ${sector} comprises ${sectorConcentration[sector]}% of total value.`);
+    }
+  }
+
+  return {
+    healthScore,
+    insights,
+    sectorConcentration,
+    riskFlags,
+    disclaimer: 'Disclaimer: This analysis is generated using programmatic fallback heuristics and is not financial or investment advice.'
+  };
+}
+
+// ── callGemini ───────────────────────────────────────────────
+function callGemini(apiKey, promptText) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify({
+      contents: [{
+        role: 'user',
+        parts: [{ text: promptText }]
+      }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'object',
+          properties: {
+            healthScore: { type: 'integer' },
+            insights: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string', enum: ['positive', 'warning', 'info'] },
+                  icon: { type: 'string' },
+                  title: { type: 'string' },
+                  detail: { type: 'string' }
+                },
+                required: ['type', 'icon', 'title', 'detail']
+              }
+            },
+            sectorConcentration: {
+              type: 'object',
+              additionalProperties: { type: 'number' }
+            },
+            riskFlags: {
+              type: 'array',
+              items: { type: 'string' }
+            },
+            disclaimer: { type: 'string' }
+          },
+          required: ['healthScore', 'insights', 'sectorConcentration', 'riskFlags', 'disclaimer']
+        }
+      }
+    });
+
+    const options = {
+      hostname: 'generativelanguage.googleapis.com',
+      port: 443,
+      path: `/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (res.statusCode >= 400) {
+            return reject(new Error(parsed.error?.message || `Gemini API returned status ${res.statusCode}`));
+          }
+          const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!text) {
+            return reject(new Error('No response text returned from Gemini API'));
+          }
+          const jsonResult = JSON.parse(text);
+          resolve(jsonResult);
+        } catch (e) {
+          reject(new Error(`Failed to parse Gemini response: ${e.message}`));
+        }
+      });
+    });
+
+    req.on('error', (err) => {
+      reject(err);
+    });
+
+    req.write(payload);
+    req.end();
+  });
+}
+
+// ── Gemini AI Portfolio Insights Endpoint ────────────────────
+app.post('/api/ai-insights', async (req, res) => {
+  try {
+    const rawHoldings = req.body.holdings;
+    if (!rawHoldings || !Array.isArray(rawHoldings) || rawHoldings.length === 0) {
+      return res.status(400).json({ status: 'FAILURE', error: 'Missing or invalid parameter: holdings (non-empty array required)' });
+    }
+
+    const holdings = await resolveLivePricesForHoldings(rawHoldings);
+    const geminiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : '';
+    const isGeminiConfigured = geminiKey && !geminiKey.includes('dummy_gemini_key');
+
+    if (!isGeminiConfigured) {
+      console.warn('Gemini API key is not configured or is a placeholder. Using fallback engine.');
+      const fallbackResult = getFallbackAIInsights(holdings);
+      return res.json({
+        status: 'SUCCESS',
+        ...fallbackResult,
+        engine: 'fallback'
+      });
+    }
+
+    const promptText = `
+You are SaarthiX AI, an institutional-grade portfolio analysis assistant specializing in Indian equity markets (NSE & BSE).
+Analyze the following user stock portfolio containing holdings, purchase costs, and current live market prices.
+
+Holdings Data:
+${JSON.stringify(holdings, null, 2)}
+
+Provide:
+1. An overall portfolio health score (0-100) based on sector diversification, single-stock concentration, and PnL performance.
+2. At least 3 actionable insights with a type ('positive', 'warning', or 'info') and an appropriate material icon name ('trending_up', 'trending_down', 'warning', 'info', 'auto_awesome', 'verified', 'pie_chart').
+3. Sector concentration percentages (calculated from the holdings' live market value).
+4. Specific risk flags if any concentration or downside threshold is breached.
+5. A disclaimer stating that all analysis is informational and not direct investment advice.
+
+Important: All insights and commentary must be framed as informational analysis, not direct investment advice, and you must maintain an institutional, objective tone. Do not write any freeform prose, markdown formatting, or surrounding wrapper text; return strictly structured JSON.
+`;
+
+    try {
+      const geminiResult = await callGemini(geminiKey, promptText);
+      res.json({
+        status: 'SUCCESS',
+        ...geminiResult,
+        engine: 'gemini-2.0-flash'
+      });
+    } catch (apiErr) {
+      console.error('Gemini API invocation failed, falling back to heuristics:', apiErr.message);
+      const fallbackResult = getFallbackAIInsights(holdings);
+      res.json({
+        status: 'SUCCESS',
+        ...fallbackResult,
+        engine: 'fallback_after_error',
+        errorMsg: apiErr.message
+      });
+    }
+  } catch (error) {
+    console.error('Insights Route Error:', error);
+    res.status(500).json({
+      status: 'FAILURE',
+      error: {
+        code: 'INSIGHTS_ERROR',
+        message: error.message || 'Internal server error while compiling portfolio insights'
+      }
+    });
+  }
+});
+
+// ============================================================
+//  Yahoo Finance Market Watch & NSE Market Schedule Engine
+// ============================================================
+
+/**
+ * Checks NSE Market status based on IST (Asia/Kolkata)
+ */
+function getNSEMarketStatus() {
+  const now = new Date();
+  const istString = now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+  const istDate = new Date(istString);
+  
+  const year = istDate.getFullYear();
+  const month = String(istDate.getMonth() + 1).padStart(2, '0');
+  const day = String(istDate.getDate()).padStart(2, '0');
+  const dateStr = `${year}-${month}-${day}`;
+
+  const dayOfWeek = istDate.getDay(); // 0 = Sun, 6 = Sat
+  const hours = istDate.getHours();
+  const minutes = istDate.getMinutes();
+  const totalMinutes = hours * 60 + minutes;
+
+  // 2026 Indian NSE Market Holidays List (Trading Holidays)
+  const HOLIDAYS_2026 = [
+    "2026-01-26", // Republic Day
+    "2026-02-15", // Mahashivratri
+    "2026-03-03", // Holi
+    "2026-03-20", // Ramzan Id (Id-Ul-Fitr)
+    "2026-04-03", // Good Friday
+    "2026-04-14", // Dr. Baba Saheb Ambedkar Jayanti
+    "2026-05-01", // Maharashtra Day
+    "2026-07-06", // Muharram
+    "2026-08-15", // Independence Day
+    "2026-09-14", // Ganesh Chaturthi
+    "2026-10-02", // Mahatma Gandhi Jayanti
+    "2026-10-20", // Dussehra
+    "2026-11-09", // Diwali Balipratipada
+    "2026-11-24", // Guru Nanak Jayanti
+    "2026-12-25"  // Christmas
+  ];
+
+  const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+  const isHoliday = HOLIDAYS_2026.includes(dateStr);
+  const isMarketHours = totalMinutes >= (9 * 60 + 15) && totalMinutes <= (15 * 60 + 30);
+
+  const isOpen = !isWeekend && !isHoliday && isMarketHours;
+
+  let reason = "Trading Hours (09:15 - 15:30 IST)";
+  if (isWeekend) reason = "Weekend";
+  else if (isHoliday) reason = "Market Holiday";
+  else if (!isMarketHours) reason = totalMinutes < (9 * 60 + 15) ? "Pre-market" : "After hours";
+
+  return {
+    isOpen,
+    statusText: isOpen ? "OPEN" : "Closed",
+    reason,
+    isHoliday,
+    isWeekend,
+    istTime: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+  };
+}
+
+/**
+ * Fetches quote from Yahoo Finance public chart endpoint with exponential retry backoff
+ * URL: https://query1.finance.yahoo.com/v8/finance/chart/{SYMBOL}
+ */
+async function fetchYahooQuote(yahooSymbol, retries = 3) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}`;
+  let lastErr = null;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+          'Accept': 'application/json, text/plain, */*'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const json = await response.json();
+      const meta = json?.chart?.result?.[0]?.meta;
+      if (!meta) {
+        throw new Error('Invalid quote structure returned from Yahoo Finance');
+      }
+
+      const price = meta.regularMarketPrice ?? 0;
+      const prevClose = meta.previousClose ?? meta.chartPreviousClose ?? price;
+      const change = price - prevClose;
+      const changePct = prevClose > 0 ? (change / prevClose) * 100 : 0;
+      const volume = meta.regularMarketVolume ?? 0;
+      const high = meta.regularMarketDayHigh ?? price;
+      const low = meta.regularMarketDayLow ?? price;
+      const fiftyTwoWeekHigh = meta.fiftyTwoWeekHigh ?? high;
+      const fiftyTwoWeekLow = meta.fiftyTwoWeekLow ?? low;
+      const companyName = meta.longName || meta.shortName || yahooSymbol;
+
+      return {
+        symbol: yahooSymbol,
+        price: parseFloat(price.toFixed(2)),
+        prevClose: parseFloat(prevClose.toFixed(2)),
+        change: parseFloat(change.toFixed(2)),
+        changePct: parseFloat(changePct.toFixed(2)),
+        pChange: parseFloat(changePct.toFixed(2)),
+        volume: volume,
+        high: parseFloat(high.toFixed(2)),
+        low: parseFloat(low.toFixed(2)),
+        fiftyTwoWeekHigh: parseFloat(fiftyTwoWeekHigh.toFixed(2)),
+        fiftyTwoWeekLow: parseFloat(fiftyTwoWeekLow.toFixed(2)),
+        yearHigh: parseFloat(fiftyTwoWeekHigh.toFixed(2)),
+        yearLow: parseFloat(fiftyTwoWeekLow.toFixed(2)),
+        companyName: companyName,
+        timestamp: new Date().toISOString()
+      };
+    } catch (err) {
+      lastErr = err;
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 300 * Math.pow(2, attempt - 1)));
+      }
+    }
+  }
+  console.warn(`[YahooFinance] Failed to fetch ${yahooSymbol} after ${retries} retries:`, lastErr?.message);
+  return null;
+}
+
+// Global server memory cache for market data
+const marketWatchCache = {
+  stocks: {},
+  indices: {},
+  lastUpdated: null,
+  isDelayed: false
+};
+
+const STARTER_TICKERS = [
+  'RELIANCE', 'ONGC', 'BPCL', 'TCS', 'INFY', 'WIPRO', 'HCLTECH', 'TECHM',
+  'HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK', 'SBIN', 'INDUSINDBK',
+  'BAJFINANCE', 'BAJAJFINSV', 'HINDUNILVR', 'ITC', 'NESTLEIND', 'BRITANNIA',
+  'TATACONSUM', 'MARUTI', 'TATAMOTORS', 'HEROMOTOCO', 'EICHERMOT', 'M&M',
+  'BAJAJ-AUTO', 'SUNPHARMA', 'DRREDDY', 'CIPLA', 'DIVISLAB', 'APOLLOHOSP',
+  'TATASTEEL', 'JSWSTEEL', 'HINDALCO', 'COALINDIA', 'LT', 'POWERGRID',
+  'NTPC', 'ADANIENT', 'ADANIPORTS', 'BHARTIARTL', 'ULTRACEMCO', 'GRASIM',
+  'SHREECEM', 'ASIANPAINT', 'TITAN', 'HDFCLIFE', 'SBILIFE', 'UPL'
+];
+
+const YAHOO_SYMBOL_OVERRIDE = {
+  'TATAMOTORS': 'TMCV.NS',
+  'NESTLEIND': 'NESTLEIND.BO',
+  'SHREECEM': 'SHREECEM.BO',
+  'BPCL': 'BPCL.BO'
+};
+
+/**
+ * Background refresh helper to populate cache from Yahoo Finance
+ */
+async function refreshMarketWatchCache() {
+  const marketStatus = getNSEMarketStatus();
+  
+  // Indices mapping
+  const indexSymbols = {
+    nifty50: '^NSEI',
+    sensex: '^BSESN',
+    niftyBank: '^NSEBANK',
+    niftyIT: '^CNXIT'
+  };
+
+  // 1. Refresh Indices in parallel
+  await Promise.all(Object.entries(indexSymbols).map(async ([key, ySym]) => {
+    const quote = await fetchYahooQuote(ySym);
+    if (quote) {
+      marketWatchCache.indices[key] = {
+        id: key,
+        name: key === 'nifty50' ? 'NIFTY 50' : (key === 'sensex' ? 'SENSEX' : (key === 'niftyBank' ? 'BANK NIFTY' : 'NIFTY IT')),
+        value: quote.price,
+        price: quote.price,
+        change: quote.change,
+        changePct: quote.changePct,
+        timestamp: quote.timestamp
+      };
+    }
+  }));
+
+  // 2. Refresh Stock List in parallel (batched chunks of 10)
+  const chunkSize = 10;
+  let hasErrors = false;
+  for (let i = 0; i < STARTER_TICKERS.length; i += chunkSize) {
+    const chunk = STARTER_TICKERS.slice(i, i + chunkSize);
+    await Promise.all(chunk.map(async (ticker) => {
+      const ySym = YAHOO_SYMBOL_OVERRIDE[ticker] || `${ticker}.NS`;
+      const isBseOnly = ySym.endsWith('.BO');
+      const quote = await fetchYahooQuote(ySym);
+      if (quote) {
+        marketWatchCache.stocks[ticker] = {
+          ...quote,
+          ticker: ticker,
+          exchange: isBseOnly ? 'BSE' : 'NSE'
+        };
+      } else {
+        hasErrors = true;
+      }
+    }));
+  }
+
+  marketWatchCache.lastUpdated = new Date().toISOString();
+  marketWatchCache.isDelayed = hasErrors;
+  console.log(`[MarketWatch] Cache updated at ${marketWatchCache.lastUpdated}. Total stocks: ${Object.keys(marketWatchCache.stocks).length}. Market open: ${marketStatus.isOpen}`);
+}
+
+// Run initial background refresh
+refreshMarketWatchCache().catch(err => console.error('[MarketWatch] Initial refresh error:', err));
+
+// Scheduled cron job: every 20s, refresh if market is open
+setInterval(() => {
+  const status = getNSEMarketStatus();
+  if (status.isOpen) {
+    refreshMarketWatchCache().catch(err => console.error('[MarketWatch] Scheduled refresh error:', err));
+  }
+}, 20000);
+
+// ── GET /api/market-watch Route ─────────────────────────────
+app.get('/api/market-watch', async (req, res) => {
+  try {
+    const marketStatus = getNSEMarketStatus();
+    const rawSymbols = req.query.symbols;
+    const requestedSymbols = rawSymbols ? rawSymbols.split(',').map(s => s.trim().toUpperCase()) : STARTER_TICKERS;
+
+    // Trigger refresh if cache is completely empty
+    if (Object.keys(marketWatchCache.stocks).length === 0) {
+      await refreshMarketWatchCache();
+    }
+
+    const dataList = [];
+    let containsFallback = false;
+
+    for (const ticker of requestedSymbols) {
+      let cachedQuote = marketWatchCache.stocks[ticker];
+      if (!cachedQuote) {
+        // Try on-demand fetch for un-cached symbol
+        const ySym = YAHOO_SYMBOL_OVERRIDE[ticker] || `${ticker}.NS`;
+        const isBse = ySym.endsWith('.BO');
+        const q = await fetchYahooQuote(ySym);
+        if (q) {
+          cachedQuote = {
+            ...q,
+            ticker: ticker,
+            exchange: isBse ? 'BSE' : 'NSE'
+          };
+          marketWatchCache.stocks[ticker] = cachedQuote;
+        }
+      }
+
+      if (cachedQuote) {
+        dataList.push(cachedQuote);
+      } else {
+        containsFallback = true;
+      }
+    }
+
+    res.json({
+      status: 'SUCCESS',
+      marketStatus: marketStatus,
+      data: dataList,
+      indices: marketWatchCache.indices,
+      lastUpdated: marketWatchCache.lastUpdated || new Date().toISOString(),
+      isDelayed: marketWatchCache.isDelayed || containsFallback
+    });
+
+  } catch (error) {
+    console.error('GET /api/market-watch Error:', error);
+    res.status(500).json({
+      status: 'FAILURE',
+      error: {
+        code: 'MARKET_WATCH_ERROR',
+        message: error.message || 'Internal Proxy Server Error'
+      }
+    });
+  }
+});
+
 // ── Debug environment variables securely (only show lengths and partial values) ──
 app.get('/api/debug-env', (req, res) => {
   const mask = (val) => {
@@ -1088,7 +1747,9 @@ app.get('/api/debug-env', (req, res) => {
     FINNHUB_API_KEY: mask(process.env.FINNHUB_API_KEY),
     GROWW_API_KEY: mask(process.env.GROWW_API_KEY),
     GROWW_API_SECRET: mask(process.env.GROWW_API_SECRET),
-    RAPIDAPI_KEY: mask(process.env.RAPIDAPI_KEY)
+    RAPIDAPI_KEY: mask(process.env.RAPIDAPI_KEY),
+    ATB_API_KEY: mask(process.env.ATB_API_KEY),
+    GEMINI_API_KEY: mask(process.env.GEMINI_API_KEY)
   });
 });
 

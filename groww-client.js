@@ -1,16 +1,13 @@
 // ============================================================
-//  groww-client.js  —  SaarthiX Live Data Polling Client
+//  groww-client.js  —  SaarthiX Live Market Data Client (Yahoo Finance)
 // ============================================================
 'use strict';
 
 (function() {
-  const API_BASE = 'http://localhost:3000/api';
-  let pollInterval = 7000; // default 7s
+  const API_BASE = '/api';
+  let pollInterval = 15000; // 15s polling during market hours
   let pollTimer = null;
   let isInitialLoad = true;
-
-  // Banner elements
-  let statusBanner = null;
 
   // CSS injection for banners and price-flashing animations
   const style = document.createElement('style');
@@ -19,7 +16,7 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 0.8rem;
       font-size: 0.75rem;
       font-weight: 500;
       border-radius: 0.5rem;
@@ -40,7 +37,7 @@
   `;
   document.head.appendChild(style);
 
-  // Initialize status container in top-right or inside the top bar
+  // Initialize status container in header
   function getOrCreateStatusContainer() {
     let header = document.querySelector('header');
     if (!header) return null;
@@ -50,7 +47,6 @@
       container = document.createElement('div');
       container.id = 'groww-status-container';
       container.className = 'flex items-center gap-2';
-      // Insert before the last items (e.g. before profile avatar/search bar)
       const targetChild = header.querySelector('.flex.items-center.gap-4');
       if (targetChild) {
         targetChild.insertBefore(container, targetChild.firstChild);
@@ -71,12 +67,31 @@
     let banner = document.createElement('div');
     banner.className = 'api-status-banner ';
 
+    const isDemoActive = localStorage.getItem('saarthix_demo_mode') === 'true';
+
     switch (state) {
       case 'LIVE':
         banner.className += 'bg-secondary/10 border border-secondary/30 text-secondary';
         banner.innerHTML = `
           <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-          <span>Groww Live: ${message}</span>
+          <span>Live (Yahoo Finance) • ${message}</span>
+          <button onclick="window.toggleDemoMode()" class="ml-2 text-[10px] underline opacity-75 hover:opacity-100" title="Switch to Demo Mode">Demo Mode</button>
+        `;
+        break;
+      case 'CLOSED':
+        banner.className += 'bg-surface-container border border-white/10 text-on-surface-variant';
+        banner.innerHTML = `
+          <span class="w-2.5 h-2.5 rounded-full bg-on-surface-variant/40"></span>
+          <span>Market Closed (${message})</span>
+          <button onclick="window.toggleDemoMode()" class="ml-2 text-[10px] underline opacity-75 hover:opacity-100" title="Switch to Demo Mode">Demo Mode</button>
+        `;
+        break;
+      case 'DELAYED':
+        banner.className += 'bg-warning/10 border border-warning/30 text-warning';
+        banner.innerHTML = `
+          <span class="material-symbols-outlined text-[16px] text-yellow-400">warning</span>
+          <span>Data may be delayed</span>
+          <button onclick="window.retryGrowwConnection()" class="ml-1 px-1.5 py-0.5 rounded bg-warning/20 hover:bg-warning/30 text-[10px] uppercase font-bold tracking-wider">Retry</button>
         `;
         break;
       case 'SIMULATED':
@@ -84,6 +99,7 @@
         banner.innerHTML = `
           <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
           <span>Demo Mode (Simulated Data)</span>
+          <button onclick="window.toggleDemoMode()" class="ml-2 text-[10px] underline text-primary font-bold hover:opacity-80" title="Switch to Live Yahoo Data">Switch Live</button>
         `;
         break;
       case 'ERROR':
@@ -92,13 +108,6 @@
           <span class="material-symbols-outlined text-[16px]">warning</span>
           <span class="truncate max-w-[200px]" title="${message}">${message}</span>
           <button onclick="window.retryGrowwConnection()" class="ml-1 px-1.5 py-0.5 rounded bg-error/20 hover:bg-error/30 text-[10px] uppercase font-bold tracking-wider">Retry</button>
-        `;
-        break;
-      case 'RATE_LIMIT':
-        banner.className += 'bg-tertiary-container/10 border border-tertiary-container/30 text-tertiary-container';
-        banner.innerHTML = `
-          <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-          <span>Rate Limited (Backing off...)</span>
         `;
         break;
       case 'LOADING':
@@ -112,7 +121,14 @@
     container.appendChild(banner);
   }
 
-  // Expose global retry helper
+  // Global toggle helper for settings / UI
+  window.toggleDemoMode = function() {
+    const current = localStorage.getItem('saarthix_demo_mode') === 'true';
+    localStorage.setItem('saarthix_demo_mode', (!current).toString());
+    fetchLivePrices();
+  };
+
+  // Global retry helper
   window.retryGrowwConnection = function() {
     setStatus('LOADING');
     fetchLivePrices();
@@ -123,137 +139,104 @@
     try {
       if (typeof window.LIVE_STOCKS === 'undefined') return;
 
-      // Stop local simulation if active
+      const isDemoMode = localStorage.getItem('saarthix_demo_mode') === 'true';
+
+      if (isDemoMode) {
+        setStatus('SIMULATED');
+        if (window.restartSimulation) window.restartSimulation();
+        return;
+      }
+
+      // Stop local random simulation when live data is enabled
       if (window.stopSimulation) {
         window.stopSimulation();
       }
 
-      // Collect all NSE tickers from LIVE_STOCKS and add key market indices
-      const tickers = window.LIVE_STOCKS.map(s => s.ticker);
-      tickers.push('BSE_SENSEX', 'NSE_NIFTY', 'NSE_BANKNIFTY', 'NSE_NIFTYIT');
+      const response = await fetch(`${API_BASE}/market-watch`);
       
-      // Batch symbols in chunks of 50 (Groww max limit)
-      const chunkSize = 50;
-      const chunks = [];
-      for (let i = 0; i < tickers.length; i += chunkSize) {
-        chunks.push(tickers.slice(i, i + chunkSize));
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      let allPrices = {};
-      
-      // Fetch each batch
-      for (const chunk of chunks) {
-        const queryParams = chunk.join(',');
-        const response = await fetch(`${API_BASE}/ltp?symbols=${queryParams}`);
-        
-        if (response.status === 429) {
-          handleRateLimit();
-          return;
-        }
+      const data = await response.json();
 
-        const data = await response.json();
-
-        if (data.status === 'SIMULATED') {
-          setStatus('SIMULATED');
-          if (window.restartSimulation) {
-            window.restartSimulation();
-          }
-          return;
-        }
-
-        if (data.status === 'FAILURE') {
-          throw new Error(data.error?.message || 'Server error fetching prices');
-        }
-
-        if (data.prices) {
-          allPrices = { ...allPrices, ...data.prices };
-        }
+      if (data.status === 'FAILURE') {
+        throw new Error(data.error?.message || 'Server error fetching market watch data');
       }
 
-      // Apply prices to LIVE_STOCKS and LIVE_INDICES
-      let updatedCount = 0;
-      Object.entries(allPrices).forEach(([ticker, priceData]) => {
-        // Handle indices mapping first
-        if (ticker === 'SENSEX' && window.LIVE_INDICES?.sensex) {
-          window.LIVE_INDICES.sensex.value = priceData.price;
-          window.LIVE_INDICES.sensex.change = priceData.change;
-          window.LIVE_INDICES.sensex.changePct = priceData.changePct;
-        } else if (ticker === 'NIFTY' && window.LIVE_INDICES?.nifty50) {
-          window.LIVE_INDICES.nifty50.value = priceData.price;
-          window.LIVE_INDICES.nifty50.change = priceData.change;
-          window.LIVE_INDICES.nifty50.changePct = priceData.changePct;
-        } else if (ticker === 'BANKNIFTY' && window.LIVE_INDICES?.niftyBank) {
-          window.LIVE_INDICES.niftyBank.value = priceData.price;
-          window.LIVE_INDICES.niftyBank.change = priceData.change;
-          window.LIVE_INDICES.niftyBank.changePct = priceData.changePct;
-        } else if (ticker === 'NIFTYIT' && window.LIVE_INDICES?.niftyIT) {
-          window.LIVE_INDICES.niftyIT.value = priceData.price;
-          window.LIVE_INDICES.niftyIT.change = priceData.change;
-          window.LIVE_INDICES.niftyIT.changePct = priceData.changePct;
-        } else {
-          // Regular stock
-          const stock = window.LIVE_STOCKS.find(s => s.ticker === ticker);
+      // 1. Update Stocks
+      if (data.data && Array.isArray(data.data)) {
+        data.data.forEach(item => {
+          const stock = window.LIVE_STOCKS.find(s => s.ticker === item.ticker);
           if (stock) {
-            const changed = stock.price !== priceData.price;
-            stock.price = priceData.price;
-            stock.change = priceData.change;
-            stock.changePct = priceData.changePct;
+            const changed = stock.price !== item.price;
+            stock.price = item.price;
+            stock.change = item.change;
+            stock.changePct = item.changePct;
+            stock.pChange = item.changePct;
+            stock.volume = item.volume;
+            stock.high = item.high;
+            stock.low = item.low;
+            stock.high52 = item.fiftyTwoWeekHigh;
+            stock.low52 = item.fiftyTwoWeekLow;
+            stock.yearHigh = item.fiftyTwoWeekHigh;
+            stock.yearLow = item.fiftyTwoWeekLow;
+            if (item.companyName) stock.name = item.companyName;
+            if (item.exchange) stock.exchange = item.exchange;
             
             if (changed && !isInitialLoad) {
               stock.lastUpdated = Date.now();
             }
-            updatedCount++;
           }
-        }
-      });
+        });
+      }
+
+      // 2. Update Indices
+      if (data.indices) {
+        Object.entries(data.indices).forEach(([key, idxObj]) => {
+          if (window.LIVE_INDICES && window.LIVE_INDICES[key] && idxObj) {
+            window.LIVE_INDICES[key].value = idxObj.price;
+            window.LIVE_INDICES[key].change = idxObj.change;
+            window.LIVE_INDICES[key].changePct = idxObj.changePct;
+          }
+        });
+      }
 
       isInitialLoad = false;
       const timeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      setStatus('LIVE', timeStr);
       
-      // Update any page-specific elements showing live timestamp
+      // Market status display
+      if (data.isDelayed) {
+        setStatus('DELAYED');
+      } else if (data.marketStatus?.isOpen) {
+        setStatus('LIVE', timeStr);
+      } else {
+        setStatus('CLOSED', data.marketStatus?.reason || 'Closed');
+      }
+      
+      // Update timestamp indicators across the app
       document.querySelectorAll('.live-timestamp').forEach(el => {
         el.textContent = `Last updated: ${timeStr} IST`;
       });
 
-      // Dispatch standard tick event for all pages to re-render
+      // Dispatch tick event to update all DOM views
       document.dispatchEvent(new CustomEvent('market:tick'));
 
     } catch (err) {
-      console.warn('Groww client error:', err.message);
-      
-      // Gracefully fall back to Demo Mode (Simulated Data) on any offline, config, or auth errors
+      console.warn('[MarketWatch Client Error]:', err.message);
+      // Fall back to Demo Mode if connection fails
       setStatus('SIMULATED');
-      if (window.restartSimulation) {
-        window.restartSimulation();
-      }
+      if (window.restartSimulation) window.restartSimulation();
     }
   }
 
-  // Handle Groww API Rate Limits
-  function handleRateLimit() {
-    setStatus('RATE_LIMIT');
-    // Clear regular poll interval and wait longer (60 seconds back-off)
-    clearInterval(pollTimer);
-    setTimeout(() => {
-      startPolling();
-    }, 60000);
-  }
-
-  // Start client polling
   function startPolling() {
     if (pollTimer) clearInterval(pollTimer);
-    
-    // Fetch immediately
     fetchLivePrices();
-    
-    // Set interval
     pollTimer = setInterval(fetchLivePrices, pollInterval);
   }
 
-  // Initialize
   document.addEventListener('DOMContentLoaded', () => {
-    // Wait a brief moment to ensure header layout and variables are ready
     setTimeout(() => {
       setStatus('LOADING');
       startPolling();

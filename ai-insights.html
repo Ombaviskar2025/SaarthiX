@@ -222,6 +222,86 @@
         </div>
       </div>
 
+      <!-- ═══════════════════════════════════════════════════
+           DEEP AI ANALYSIS — Powered by ATB Stock Analysis API
+      ══════════════════════════════════════════════════════ -->
+      <div class="glass-panel p-6 relative overflow-hidden" id="deep-analysis-section">
+        <!-- Ambient glow -->
+        <div class="absolute -right-16 -top-16 w-56 h-56 bg-primary/8 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-secondary/8 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-xl font-heading font-bold flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">robot_2</span>
+              Deep AI Analysis
+              <span class="text-[10px] font-mono bg-primary/20 text-primary px-2 py-0.5 rounded-full border border-primary/30 ml-1">LIVE</span>
+            </h2>
+            <p class="text-xs text-on-surface-variant mt-0.5">Real-time thesis, earnings, valuation & insider signals — powered by ATB</p>
+          </div>
+          <!-- Search Bar -->
+          <form id="atb-search-form" class="flex items-center gap-2 bg-surface-container-low border border-white/10 rounded-xl px-3 py-2 w-full md:w-auto min-w-[260px]" onsubmit="return false;">
+            <span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+            <input
+              id="atb-ticker-input"
+              type="text"
+              placeholder="Enter ticker e.g. AAPL, TCS, RELIANCE"
+              class="bg-transparent outline-none text-sm text-on-surface placeholder:text-on-surface-variant/50 flex-1 uppercase"
+              maxlength="20"
+              autocomplete="off"
+            />
+            <button
+              id="atb-analyze-btn"
+              type="submit"
+              onclick="runDeepAnalysis()"
+              class="bg-primary-container hover:bg-primary-container/80 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5"
+            >
+              <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+              Analyze
+            </button>
+          </form>
+        </div>
+
+        <!-- Tool Tabs -->
+        <div class="flex gap-1 mb-5 overflow-x-auto pb-1 no-scrollbar" id="atb-tabs">
+          <button onclick="switchAtbTab('stock-thesis')"     data-tab="stock-thesis"     class="atb-tab active-tab text-xs font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-all flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">lightbulb</span>Stock Thesis</button>
+          <button onclick="switchAtbTab('earnings-analysis')" data-tab="earnings-analysis" class="atb-tab text-xs font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-all flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">bar_chart</span>Earnings</button>
+          <button onclick="switchAtbTab('valuation-snapshot')" data-tab="valuation-snapshot" class="atb-tab text-xs font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-all flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">price_check</span>Valuation</button>
+          <button onclick="switchAtbTab('bear-vs-bull')"     data-tab="bear-vs-bull"     class="atb-tab text-xs font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-all flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">swap_vert</span>Bear vs Bull</button>
+          <button onclick="switchAtbTab('insider-signal')"   data-tab="insider-signal"   class="atb-tab text-xs font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-all flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">visibility</span>Insider Signal</button>
+        </div>
+
+        <!-- Result Panel -->
+        <div id="atb-result-panel" class="min-h-[200px] relative">
+          <!-- Empty / Prompt State -->
+          <div id="atb-empty-state" class="flex flex-col items-center justify-center py-12 text-center">
+            <span class="material-symbols-outlined text-5xl text-primary/30 mb-3">manage_search</span>
+            <p class="text-on-surface-variant text-sm font-medium">Enter a stock ticker above and click <strong class="text-on-surface">Analyze</strong></p>
+            <p class="text-on-surface-variant/60 text-xs mt-1">Supports US (AAPL, TSLA) and Indian stocks (RELIANCE, TCS)</p>
+          </div>
+
+          <!-- Loading State -->
+          <div id="atb-loading-state" class="hidden flex flex-col items-center justify-center py-12 text-center gap-3">
+            <div class="relative w-12 h-12">
+              <div class="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+              <div class="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p class="text-on-surface-variant text-sm" id="atb-loading-text">Fetching AI analysis...</p>
+          </div>
+
+          <!-- Error State -->
+          <div id="atb-error-state" class="hidden flex flex-col items-center justify-center py-12 text-center gap-2">
+            <span class="material-symbols-outlined text-4xl text-error/60">error_outline</span>
+            <p class="text-error text-sm font-medium" id="atb-error-msg">Something went wrong</p>
+            <button onclick="runDeepAnalysis()" class="text-xs text-primary underline mt-1">Try again</button>
+          </div>
+
+          <!-- Result Content -->
+          <div id="atb-result-content" class="hidden"></div>
+        </div>
+      </div>
+
       <!-- Bottom Row -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -287,7 +367,7 @@
           </div>
 
           <!-- PORTFOLIO FIT SCORE -->
-          <div class="glass-panel p-6 flex flex-col items-center text-center justify-center flex-1 bg-gradient-to-br from-surface-container to-surface-container-low border-primary/20 relative overflow-hidden">
+          <div id="portfolio-fit-container" class="glass-panel p-6 flex flex-col items-center text-center justify-center flex-1 bg-gradient-to-br from-surface-container to-surface-container-low border-primary/20 relative overflow-hidden">
             <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
             <span class="material-symbols-outlined text-4xl text-primary mb-3">troubleshoot</span>
             <h3 class="font-heading font-bold text-lg mb-2">Portfolio Fit Score</h3>
@@ -312,6 +392,82 @@
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
     .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* ATB Analysis Tabs */
+    .atb-tab {
+      background: rgba(255,255,255,0.04);
+      color: rgba(194,198,214,0.7);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .atb-tab:hover {
+      background: rgba(255,255,255,0.08);
+      color: #dfe2ef;
+    }
+    .atb-tab.active-tab {
+      background: rgba(77,142,255,0.18);
+      color: #adc6ff;
+      border-color: rgba(77,142,255,0.35);
+      box-shadow: 0 0 12px rgba(77,142,255,0.15);
+    }
+
+    /* ATB Result Cards */
+    .atb-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      transition: border-color 0.2s;
+    }
+    .atb-card:hover { border-color: rgba(255,255,255,0.13); }
+    .atb-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      border: 1px solid;
+    }
+    .atb-tag.bull { background: rgba(78,222,163,0.12); color: #4edea3; border-color: rgba(78,222,163,0.3); }
+    .atb-tag.bear { background: rgba(255,180,171,0.12); color: #ffb4ab; border-color: rgba(255,180,171,0.3); }
+    .atb-tag.neutral { background: rgba(253,211,77,0.12); color: #fcd34d; border-color: rgba(253,211,77,0.3); }
+    .atb-tag.info { background: rgba(77,142,255,0.12); color: #adc6ff; border-color: rgba(77,142,255,0.3); }
+
+    .atb-section-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(194,198,214,0.55);
+      margin-bottom: 0.5rem;
+    }
+    .atb-prose {
+      font-size: 0.875rem;
+      line-height: 1.7;
+      color: #c2c6d6;
+    }
+    .atb-prose strong { color: #dfe2ef; }
+    .atb-metric-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .atb-metric-row:last-child { border-bottom: none; }
+    .atb-metric-label { font-size: 0.8rem; color: #c2c6d6; }
+    .atb-metric-value { font-size: 0.85rem; font-weight: 600; color: #dfe2ef; text-align: right; max-width: 60%; }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .atb-animate { animation: fadeSlideUp 0.35s ease forwards; }
   </style>
 
   <script src="shared.js"></script>
@@ -328,9 +484,11 @@
       if(statMob) statMob.innerHTML = statusDot;
       
       initPage();
+      updatePortfolioFitScore();
     });
 
     let isFetching = false;
+    let rateLimitTimer = null; // holds setTimeout ID when backing off due to 429
 
     function showSkeletons() {
       // 1. Sentiment card skeleton
@@ -387,6 +545,7 @@
 
     async function fetchMarketData() {
       if (isFetching) return;
+      if (rateLimitTimer) return; // Currently in rate-limit back-off; skip this tick
       isFetching = true;
       
       // Only show skeletons on the very first load
@@ -398,16 +557,25 @@
       try {
         // 1. Fetch Nifty quote for Sentiment Gauge
         const niftyResponse = await fetch('/api/market-data?type=quote&symbol=NIFTY');
+
+        // ── Rate limit guard: if Groww is throttling us, back off 60 s ──
+        if (niftyResponse.status === 429) {
+          showRateLimitState();
+          return;
+        }
+
         const niftyData = await niftyResponse.json();
         
         // 2. Fetch live LTP for all stocks in the database to compute AI Picks and Sector Momentum
         const tickers = STOCKS_DB.map(s => `NSE_${s.ticker}`).join(',');
         const ltpResponse = await fetch(`/api/market-data?type=ltp&symbols=${tickers}`);
+        if (ltpResponse.status === 429) { showRateLimitState(); return; }
         const ltpData = await ltpResponse.json();
         
         // 3. Fetch OHLC for Technical Signals
         const techTickers = ['RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'ICICIBANK', 'SBIN'].map(t => `NSE_${t}`).join(',');
         const ohlcResponse = await fetch(`/api/market-data?type=ohlc&symbols=${techTickers}`);
+        if (ohlcResponse.status === 429) { showRateLimitState(); return; }
         const ohlcData = await ohlcResponse.json();
 
         if (niftyData.status === 'SUCCESS' && ltpData.status === 'SUCCESS' && ohlcData.status === 'SUCCESS') {
@@ -451,7 +619,7 @@
       const detEl = document.getElementById('sentiment-details');
       if (detEl) {
         const sign = pct >= 0 ? '+' : '';
-        detEl.textContent = `NIFTY 50 is trading at ₹${fmtPrice(nifty.last_price)} (${sign}${pct.toFixed(2)}% today)`;
+        detEl.textContent = `NIFTY 50 is trading at ${fmtPrice(nifty.last_price)} (${sign}${pct.toFixed(2)}% today)`;
       }
     }
 
@@ -475,7 +643,7 @@
       const sortedPicks = picksWithLiveData.sort((a, b) => b.changePct - a.changePct);
       
       container.innerHTML = sortedPicks.map(pick => {
-        const priceStr = fmtPrice(pick.price);
+        const priceStr = fmtPrice(pick.price); // fmtPrice already includes ₹ symbol
         const bgCls = pick.signal === 'BUY' ? 'bg-secondary-container/20 text-secondary border border-secondary/30' : 
                       pick.signal === 'SELL' ? 'bg-error/20 text-error border border-error/30' : 
                       'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
@@ -508,11 +676,11 @@
             <div class="flex justify-between items-end bg-surface-container-low p-3 rounded-lg border border-white/5">
               <div>
                 <div class="text-[10px] uppercase tracking-wider text-on-surface-variant mb-1">LTP</div>
-                <div class="text-2xl font-bold font-heading">₹${priceStr}</div>
+                <div class="text-2xl font-bold font-heading">${priceStr}</div>
               </div>
               <div class="text-right">
                 <div class="text-[10px] uppercase tracking-wider text-on-surface-variant mb-1">Target</div>
-                <div class="text-lg font-bold font-heading">₹${fmtPrice(target)}</div>
+                <div class="text-lg font-bold font-heading">${fmtPrice(target)}</div>
                 <div class="text-xs font-bold ${upCls}">${upStr} target upside</div>
               </div>
             </div>
@@ -667,6 +835,341 @@
       
       const detEl = document.getElementById('sentiment-details');
       if (detEl) detEl.textContent = msg || 'Proxy server communication failed.';
+    }
+
+    function showRateLimitState() {
+      // Back off for 60 seconds when Groww rate-limits us
+      const detEl = document.getElementById('sentiment-details');
+      if (detEl) detEl.textContent = 'Groww API rate limit reached. Pausing updates for 60s…';
+
+      const lastUpEl = document.getElementById('last-updated');
+      if (lastUpEl) lastUpEl.textContent = 'Rate limited — retrying in 60s';
+
+      // Set a 60 s back-off; after that normal polling resumes automatically
+      rateLimitTimer = setTimeout(() => {
+        rateLimitTimer = null;
+        fetchMarketData(); // immediately re-try after back-off
+      }, 60000);
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  DEEP AI ANALYSIS — ATB API Integration
+    // ══════════════════════════════════════════════════════
+    let atbActiveTab = 'stock-thesis';
+    const atbCache = {}; // { "AAPL:stock-thesis": { data, ts } }
+    const ATB_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+    function switchAtbTab(tool) {
+      atbActiveTab = tool;
+      document.querySelectorAll('.atb-tab').forEach(btn => {
+        btn.classList.toggle('active-tab', btn.dataset.tab === tool);
+      });
+      // If we already have a ticker loaded, refetch for this tab
+      const ticker = document.getElementById('atb-ticker-input').value.trim().toUpperCase();
+      if (ticker) runDeepAnalysis();
+    }
+
+    function atbShowState(state) {
+      ['atb-empty-state', 'atb-loading-state', 'atb-error-state', 'atb-result-content'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.toggle('hidden', id !== state);
+      });
+    }
+
+    async function runDeepAnalysis() {
+      const input = document.getElementById('atb-ticker-input');
+      const ticker = input.value.trim().toUpperCase();
+      if (!ticker) { input.focus(); return; }
+
+      const tool = atbActiveTab;
+      const cacheKey = `${ticker}:${tool}`;
+      const now = Date.now();
+
+      // Serve from cache if fresh
+      if (atbCache[cacheKey] && (now - atbCache[cacheKey].ts) < ATB_CACHE_TTL) {
+        renderAtbResult(tool, ticker, atbCache[cacheKey].data);
+        return;
+      }
+
+      // Show loading
+      const loadingText = {
+        'stock-thesis': `Generating thesis for ${ticker}…`,
+        'earnings-analysis': `Analyzing earnings for ${ticker}…`,
+        'valuation-snapshot': `Fetching valuation metrics for ${ticker}…`,
+        'bear-vs-bull': `Building bear vs bull case for ${ticker}…`,
+        'insider-signal': `Scanning insider signals for ${ticker}…`
+      };
+      document.getElementById('atb-loading-text').textContent = loadingText[tool] || 'Fetching AI analysis…';
+      atbShowState('atb-loading-state');
+
+      try {
+        const resp = await fetch('/api/stock-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tool, ticker })
+        });
+        const json = await resp.json();
+
+        if (!resp.ok || json.status !== 'SUCCESS') {
+          throw new Error(json.error || 'API returned an error');
+        }
+
+        atbCache[cacheKey] = { data: json.payload, ts: now };
+        renderAtbResult(tool, ticker, json.payload);
+      } catch (err) {
+        document.getElementById('atb-error-msg').textContent = err.message || 'Failed to fetch AI analysis.';
+        atbShowState('atb-error-state');
+      }
+    }
+
+    // Keyboard Enter support
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('atb-ticker-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); runDeepAnalysis(); }
+      });
+    });
+
+    function esc(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function sentimentTag(text) {
+      if (!text) return '';
+      const t = text.toLowerCase();
+      let cls = 'neutral';
+      if (t.includes('bull') || t.includes('buy') || t.includes('strong') || t.includes('positive')) cls = 'bull';
+      else if (t.includes('bear') || t.includes('sell') || t.includes('negative') || t.includes('risk')) cls = 'bear';
+      return `<span class="atb-tag ${cls}">${esc(text)}</span>`;
+    }
+
+    function metricRow(label, value) {
+      if (value === undefined || value === null || value === '') return '';
+      return `<div class="atb-metric-row"><span class="atb-metric-label">${esc(label)}</span><span class="atb-metric-value">${esc(String(value))}</span></div>`;
+    }
+
+    function renderAtbResult(tool, ticker, data) {
+      let html = '';
+
+      if (tool === 'stock-thesis') {
+        const thesis = data.thesis || data.summary || data.analysis || '';
+        const signal = data.signal || data.recommendation || data.rating || '';
+        const reasons = data.reasons || data.key_points || data.catalysts || [];
+        const risks = data.risks || data.downside_risks || [];
+        const targetPrice = data.target_price || data.price_target || '';
+
+        html = `
+          <div class="atb-animate">
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+              <span class="font-heading font-bold text-lg">${esc(ticker)}</span>
+              ${sentimentTag(signal)}
+              ${targetPrice ? `<span class="atb-tag info">Target: ${esc(String(targetPrice))}</span>` : ''}
+            </div>
+            ${thesis ? `<div class="atb-card mb-4"><p class="atb-section-title">AI Investment Thesis</p><p class="atb-prose">${esc(thesis)}</p></div>` : ''}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${reasons.length ? `<div class="atb-card"><p class="atb-section-title">📈 Bull Catalysts</p><ul class="atb-prose space-y-1">${reasons.map(r => `<li class="flex gap-2"><span class="text-secondary mt-0.5">▸</span><span>${esc(String(r))}</span></li>`).join('')}</ul></div>` : ''}
+              ${risks.length ? `<div class="atb-card"><p class="atb-section-title">⚠️ Key Risks</p><ul class="atb-prose space-y-1">${risks.map(r => `<li class="flex gap-2"><span class="text-error mt-0.5">▸</span><span>${esc(String(r))}</span></li>`).join('')}</ul></div>` : ''}
+            </div>
+            ${!thesis && !reasons.length && !risks.length ? renderRawData(data) : ''}
+          </div>`;
+      }
+
+      else if (tool === 'earnings-analysis') {
+        const summary = data.summary || data.analysis || data.overview || '';
+        const eps = data.eps || data.earnings_per_share || {};
+        const revenue = data.revenue || {};
+        const guidance = data.guidance || data.forward_guidance || '';
+        const surprises = data.earnings_surprises || data.surprises || [];
+
+        html = `
+          <div class="atb-animate">
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+              <span class="font-heading font-bold text-lg">${esc(ticker)} — Earnings</span>
+            </div>
+            ${summary ? `<div class="atb-card mb-4"><p class="atb-section-title">Earnings Summary</p><p class="atb-prose">${esc(summary)}</p></div>` : ''}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${(Object.keys(eps).length || Object.keys(revenue).length) ? `
+                <div class="atb-card">
+                  <p class="atb-section-title">📊 EPS & Revenue</p>
+                  ${Object.entries(eps).map(([k,v]) => metricRow(`EPS ${k}`, v)).join('')}
+                  ${Object.entries(revenue).map(([k,v]) => metricRow(`Revenue ${k}`, v)).join('')}
+                </div>` : ''}
+              ${(guidance || surprises.length) ? `
+                <div class="atb-card">
+                  ${guidance ? `<p class="atb-section-title">Forward Guidance</p><p class="atb-prose mb-4">${esc(guidance)}</p>` : ''}
+                  ${surprises.length ? `<p class="atb-section-title">Earnings Surprises</p><ul class="atb-prose space-y-1">${surprises.map(s => `<li>▸ ${esc(String(s))}</li>`).join('')}</ul>` : ''}
+                </div>` : ''}
+            </div>
+            ${!summary && !Object.keys(eps).length && !guidance ? renderRawData(data) : ''}
+          </div>`;
+      }
+
+      else if (tool === 'valuation-snapshot') {
+        const summary = data.summary || data.analysis || data.overview || '';
+        const metrics = data.metrics || data.valuation_metrics || data.multiples || {};
+        const verdict = data.verdict || data.valuation_verdict || data.assessment || '';
+        const comparison = data.peer_comparison || data.sector_comparison || data.vs_peers || '';
+
+        html = `
+          <div class="atb-animate">
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+              <span class="font-heading font-bold text-lg">${esc(ticker)} — Valuation</span>
+              ${sentimentTag(verdict)}
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="atb-card">
+                <p class="atb-section-title">💰 Valuation Metrics</p>
+                ${Object.keys(metrics).length
+                  ? Object.entries(metrics).map(([k,v]) => metricRow(k.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase()), v)).join('')
+                  : `<p class="atb-prose text-on-surface-variant/60 text-xs">No structured metrics returned.</p>`}
+              </div>
+              <div class="atb-card">
+                ${summary ? `<p class="atb-section-title">Analyst View</p><p class="atb-prose mb-3">${esc(summary)}</p>` : ''}
+                ${comparison ? `<p class="atb-section-title mt-2">Peer Comparison</p><p class="atb-prose">${esc(String(comparison))}</p>` : ''}
+              </div>
+            </div>
+            ${!summary && !Object.keys(metrics).length ? renderRawData(data) : ''}
+          </div>`;
+      }
+
+      else if (tool === 'bear-vs-bull') {
+        const bullCase = data.bull_case || data.bullish_case || data.bull || {};
+        const bearCase = data.bear_case || data.bearish_case || data.bear || {};
+        const bullSummary = (typeof bullCase === 'string') ? bullCase : (bullCase.summary || bullCase.analysis || '');
+        const bearSummary = (typeof bearCase === 'string') ? bearCase : (bearCase.summary || bearCase.analysis || '');
+        const bullPoints = Array.isArray(bullCase.points || bullCase.arguments || bullCase.reasons) ? (bullCase.points || bullCase.arguments || bullCase.reasons) : [];
+        const bearPoints = Array.isArray(bearCase.points || bearCase.arguments || bearCase.reasons) ? (bearCase.points || bearCase.arguments || bearCase.reasons) : [];
+        const verdict = data.verdict || data.conclusion || data.overall || '';
+
+        html = `
+          <div class="atb-animate">
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+              <span class="font-heading font-bold text-lg">${esc(ticker)} — Bear vs Bull</span>
+              ${verdict ? sentimentTag(verdict) : ''}
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="atb-card border-secondary/15">
+                <p class="atb-section-title" style="color:#4edea3">📈 Bull Case</p>
+                ${bullSummary ? `<p class="atb-prose mb-3">${esc(bullSummary)}</p>` : ''}
+                ${bullPoints.length ? `<ul class="atb-prose space-y-1">${bullPoints.map(p => `<li class="flex gap-2"><span class="text-secondary">▸</span><span>${esc(String(p))}</span></li>`).join('')}</ul>` : ''}
+                ${!bullSummary && !bullPoints.length ? renderRawData(bullCase) : ''}
+              </div>
+              <div class="atb-card border-error/15">
+                <p class="atb-section-title" style="color:#ffb4ab">📉 Bear Case</p>
+                ${bearSummary ? `<p class="atb-prose mb-3">${esc(bearSummary)}</p>` : ''}
+                ${bearPoints.length ? `<ul class="atb-prose space-y-1">${bearPoints.map(p => `<li class="flex gap-2"><span class="text-error">▸</span><span>${esc(String(p))}</span></li>`).join('')}</ul>` : ''}
+                ${!bearSummary && !bearPoints.length ? renderRawData(bearCase) : ''}
+              </div>
+            </div>
+          </div>`;
+      }
+
+      else if (tool === 'insider-signal') {
+        const summary = data.summary || data.analysis || data.overview || '';
+        const signal = data.signal || data.overall_signal || data.verdict || '';
+        const transactions = data.transactions || data.insider_transactions || data.trades || [];
+        const sentiment = data.sentiment || data.insider_sentiment || '';
+
+        html = `
+          <div class="atb-animate">
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+              <span class="font-heading font-bold text-lg">${esc(ticker)} — Insider Activity</span>
+              ${sentimentTag(signal || sentiment)}
+            </div>
+            ${summary ? `<div class="atb-card mb-4"><p class="atb-section-title">👁 Insider Signal Summary</p><p class="atb-prose">${esc(summary)}</p></div>` : ''}
+            ${transactions.length ? `
+              <div class="atb-card">
+                <p class="atb-section-title">Recent Insider Transactions</p>
+                <div class="space-y-2">
+                  ${transactions.map(t => {
+                    const tStr = typeof t === 'string' ? t : JSON.stringify(t);
+                    const isBuy = tStr.toLowerCase().includes('buy') || tStr.toLowerCase().includes('purchase') || tStr.toLowerCase().includes('acqui');
+                    return `<div class="atb-metric-row">
+                      <span class="atb-metric-label flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full ${isBuy ? 'bg-secondary' : 'bg-error'}"></span>
+                        ${typeof t === 'object' && t.insider ? esc(t.insider) : 'Transaction'}
+                      </span>
+                      <span class="atb-metric-value text-xs">${esc(typeof t === 'object' ? (t.action || t.type || t.transaction_type || JSON.stringify(t)) : tStr)}</span>
+                    </div>`;
+                  }).join('')}
+                </div>
+              </div>` : ''}
+            ${!summary && !transactions.length ? renderRawData(data) : ''}
+          </div>`;
+      }
+
+      // Fallback: raw data dump
+      if (!html) html = `<div class="atb-animate">${renderRawData(data)}</div>`;
+
+      const content = document.getElementById('atb-result-content');
+      content.innerHTML = html;
+      atbShowState('atb-result-content');
+    }
+
+    // Generic fallback: render any object as metric rows
+    function renderRawData(obj) {
+      if (!obj || typeof obj !== 'object') {
+        return `<div class="atb-card"><p class="atb-prose">${esc(String(obj))}</p></div>`;
+      }
+      const entries = Object.entries(obj).filter(([, v]) => v !== null && v !== undefined && v !== '');
+      if (!entries.length) return `<div class="atb-card"><p class="text-on-surface-variant/50 text-xs text-center py-6">No data returned from API.</p></div>`;
+      return `
+        <div class="atb-card">
+          <p class="atb-section-title">Analysis Data</p>
+          ${entries.map(([k, v]) => {
+            const label = k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            const val = typeof v === 'object' ? JSON.stringify(v) : String(v);
+            return metricRow(label, val.length > 120 ? val.slice(0, 120) + '…' : val);
+          }).join('')}
+        </div>`;
+    }
+
+    function updatePortfolioFitScore() {
+      const container = document.getElementById('portfolio-fit-container');
+      if (!container) return;
+
+      const cachedDataStr = localStorage.getItem('saarthix_insights_cache');
+      const holdingsStr = localStorage.getItem('saarthix_holdings');
+
+      if (cachedDataStr && holdingsStr) {
+        try {
+          const data = JSON.parse(cachedDataStr);
+          const score = data.healthScore || 0;
+          const risks = data.riskFlags || [];
+          
+          let healthLabel = 'Moderate';
+          let healthCls = 'text-yellow-400';
+          if (score >= 75) { healthLabel = 'Healthy'; healthCls = 'text-up'; }
+          else if (score < 55) { healthLabel = 'High Risk'; healthCls = 'text-down'; }
+
+          let risksHtml = '';
+          if (risks.length > 0) {
+            risksHtml = `<div class="text-left text-[11px] bg-white/5 border border-white/5 p-2 rounded w-full mb-4">
+              <span class="font-semibold text-orange-400 flex items-center gap-1 mb-1">
+                <span class="material-symbols-outlined text-[12px]">warning</span> Risk Alert
+              </span>
+              <p class="text-on-surface-variant line-clamp-2">${esc(risks[0])}</p>
+            </div>`;
+          } else {
+            risksHtml = `<p class="text-[11px] text-secondary mb-4 flex items-center gap-1 justify-center"><span class="material-symbols-outlined text-[12px]">check_circle</span> No major risk alerts</p>`;
+          }
+
+          container.innerHTML = `
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
+            <span class="material-symbols-outlined text-3xl text-secondary mb-1">auto_awesome</span>
+            <h3 class="font-heading font-bold text-xs text-on-surface-variant mb-1">AI Health Score</h3>
+            <div class="text-4xl font-heading font-bold ${healthCls} mb-1">${score}%</div>
+            <p class="text-xs font-semibold text-on-surface mb-3">${healthLabel} Diversification</p>
+            ${risksHtml}
+            <a href="portfolio.html" class="w-full bg-white/10 hover:bg-white/20 text-white font-medium py-2 px-3 rounded-lg transition-colors border border-white/10 flex items-center justify-center gap-1 text-xs">
+              Manage Portfolio <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </a>
+          `;
+        } catch (e) {
+          console.error('Failed to parse portfolio cache:', e);
+        }
+      }
     }
   </script>
 </body>
