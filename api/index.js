@@ -1604,6 +1604,7 @@ const STARTER_TICKERS = [
 
 const YAHOO_SYMBOL_OVERRIDE = {
   'TATAMOTORS': 'TMCV.NS',
+  'ZOMATO': 'ETERNAL.NS',
   'NESTLEIND': 'NESTLEIND.BO',
   'SHREECEM': 'SHREECEM.BO',
   'BPCL': 'BPCL.BO'
@@ -1694,10 +1695,14 @@ app.get('/api/market-watch', async (req, res) => {
     for (const ticker of requestedSymbols) {
       let cachedQuote = marketWatchCache.stocks[ticker];
       if (!cachedQuote) {
-        // Try on-demand fetch for un-cached symbol
-        const ySym = YAHOO_SYMBOL_OVERRIDE[ticker] || `${ticker}.NS`;
-        const isBse = ySym.endsWith('.BO');
-        const q = await fetchYahooQuote(ySym);
+        // Try on-demand fetch for un-cached symbol (try .NS first, fallback to .BO)
+        const ySym = YAHOO_SYMBOL_OVERRIDE[ticker] || (ticker.endsWith('.BO') || ticker.endsWith('.NS') ? ticker : `${ticker}.NS`);
+        let q = await fetchYahooQuote(ySym);
+        let isBse = ySym.endsWith('.BO');
+        if (!q && !ySym.endsWith('.BO')) {
+          q = await fetchYahooQuote(`${ticker}.BO`);
+          if (q) isBse = true;
+        }
         if (q) {
           cachedQuote = {
             ...q,

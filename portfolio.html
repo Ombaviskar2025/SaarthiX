@@ -380,13 +380,18 @@
       rowCounter++;
       const id = rowCounter;
       const div = document.createElement('div');
-      div.className = 'stock-row flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_1fr_2.5rem] gap-3 items-end p-3 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors border border-white/5';
+      div.className = 'stock-row flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_1fr_2.5rem] gap-3 items-end p-3 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors border border-white/5 relative';
       div.dataset.rowId = id;
+      
+      const stockName = h.ticker ? (STOCKS_DB.find(s=>s.ticker===h.ticker)||{name:h.name||''}).name : '';
+      const displayVal = h.ticker ? (stockName ? `${h.ticker} - ${stockName}` : h.ticker) : '';
+
       div.innerHTML = `
         <div class="w-full relative">
-          <label class="block md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">Stock Ticker</label>
-          <input list="ticker-dl-${id}" class="w-full glass-input rounded-lg px-4 py-2 font-mono-data text-mono-data ticker-input uppercase" placeholder="e.g. RELIANCE" value="${h.ticker ? h.ticker + ' - ' + (STOCKS_DB.find(s=>s.ticker===h.ticker)||{name:''}).name : ''}" type="text" autocomplete="off"/>
-          <datalist id="ticker-dl-${id}">${getTickerOptions()}</datalist>
+          <label class="block md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">Stock Ticker / Company</label>
+          <input class="w-full glass-input rounded-lg px-4 py-2 font-mono-data text-mono-data ticker-input uppercase" placeholder="Search stock (e.g. TATAPOWER, SUZLON, RELIANCE)..." value="${displayVal}" type="text" autocomplete="off"/>
+          <!-- Custom Auto-Suggest Dropdown -->
+          <div class="suggest-dropdown hidden absolute left-0 right-0 top-full mt-1 glass-panel rounded-xl border border-white/10 shadow-2xl z-50 flex flex-col max-h-48 overflow-y-auto p-1.5 gap-1"></div>
         </div>
         <div class="w-full">
           <label class="block md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">Exchange</label>
@@ -409,6 +414,54 @@
         <button onclick="removeRow(${id})" class="p-2 rounded-lg border border-error/20 text-error hover:bg-error/10 transition-colors w-full md:w-auto flex justify-center" title="Remove">
           <span class="material-symbols-outlined text-[20px]">delete</span>
         </button>`;
+
+      // Setup Auto-Suggest listener
+      const tickerInput = div.querySelector('.ticker-input');
+      const dropdown = div.querySelector('.suggest-dropdown');
+      const exchangeSelect = div.querySelector('.exchange-input');
+
+      function renderSuggestions(q) {
+        if (!q) { dropdown.classList.add('hidden'); return; }
+        const matches = (typeof searchStocksDB === 'function' ? searchStocksDB(q) : STOCKS_DB.filter(s=>s.ticker.toLowerCase().includes(q.toLowerCase())||s.name.toLowerCase().includes(q.toLowerCase()))).slice(0, 8);
+
+        if (matches.length === 0) {
+          dropdown.innerHTML = `<div class="px-3 py-2 text-xs text-on-surface-variant/60">Press Enter for custom ticker: "${q.toUpperCase()}"</div>`;
+          dropdown.classList.remove('hidden');
+          return;
+        }
+
+        dropdown.innerHTML = matches.map(s => `
+          <button type="button" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 flex items-center justify-between text-xs transition-colors" data-ticker="${s.ticker}" data-name="${s.name}" data-exchange="${s.exchange}">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white font-mono">${s.ticker}</span>
+              <span class="text-on-surface-variant truncate max-w-[140px]">${s.name}</span>
+            </div>
+            <span class="px-1.5 py-0.5 text-[9px] rounded font-bold ${s.exchange==='NSE'?'bg-secondary/10 text-secondary border border-secondary/20':'bg-primary/10 text-primary border border-primary/20'}">${s.exchange}</span>
+          </button>
+        `).join('');
+        dropdown.classList.remove('hidden');
+
+        dropdown.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const t = btn.dataset.ticker;
+            const n = btn.dataset.name;
+            const ex = btn.dataset.exchange;
+            tickerInput.value = `${t} - ${n}`;
+            exchangeSelect.value = ex || 'NSE';
+            dropdown.classList.add('hidden');
+          });
+        });
+      }
+
+      tickerInput.addEventListener('input', (e) => renderSuggestions(e.target.value.trim()));
+      tickerInput.addEventListener('focus', (e) => {
+        if (e.target.value.trim()) renderSuggestions(e.target.value.trim());
+      });
+      document.addEventListener('click', (e) => {
+        if (!div.contains(e.target)) dropdown.classList.add('hidden');
+      });
+
       return div;
     }
 
@@ -440,8 +493,8 @@
         const ticker   = raw.split(/[\s\-]/)[0];
         const dbStock  = STOCKS_DB.find(s => s.ticker === ticker);
         const name     = dbStock ? dbStock.name : ticker;
-        const liveStock= LIVE_STOCKS.find(s => s.ticker === ticker);
-        const ltp      = liveStock ? liveStock.price : price * (1 + (Math.random()*0.2 - 0.05));
+        const liveStock= (window.LIVE_STOCKS||[]).find(s => s.ticker === ticker);
+        const ltp      = liveStock ? liveStock.price : (dbStock ? dbStock.price : price);
         out.push({ ticker, name, exchange, qty, price, ltp });
       });
       return out;

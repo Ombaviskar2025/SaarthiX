@@ -495,10 +495,10 @@
 
       if(!window.LIVE_STOCKS) return;
 
-      const matches = LIVE_STOCKS.filter(s => 
+      const matches = (typeof searchStocksDB === 'function' ? searchStocksDB(val) : STOCKS_DB.filter(s => 
         s.ticker.toLowerCase().includes(val) || 
         s.name.toLowerCase().includes(val)
-      ).slice(0, 6);
+      )).slice(0, 8);
 
       if (matches.length > 0) {
         searchResults.innerHTML = matches.map(s => {
@@ -519,7 +519,17 @@
         }).join('');
         searchResults.classList.remove('hidden');
       } else {
-        searchResults.innerHTML = `<div class="p-3 text-sm text-on-surface-variant text-center">No matching stocks found</div>`;
+        // Allow adding custom ticker if user typed a symbol
+        const customSym = val.toUpperCase();
+        searchResults.innerHTML = `
+          <div class="flex items-center justify-between p-2 hover:bg-white/5 rounded-lg cursor-pointer transition-colors" onclick="addStock('${customSym}')">
+            <div>
+              <div class="font-medium text-white text-sm">${customSym} <span class="text-[10px] px-1 rounded bg-white/10 text-on-surface-variant ml-1">NSE</span></div>
+              <div class="text-xs text-on-surface-variant">Add custom symbol to watchlist</div>
+            </div>
+            <span class="material-symbols-outlined text-primary text-[18px]">add_circle</span>
+          </div>
+        `;
         searchResults.classList.remove('hidden');
       }
     });
@@ -537,6 +547,9 @@
         saveWatchlist();
         renderSectors(); // Re-evaluate available sectors
         updateFilteredStocks();
+        if (typeof window.retryGrowwConnection === 'function') {
+          window.retryGrowwConnection();
+        }
       }
       searchInput.value = '';
       searchResults.classList.add('hidden');

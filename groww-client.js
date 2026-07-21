@@ -5,7 +5,7 @@
 
 (function() {
   const API_BASE = '/api';
-  let pollInterval = 15000; // 15s polling during market hours
+  let pollInterval = 15000; // 15s polling
   let pollTimer = null;
   let isInitialLoad = true;
 
@@ -67,15 +67,12 @@
     let banner = document.createElement('div');
     banner.className = 'api-status-banner ';
 
-    const isDemoActive = localStorage.getItem('saarthix_demo_mode') === 'true';
-
     switch (state) {
       case 'LIVE':
         banner.className += 'bg-secondary/10 border border-secondary/30 text-secondary';
         banner.innerHTML = `
           <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
           <span>Live (Yahoo Finance) • ${message}</span>
-          <button onclick="window.toggleDemoMode()" class="ml-2 text-[10px] underline opacity-75 hover:opacity-100" title="Switch to Demo Mode">Demo Mode</button>
         `;
         break;
       case 'CLOSED':
@@ -83,7 +80,6 @@
         banner.innerHTML = `
           <span class="w-2.5 h-2.5 rounded-full bg-on-surface-variant/40"></span>
           <span>Market Closed (${message})</span>
-          <button onclick="window.toggleDemoMode()" class="ml-2 text-[10px] underline opacity-75 hover:opacity-100" title="Switch to Demo Mode">Demo Mode</button>
         `;
         break;
       case 'DELAYED':
@@ -92,14 +88,6 @@
           <span class="material-symbols-outlined text-[16px] text-yellow-400">warning</span>
           <span>Data may be delayed</span>
           <button onclick="window.retryGrowwConnection()" class="ml-1 px-1.5 py-0.5 rounded bg-warning/20 hover:bg-warning/30 text-[10px] uppercase font-bold tracking-wider">Retry</button>
-        `;
-        break;
-      case 'SIMULATED':
-        banner.className += 'bg-primary-container/10 border border-primary-container/30 text-primary';
-        banner.innerHTML = `
-          <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
-          <span>Demo Mode (Simulated Data)</span>
-          <button onclick="window.toggleDemoMode()" class="ml-2 text-[10px] underline text-primary font-bold hover:opacity-80" title="Switch to Live Yahoo Data">Switch Live</button>
         `;
         break;
       case 'ERROR':
@@ -121,13 +109,6 @@
     container.appendChild(banner);
   }
 
-  // Global toggle helper for settings / UI
-  window.toggleDemoMode = function() {
-    const current = localStorage.getItem('saarthix_demo_mode') === 'true';
-    localStorage.setItem('saarthix_demo_mode', (!current).toString());
-    fetchLivePrices();
-  };
-
   // Global retry helper
   window.retryGrowwConnection = function() {
     setStatus('LOADING');
@@ -139,20 +120,14 @@
     try {
       if (typeof window.LIVE_STOCKS === 'undefined') return;
 
-      const isDemoMode = localStorage.getItem('saarthix_demo_mode') === 'true';
-
-      if (isDemoMode) {
-        setStatus('SIMULATED');
-        if (window.restartSimulation) window.restartSimulation();
-        return;
-      }
-
-      // Stop local random simulation when live data is enabled
+      // Stop local random simulation when live data is active
       if (window.stopSimulation) {
         window.stopSimulation();
       }
 
-      const response = await fetch(`${API_BASE}/market-watch`);
+      // Pass current watchlist tickers to market-watch endpoint
+      const currentTickers = window.LIVE_STOCKS.map(s => s.ticker).join(',');
+      const response = await fetch(`${API_BASE}/market-watch?symbols=${currentTickers}`);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -167,8 +142,28 @@
       // 1. Update Stocks
       if (data.data && Array.isArray(data.data)) {
         data.data.forEach(item => {
-          const stock = window.LIVE_STOCKS.find(s => s.ticker === item.ticker);
-          if (stock) {
+          let stock = window.LIVE_STOCKS.find(s => s.ticker === item.ticker);
+          if (!stock) {
+            // Dynamically register stock into LIVE_STOCKS if it was searched on demand
+            stock = {
+              ticker: item.ticker,
+              name: item.companyName || item.ticker,
+              exchange: item.exchange || 'NSE',
+              sector: item.sector || 'Other',
+              price: item.price,
+              change: item.change,
+              changePct: item.changePct,
+              pChange: item.changePct,
+              volume: item.volume,
+              high: item.high,
+              low: item.low,
+              high52: item.fiftyTwoWeekHigh,
+              low52: item.fiftyTwoWeekLow,
+              yearHigh: item.fiftyTwoWeekHigh,
+              yearLow: item.fiftyTwoWeekLow
+            };
+            window.LIVE_STOCKS.push(stock);
+          } else {
             const changed = stock.price !== item.price;
             stock.price = item.price;
             stock.change = item.change;
@@ -224,9 +219,7 @@
 
     } catch (err) {
       console.warn('[MarketWatch Client Error]:', err.message);
-      // Fall back to Demo Mode if connection fails
-      setStatus('SIMULATED');
-      if (window.restartSimulation) window.restartSimulation();
+      setStatus('DELAYED');
     }
   }
 
