@@ -480,6 +480,7 @@
 
     function clearAll() {
       document.querySelectorAll('.stock-row').forEach(r=>r.classList.add('removing'));
+      localStorage.removeItem('saarthix_holdings');
       setTimeout(()=>{ document.getElementById('portfolio-inputs').innerHTML=''; addStockRow(); },350);
     }
 
@@ -696,7 +697,19 @@
       document.getElementById('nav-links').innerHTML  = navLinks;
       document.getElementById('mobile-nav').innerHTML = mobileLinks;
       document.getElementById('market-status').innerHTML = statusDot;
-      DEFAULT_HOLDINGS.forEach(h => addStockRow(h));
+
+      const savedHoldingsStr = localStorage.getItem('saarthix_holdings');
+      let initialHoldings = null;
+      if (savedHoldingsStr) {
+        try { initialHoldings = JSON.parse(savedHoldingsStr); } catch (e) {}
+      }
+
+      if (initialHoldings && Array.isArray(initialHoldings) && initialHoldings.length > 0) {
+        initialHoldings.forEach(h => addStockRow(h));
+      } else {
+        addStockRow(); // Render 1 clean empty row for user entry
+      }
+
       updateClock(); setInterval(updateClock, 1000);
       updateHeaderIndices();
     });
