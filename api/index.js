@@ -1414,14 +1414,19 @@ function parseYahooChartData(d) {
     const timestamps = result.timestamp || [];
     const quote = result.indicators?.quote?.[0] || {};
     const rawCloses = quote.close || [];
+    const rawHighs = quote.high || [];
+    const rawLows = quote.low || [];
     const rawVolumes = quote.volume || [];
     
     const validData = [];
     for (let i = 0; i < rawCloses.length; i++) {
       if (rawCloses[i] != null && !isNaN(rawCloses[i])) {
+        const c = rawCloses[i];
         validData.push({
           timestamp: timestamps[i] || i,
-          close: rawCloses[i],
+          close: c,
+          high: (rawHighs[i] != null && !isNaN(rawHighs[i])) ? rawHighs[i] : c,
+          low: (rawLows[i] != null && !isNaN(rawLows[i])) ? rawLows[i] : c,
           volume: rawVolumes[i] || 0
         });
       }
@@ -2390,6 +2395,248 @@ app.get('/api/debug-env', (req, res) => {
     ATB_API_KEY: mask(process.env.ATB_API_KEY),
     GEMINI_API_KEY: mask(process.env.GEMINI_API_KEY)
   });
+});
+
+// ── VOLATILITY & TECHNICAL SIGNAL COMPUTATION (AI VERDICT) ──
+function calculateATR(chartData) {
+  if (!chartData || chartData.length < 2) return 0;
+  
+  // Calculate True Range (TR) for each day
+  const trs = [];
+  for (let i = 1; i < chartData.length; i++) {
+    const current = chartData[i];
+    const prev = chartData[i - 1];
+    const tr = Math.max(
+      current.high - current.low,
+      Math.abs(current.high - prev.close),
+      Math.abs(current.low - prev.close)
+    );
+    trs.push(tr);
+  }
+
+  // Calculate 14-day Average True Range (ATR)
+  const period = Math.min(14, trs.length);
+  const lastTRs = trs.slice(-period);
+  const sum = lastTRs.reduce((a, b) => a + b, 0);
+  return sum / period;
+}
+
+// Cache object for AI Verdict
+let verdictCache = {}; // { KEY: { data, ts } }
+
+app.post('/api/ai-verdict', async (req, res) => {
+  try {
+    const { ticker, exchange, avg_buy_price, quantity } = req.body;
+    if (!ticker) {
+      return res.status(400).json({ status: 'FAILURE', error: 'Missing parameter: ticker' });
+    }
+
+    const sym = ticker.trim().toUpperCase();
+    const exch = (exchange || 'NSE').toUpperCase();
+    const buyPrice = parseFloat(avg_buy_price) || 0;
+    const qty = parseInt(quantity) || 0;
+
+    const cacheKey = `${sym}:${exch}:${buyPrice}:${qty}`;
+    const now = Date.now();
+
+    // Check Cache (20 minutes window)
+    if (verdictCache[cacheKey] && (now - verdictCache[cacheKey].ts) < 20 * 60 * 1000) {
+      console.log(`[VerdictCache] Serving cached verdict for ${sym}`);
+      return res.json({ status: 'SUCCESS', payload: verdictCache[cacheKey].data });
+    }
+
+    // 1. Fetch live quote
+    let liveQuote = marketWatchCache.stocks[sym];
+    if (!liveQuote) {
+      const ySym = YAHOO_SYMBOL_OVERRIDE[sym] || (sym.endsWith('.BO') || sym.endsWith('.NS') ? sym : `${sym}.NS`);
+      liveQuote = await fetchYahooQuote(ySym);
+      if (!liveQuote && !ySym.endsWith('.BO')) {
+        liveQuote = await fetchYahooQuote(`${sym}.BO`);
+      }
+    }
+
+    // 2. Fetch 1Y chart data
+    const chartData = await fetchYahooHistoricalChart(sym);
+    if (!chartData) {
+      return res.status(404).json({ status: 'FAILURE', error: `Chart data not found for ${sym}` });
+    }
+
+    const ltp = liveQuote?.price || chartData[chartData.length - 1].close;
+    const high52 = liveQuote?.high52 || Math.max(...chartData.map(d => d.high));
+    const low52 = liveQuote?.low52 || Math.min(...chartData.map(d => d.low));
+
+    // Calculate DMAs
+    const closePrices = chartData.map(d => d.close);
+    const dma50 = closePrices.length >= 50 ? closePrices.slice(-50).reduce((a, b) => a + b, 0) / 50 : ltp;
+    const dma200 = closePrices.length >= 200 ? closePrices.slice(-200).reduce((a, b) => a + b, 0) / 200 : ltp;
+
+    // Volatility (ATR)
+    let atr = calculateATR(chartData);
+    if (atr === 0) atr = ltp * 0.025; // fallback
+
+    // Support Level (nearest of 20-day low, 50DMA, or LTP - 1x ATR)
+    const last20Days = chartData.slice(-20);
+    const low20 = last20Days.length > 0 ? Math.min(...last20Days.map(d => d.low)) : ltp * 0.95;
+
+    // Formula: Choose nearest support level among (20-day low, 50DMA, or LTP - 1x ATR) that is below or equal to LTP
+    const candidates = [low20, dma50, ltp - atr].filter(c => c <= ltp);
+    const buyBelow = candidates.length > 0 ? Math.max(...candidates) : ltp - atr;
+
+    // Stop Loss: LTP minus (2x ATR) or nearest recent swing low, whichever is more conservative
+    const stopLoss = Math.min(ltp - (2 * atr), low20);
+
+    // Target (12M): Trend-adjusted extrapolation
+    // Compute 1Y trend
+    const c1Y = chartData[0].close;
+    const trend_1y_pct = ((ltp - c1Y) / c1Y) * 100;
+    const expected_growth = Math.max(-0.15, Math.min(0.35, trend_1y_pct / 100));
+    const growth_rate = (expected_growth * 0.6) + (0.12 * 0.4); // Blend with 12% standard cost of equity
+    const target12M = ltp * (1 + growth_rate);
+
+    // Expected Return Range: Target minus current ltp, expressed as a range accounting for 1x ATR
+    const expReturnPct = ((target12M - ltp) / ltp) * 100;
+    const atrPct = (atr / ltp) * 100;
+    const returnMin = Math.round(expReturnPct - atrPct);
+    const returnMax = Math.round(expReturnPct + atrPct);
+    const expectedReturnStr = `${returnMin > 0 ? '+' : ''}${returnMin}% to ${returnMax > 0 ? '+' : ''}${returnMax}%`;
+
+    // Sector P/E and fundamentals (simulate if unavailable)
+    const sector = getStockSector(sym);
+    const pe = liveQuote?.pe || 24.5;
+    const sectorPe = 28.5; // Benchmark average
+    const isFundamentalsMissing = !liveQuote?.pe;
+
+    // Risk label: Based on volatility percentile (ATR / LTP) and holding concentration
+    const volRatio = atr / ltp;
+    let riskLabel = 'Medium';
+    if (volRatio > 0.04) riskLabel = 'High';
+    else if (volRatio < 0.02) riskLabel = 'Low';
+
+    // Confidence composite score (NOT arbitrary)
+    // - Trend strength: LTP above 50 & 200 DMA (+25%)
+    // - Volume confirmation: 5-day volume > 30-day volume (+20%)
+    // - Fundamentals alignment: PE < sector PE (+20%)
+    // - Data completeness (+35%)
+    let confidenceScore = 35; // base for complete data
+    if (ltp >= dma50 && ltp >= dma200) confidenceScore += 25;
+    else if (ltp >= dma50 || ltp >= dma200) confidenceScore += 12;
+
+    const recent5 = chartData.slice(-5);
+    const recent30 = chartData.slice(-30);
+    const vol5 = recent5.reduce((a, b) => a + b.volume, 0) / 5;
+    const vol30 = recent30.reduce((a, b) => a + b.volume, 0) / 30;
+    if (vol5 > vol30) confidenceScore += 20;
+    else confidenceScore += 10;
+
+    if (pe < sectorPe) confidenceScore += 20;
+    else confidenceScore += 8;
+
+    // Cap confidence at 85% if fundamentals are missing or simulated
+    let isCapped = false;
+    if (isFundamentalsMissing) {
+      confidenceScore = Math.min(85, confidenceScore - 15);
+      isCapped = true;
+    }
+    confidenceScore = Math.max(50, Math.min(isCapped ? 85 : 98, confidenceScore));
+
+    // Decision-tree Recommendation Classification
+    let actionBadge = 'HOLD';
+    if (ltp < buyBelow * 1.05 && ltp > stopLoss && trend_1y_pct > -10 && pe < sectorPe * 1.5) {
+      actionBadge = 'BUY_MORE';
+    } else if (ltp < stopLoss || (trend_1y_pct < -25 && pe > sectorPe * 1.8)) {
+      actionBadge = 'SELL';
+    }
+
+    // User Position Context (unrealized P&L %, holding period)
+    let pnlPct = 0;
+    if (buyPrice > 0) {
+      pnlPct = ((ltp - buyPrice) / buyPrice) * 100;
+    }
+
+    // Call Gemini LLM only for narrative reasoning text + action sentence framing
+    const geminiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : '';
+    const isGeminiConfigured = geminiKey && !geminiKey.includes('dummy_gemini_key');
+
+    let reasonText = '';
+    let actionText = '';
+
+    if (isGeminiConfigured) {
+      const promptText = `
+You are summarizing pre-computed quantitative stock signals for an Indian retail investor tool. You will receive structured data including price levels, trend signals, and risk metrics that have already been calculated. Do not alter, recalculate, or invent any numbers — use only the exact figures provided. Your job is only to: (1) write a 2-3 phrase 'Reason' summarizing why the signals point this way, and (2) write a 1-sentence 'Action' explaining how a retail investor might interpret the provided buy-below/target/stop-loss levels. Use conditional, non-guaranteed language (e.g. 'may suggest', 'historically indicates') — never state price movements as certain.
+
+Input Structured Data:
+- Ticker: ${sym}
+- Current LTP: ₹${ltp.toFixed(2)}
+- 1Y Trend: ${trend_1y_pct.toFixed(2)}%
+- Support: ₹${buyBelow.toFixed(2)}
+- Stop Loss: ₹${stopLoss.toFixed(2)}
+- 12M Target: ₹${target12M.toFixed(2)}
+- Expected Return: ${expectedReturnStr}
+- Risk Level: ${riskLabel}
+- P&L Context (if any): ${buyPrice > 0 ? `${pnlPct.toFixed(2)}% unrealized gain` : 'N/A'}
+- Recommendation: ${actionBadge}
+
+Response must be in JSON format:
+{
+  "reason": "Reason summary text here",
+  "action": "Action explanation sentence here"
+}
+`;
+      try {
+        const geminiResult = await callGemini(geminiKey, promptText);
+        if (geminiResult && geminiResult.reason) {
+          reasonText = geminiResult.reason;
+          actionText = geminiResult.action;
+        }
+      } catch (err) {
+        console.warn('[GeminiVerdict] Call failed, using quantitative fallback narrative:', err.message);
+      }
+    }
+
+    // Quantitative Fallback Narrative Builder
+    if (!reasonText || !actionText) {
+      if (actionBadge === 'BUY_MORE') {
+        reasonText = `${sym} demonstrates positive 1Y momentum (+${trend_1y_pct.toFixed(1)}%) trading near support at ₹${buyBelow.toFixed(2)} with a moderate valuation P/E of ${pe}x.`;
+        actionText = `Gradually accumulate shares on minor retracements towards ₹${buyBelow.toFixed(2)} with a target of ₹${target12M.toFixed(2)}, maintaining a strict stop loss at ₹${stopLoss.toFixed(2)}.`;
+      } else if (actionBadge === 'SELL') {
+        reasonText = `${sym} shows persistent technical weakness and stands below key support levels with a stop loss breach at ₹${stopLoss.toFixed(2)}.`;
+        actionText = `Consider trimming exposure or exiting the position below ₹${stopLoss.toFixed(2)} to protect trading capital and reallocate to stronger sectors.`;
+      } else {
+        reasonText = `${sym} displays range-bound consolidation with a 1-year change of ${trend_1y_pct.toFixed(1)}% and neutral volume confirmation.`;
+        actionText = `Hold current positions while monitoring price action between the support at ₹${buyBelow.toFixed(2)} and the 12M target of ₹${target12M.toFixed(2)}.`;
+      }
+    }
+
+    const payload = {
+      ticker: sym,
+      exchange: exch,
+      recommendation: actionBadge,
+      confidence: confidenceScore,
+      reason: reasonText,
+      buyBelow: parseFloat(buyBelow.toFixed(2)),
+      targetPrice: parseFloat(target12M.toFixed(2)),
+      stopLoss: parseFloat(stopLoss.toFixed(2)),
+      risk: riskLabel,
+      expectedReturn: expectedReturnStr,
+      action: actionText,
+      isCapped
+    };
+
+    // Audit Logging
+    console.log(`[AuditLog] [Verdict] Symbol: ${sym} | Rec: ${actionBadge} | Conf: ${confidenceScore}% | BuyBelow: ₹${buyBelow.toFixed(2)} | Target: ₹${target12M.toFixed(2)} | StopLoss: ₹${stopLoss.toFixed(2)}`);
+
+    // Cache result
+    verdictCache[cacheKey] = {
+      data: payload,
+      ts: now
+    };
+
+    res.json({ status: 'SUCCESS', payload });
+
+  } catch (err) {
+    console.error('POST /api/ai-verdict Error:', err);
+    res.status(500).json({ status: 'FAILURE', error: err.message });
+  }
 });
 
 // Fallback to serve login page

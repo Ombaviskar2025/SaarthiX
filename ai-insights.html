@@ -838,7 +838,7 @@
 
       // Serve from cache if fresh
       if (atbCache[cacheKey] && (now - atbCache[cacheKey].ts) < ATB_CACHE_TTL) {
-        renderAtbResult(tool, ticker, atbCache[cacheKey].data);
+        renderAtbResult(tool, ticker, atbCache[cacheKey].data, atbCache[cacheKey].verdict);
         return;
       }
 
@@ -853,20 +853,48 @@
       document.getElementById('atb-loading-text').textContent = loadingText[tool] || 'Fetching AI analysis…';
       atbShowState('atb-loading-state');
 
-      try {
-        const resp = await fetch('/api/stock-analysis', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tool, ticker })
-        });
-        const json = await resp.json();
+      // Fetch user holding info from localStorage if available
+      const holdingsStr = localStorage.getItem('saarthix_holdings');
+      let avgPrice = 0;
+      let qty = 0;
+      if (holdingsStr) {
+        try {
+          const holdings = JSON.parse(holdingsStr);
+          const existing = holdings.find(h => h.ticker.toUpperCase() === ticker.toUpperCase());
+          if (existing) {
+            avgPrice = parseFloat(existing.price) || 0;
+            qty = parseInt(existing.qty) || 0;
+          }
+        } catch (e) {
+          console.warn('Failed to parse saved holdings:', e);
+        }
+      }
 
-        if (!resp.ok || json.status !== 'SUCCESS') {
-          throw new Error(json.error || 'API returned an error');
+      try {
+        const [respAnalysis, respVerdict] = await Promise.all([
+          fetch('/api/stock-analysis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tool, ticker })
+          }),
+          fetch('/api/ai-verdict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticker, exchange: 'NSE', avg_buy_price: avgPrice, quantity: qty })
+          })
+        ]);
+
+        const jsonAnalysis = await respAnalysis.json();
+        const jsonVerdict = await respVerdict.json();
+
+        if (!respAnalysis.ok || jsonAnalysis.status !== 'SUCCESS') {
+          throw new Error(jsonAnalysis.error || 'API returned an error');
         }
 
-        atbCache[cacheKey] = { data: json.payload, ts: now };
-        renderAtbResult(tool, ticker, json.payload);
+        const verdictPayload = (jsonVerdict && jsonVerdict.status === 'SUCCESS') ? jsonVerdict.payload : null;
+
+        atbCache[cacheKey] = { data: jsonAnalysis.payload, verdict: verdictPayload, ts: now };
+        renderAtbResult(tool, ticker, jsonAnalysis.payload, verdictPayload);
       } catch (err) {
         document.getElementById('atb-error-msg').textContent = err.message || 'Failed to fetch AI analysis.';
         atbShowState('atb-error-state');
@@ -899,7 +927,7 @@
       return `<div class="atb-metric-row"><span class="atb-metric-label">${esc(label)}</span><span class="atb-metric-value">${esc(String(value))}</span></div>`;
     }
 
-    function renderAtbResult(tool, ticker, data) {
+    function renderAtbResult(tool, ticker, data, verdict) {
       let html = '';
 
       if (tool === 'stock-thesis') {
@@ -1051,6 +1079,87 @@
 
       // Fallback: raw data dump
       if (!html) html = `<div class="atb-animate">${renderRawData(data)}</div>`;
+
+      // Prepend AI Verdict card if available
+      let verdictHtml = '';
+      if (verdict) {
+        const recBadge = verdict.recommendation === 'BUY_MORE' ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-secondary-container/20 text-secondary border border-secondary-container/40 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>🟢 BUY MORE</span>` :
+                         verdict.recommendation === 'SELL' ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-tertiary-container/20 text-tertiary border border-tertiary-container/40 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>🔴 SELL</span>` :
+                         `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>🟡 HOLD</span>`;
+
+        const riskBadge = verdict.risk === 'High' ? 'bg-error/20 text-error border border-error/30' :
+                          verdict.risk === 'Low' ? 'bg-secondary-container/20 text-secondary border border-secondary/30' :
+                          'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
+
+        const cappedTag = verdict.isCapped ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">Partial data — confidence capped</span>` : '';
+
+        verdictHtml = `
+          <div class="glass-panel p-5 border border-white/10 mb-6 bg-gradient-to-br from-surface-container to-surface-container-low shadow-xl">
+            <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-white/10 mb-4">
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-primary text-[22px]">gavel</span>
+                <h3 class="font-heading font-bold text-white text-base">AI Verdict: ${esc(verdict.ticker)} (${esc(verdict.exchange)})</h3>
+              </div>
+              <div class="flex items-center gap-2">
+                ${cappedTag}
+                ${recBadge}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
+              <div class="space-y-3">
+                <div>
+                  <span class="text-on-surface-variant/60 text-[10px] uppercase tracking-wider block font-bold">Confidence</span>
+                  <span class="font-mono text-white text-lg font-bold">${verdict.confidence}%</span>
+                </div>
+                <div>
+                  <span class="text-on-surface-variant/60 text-[10px] uppercase tracking-wider block font-bold">Risk Level</span>
+                  <span class="px-2 py-0.5 rounded text-xs font-bold inline-block mt-0.5 ${riskBadge}">${verdict.risk}</span>
+                </div>
+              </div>
+
+              <div class="md:col-span-2 space-y-3">
+                <div>
+                  <span class="text-on-surface-variant/60 text-[10px] uppercase tracking-wider block font-bold">Reasoning Thesis</span>
+                  <p class="text-on-surface leading-relaxed mt-0.5">${esc(verdict.reason)}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Technical Target Boundaries -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 bg-black/20 p-3.5 rounded-xl border border-white/5 mt-4 text-xs">
+              <div>
+                <span class="text-on-surface-variant/70 text-[10px] block">Buy Below</span>
+                <span class="font-mono font-bold text-secondary text-base">₹${verdict.buyBelow}</span>
+              </div>
+              <div>
+                <span class="text-on-surface-variant/70 text-[10px] block">Stop Loss</span>
+                <span class="font-mono font-bold text-tertiary text-base">₹${verdict.stopLoss}</span>
+              </div>
+              <div>
+                <span class="text-on-surface-variant/70 text-[10px] block">Target (12M)</span>
+                <span class="font-mono font-bold text-primary text-base">₹${verdict.targetPrice}</span>
+              </div>
+              <div>
+                <span class="text-on-surface-variant/70 text-[10px] block">Expected Return</span>
+                <span class="font-mono font-bold text-white text-base">${esc(verdict.expectedReturn)}</span>
+              </div>
+            </div>
+
+            <!-- Action Statement -->
+            <div class="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20 text-xs leading-relaxed text-white">
+              <strong class="text-primary uppercase mr-1">Action:</strong> ${esc(verdict.action)}
+            </div>
+
+            <!-- Mandatory SEBI Disclaimer -->
+            <div class="text-[10px] text-on-surface-variant/40 mt-4 border-t border-white/5 pt-3 leading-relaxed">
+              This is an AI-generated educational analysis based on historical price data and public information. It is not personalized investment advice and SaarthiX is not a SEBI-registered investment adviser. Please consult a registered financial advisor before making investment decisions.
+            </div>
+          </div>
+        `;
+      }
+
+      html = verdictHtml + html;
 
       // Append standard SEBI disclaimer
       html += `<div class="text-[11px] text-on-surface-variant/50 border-t border-white/5 pt-3 mt-4 font-mono-data">
