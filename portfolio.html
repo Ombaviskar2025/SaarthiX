@@ -465,7 +465,8 @@
         const data = await res.json();
 
         if (!res.ok || data.status !== 'SUCCESS') {
-          throw new Error(data.error || 'Failed to fetch AI insights');
+          const msg = typeof data.error === 'object' ? (data.error.message || JSON.stringify(data.error)) : (data.error || 'Failed to fetch AI insights');
+          throw new Error(msg);
         }
 
         // Cache insights

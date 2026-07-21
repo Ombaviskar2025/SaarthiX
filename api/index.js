@@ -1191,26 +1191,32 @@ app.post('/api/stock-analysis', async (req, res) => {
 async function resolveLivePricesForHoldings(holdings) {
   const resolved = [];
   for (const h of holdings) {
-    const symKey = h.ticker.toUpperCase();
+    const symKey = (h.ticker || '').toUpperCase();
     let ltp = null;
-    const mapping = DHAN_SYMBOL_MAP[symKey];
-    const exchange = h.exchange || (mapping ? (mapping.exchangeSegment.includes('BSE') ? 'BSE' : 'NSE') : 'NSE');
-    try {
-      ltp = await getLivePriceWithCache(symKey, exchange);
-    } catch (e) {
-      console.warn(`Failed to fetch live price for ${symKey}:`, e.message);
+
+    // 1. Check marketWatchCache (Yahoo Finance)
+    if (marketWatchCache.stocks && marketWatchCache.stocks[symKey] && typeof marketWatchCache.stocks[symKey].price === 'number') {
+      ltp = marketWatchCache.stocks[symKey].price;
     }
-    
-    if (ltp === null) {
+
+    // 2. Try Dhan mapping
+    if (ltp === null || isNaN(ltp)) {
+      const mapping = DHAN_SYMBOL_MAP[symKey];
       if (mapping) {
         ltp = mapping.basePrice;
-      } else {
-        ltp = h.price;
       }
     }
+
+    // 3. Fallback to user provided ltp or purchase price
+    if (ltp === null || isNaN(ltp)) {
+      ltp = h.ltp || h.price || 100.0;
+    }
+
+    const numLtp = typeof ltp === 'number' && !isNaN(ltp) ? ltp : (parseFloat(ltp) || 100.0);
+
     resolved.push({
       ...h,
-      ltp: parseFloat(ltp.toFixed(2))
+      ltp: parseFloat(numLtp.toFixed(2))
     });
   }
   return resolved;
