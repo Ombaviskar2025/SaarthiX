@@ -69,8 +69,8 @@
     ::-webkit-scrollbar-track{background:#0a0e17}
     ::-webkit-scrollbar-thumb{background:#31353f;border-radius:4px}
     ::-webkit-scrollbar-thumb:hover{background:#424754}
-    #results-section{display:none}
-    #results-section.visible{display:flex;animation:fadeIn .5s ease-out}
+    #results-section{display:none !important}
+    #results-section.show-results{display:flex !important;animation:fadeIn .5s ease-out}
     @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     .stock-row{transition:opacity .25s ease,max-height .35s ease;position:relative;z-index:1}
     .stock-row:focus-within{z-index:90}
@@ -641,7 +641,8 @@
 
       // Show results
       const res = document.getElementById('results-section');
-      res.classList.add('visible');
+      res.classList.add('show-results');
+      res.style.setProperty('display', 'flex', 'important');
     }
 
     // ── AI Insights generator ─────────────────────────────────
@@ -667,7 +668,9 @@
     }
 
     function resetAnalysis() {
-      document.getElementById('results-section').classList.remove('visible');
+      const res = document.getElementById('results-section');
+      res.classList.remove('show-results');
+      res.style.setProperty('display', 'none', 'important');
       document.getElementById('input-section').scrollIntoView({behavior:'smooth'});
     }
 
