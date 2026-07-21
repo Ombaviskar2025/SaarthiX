@@ -72,8 +72,10 @@
     #results-section{display:none}
     #results-section.visible{display:flex;animation:fadeIn .5s ease-out}
     @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-    .stock-row{transition:opacity .25s ease,max-height .35s ease;overflow:hidden;max-height:300px}
-    .stock-row.removing{opacity:0;max-height:0;margin-bottom:0;padding:0}
+    .stock-row{transition:opacity .25s ease,max-height .35s ease;position:relative;z-index:1}
+    .stock-row:focus-within{z-index:90}
+    .stock-row.removing{opacity:0;max-height:0;margin-bottom:0;padding:0;overflow:hidden}
+    .suggest-dropdown{background:#1c1f29 !important;border:1px solid rgba(255,255,255,.2) !important;box-shadow:0 10px 30px rgba(0,0,0,.9) !important;z-index:100 !important}
     .pie-chart-wrap{position:relative;width:180px;height:180px;margin:0 auto}
     .ticker-suggestion{display:none;position:absolute;z-index:100;top:100%;left:0;right:0;background:#181b25;border:1px solid rgba(255,255,255,.1);border-radius:.5rem;max-height:200px;overflow-y:auto}
     .ticker-suggestion.show{display:block}
@@ -421,28 +423,28 @@
       const exchangeSelect = div.querySelector('.exchange-input');
 
       function renderSuggestions(q) {
-        if (!q) { dropdown.classList.add('hidden'); return; }
-        const matches = (typeof searchStocksDB === 'function' ? searchStocksDB(q) : STOCKS_DB.filter(s=>s.ticker.toLowerCase().includes(q.toLowerCase())||s.name.toLowerCase().includes(q.toLowerCase()))).slice(0, 8);
+        const query = (q || '').trim();
+        const matches = (typeof searchStocksDB === 'function' ? searchStocksDB(query) : STOCKS_DB.filter(s=>s.ticker.toLowerCase().includes(query.toLowerCase())||s.name.toLowerCase().includes(query.toLowerCase()))).slice(0, 10);
 
         if (matches.length === 0) {
-          dropdown.innerHTML = `<div class="px-3 py-2 text-xs text-on-surface-variant/60">Press Enter for custom ticker: "${q.toUpperCase()}"</div>`;
+          dropdown.innerHTML = `<div class="px-3 py-2 text-xs text-on-surface-variant/60">Press Enter for custom ticker: "${query.toUpperCase()}"</div>`;
           dropdown.classList.remove('hidden');
           return;
         }
 
         dropdown.innerHTML = matches.map(s => `
-          <button type="button" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 flex items-center justify-between text-xs transition-colors" data-ticker="${s.ticker}" data-name="${s.name}" data-exchange="${s.exchange}">
+          <div role="button" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 flex items-center justify-between text-xs transition-colors cursor-pointer" data-ticker="${s.ticker}" data-name="${s.name}" data-exchange="${s.exchange}">
             <div class="flex items-center gap-2">
               <span class="font-bold text-white font-mono">${s.ticker}</span>
-              <span class="text-on-surface-variant truncate max-w-[140px]">${s.name}</span>
+              <span class="text-on-surface-variant truncate max-w-[160px]">${s.name}</span>
             </div>
             <span class="px-1.5 py-0.5 text-[9px] rounded font-bold ${s.exchange==='NSE'?'bg-secondary/10 text-secondary border border-secondary/20':'bg-primary/10 text-primary border border-primary/20'}">${s.exchange}</span>
-          </button>
+          </div>
         `).join('');
         dropdown.classList.remove('hidden');
 
-        dropdown.querySelectorAll('button').forEach(btn => {
-          btn.addEventListener('click', (e) => {
+        dropdown.querySelectorAll('[data-ticker]').forEach(btn => {
+          btn.addEventListener('mousedown', (e) => {
             e.preventDefault();
             const t = btn.dataset.ticker;
             const n = btn.dataset.name;
@@ -454,9 +456,10 @@
         });
       }
 
-      tickerInput.addEventListener('input', (e) => renderSuggestions(e.target.value.trim()));
-      tickerInput.addEventListener('focus', (e) => {
-        if (e.target.value.trim()) renderSuggestions(e.target.value.trim());
+      tickerInput.addEventListener('input', (e) => renderSuggestions(e.target.value));
+      tickerInput.addEventListener('focus', (e) => renderSuggestions(e.target.value));
+      tickerInput.addEventListener('blur', () => {
+        setTimeout(() => dropdown.classList.add('hidden'), 150);
       });
       document.addEventListener('click', (e) => {
         if (!div.contains(e.target)) dropdown.classList.add('hidden');
