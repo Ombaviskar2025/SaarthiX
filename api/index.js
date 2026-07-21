@@ -1406,6 +1406,356 @@ function callGemini(apiKey, promptText) {
   });
 }
 
+// ── Technical Signal Computation & Recommendation Engine ───
+async function fetchYahooHistoricalChart(ticker) {
+  const sym = (ticker || '').toUpperCase();
+  const ySym = YAHOO_SYMBOL_OVERRIDE[sym] || (sym.endsWith('.BO') || sym.endsWith('.NS') ? sym : `${sym}.NS`);
+  
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ySym)}?range=1y&interval=1d`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    if (!res.ok) {
+      if (!ySym.endsWith('.BO')) {
+        const bseSym = `${sym}.BO`;
+        const resBse = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(bseSym)}?range=1y&interval=1d`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        if (resBse.ok) {
+          const dBse = await resBse.json();
+          return parseYahooChartData(dBse);
+        }
+      }
+      return null;
+    }
+    const d = await res.json();
+    return parseYahooChartData(d);
+  } catch (err) {
+    console.warn(`[YahooFinanceChart] Failed to fetch chart for ${ticker}:`, err.message);
+    return null;
+  }
+}
+
+function parseYahooChartData(d) {
+  try {
+    const result = d?.chart?.result?.[0];
+    if (!result) return null;
+    const timestamps = result.timestamp || [];
+    const quote = result.indicators?.quote?.[0] || {};
+    const rawCloses = quote.close || [];
+    const rawVolumes = quote.volume || [];
+    
+    const validData = [];
+    for (let i = 0; i < rawCloses.length; i++) {
+      if (rawCloses[i] != null && !isNaN(rawCloses[i])) {
+        validData.push({
+          timestamp: timestamps[i] || i,
+          close: rawCloses[i],
+          volume: rawVolumes[i] || 0
+        });
+      }
+    }
+    return validData.length > 0 ? validData : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function computeTechnicalSignals(holding, totalPortfolioValue, chartData) {
+  const current_price = holding.ltp || holding.price || 100;
+  const avg_buy_price = holding.price || current_price;
+  const unrealized_gain_pct = avg_buy_price > 0 ? ((current_price - avg_buy_price) / avg_buy_price) * 100 : 0;
+  const holdingValue = holding.qty * current_price;
+  const portfolio_weight_pct = totalPortfolioValue > 0 ? (holdingValue / totalPortfolioValue) * 100 : 0;
+  const sector = holding.sector || getStockSector(holding.ticker);
+
+  let trend_1m_pct = 0, trend_3m_pct = 0, trend_6m_pct = 0, trend_1y_pct = 0;
+  let dma50 = current_price, dma200 = current_price;
+  let high52 = current_price, low52 = current_price;
+  let volume_trend = 'flat';
+
+  if (chartData && chartData.length > 0) {
+    const closes = chartData.map(d => d.close);
+    const volumes = chartData.map(d => d.volume);
+    const len = closes.length;
+
+    // Moving Averages
+    const slice50 = closes.slice(-Math.min(50, len));
+    dma50 = slice50.reduce((a, b) => a + b, 0) / slice50.length;
+
+    const slice200 = closes.slice(-Math.min(200, len));
+    dma200 = slice200.reduce((a, b) => a + b, 0) / slice200.length;
+
+    // 52-Week High & Low
+    high52 = Math.max(...closes);
+    low52 = Math.min(...closes);
+
+    // Trends (% changes)
+    if (len >= 21) trend_1m_pct = ((closes[len - 1] - closes[len - 21]) / closes[len - 21]) * 100;
+    if (len >= 63) trend_3m_pct = ((closes[len - 1] - closes[len - 63]) / closes[len - 63]) * 100;
+    if (len >= 126) trend_6m_pct = ((closes[len - 1] - closes[len - 126]) / closes[len - 126]) * 100;
+    trend_1y_pct = ((closes[len - 1] - closes[0]) / closes[0]) * 100;
+
+    // Volume trend (last 5d avg vs last 30d avg)
+    const vol5 = volumes.slice(-Math.min(5, len));
+    const avgVol5 = vol5.reduce((a, b) => a + b, 0) / Math.max(1, vol5.length);
+
+    const vol30 = volumes.slice(-Math.min(30, len));
+    const avgVol30 = vol30.reduce((a, b) => a + b, 0) / Math.max(1, vol30.length);
+
+    if (avgVol30 > 0) {
+      if (avgVol5 > avgVol30 * 1.15) volume_trend = 'rising';
+      else if (avgVol5 < avgVol30 * 0.85) volume_trend = 'falling';
+    }
+  }
+
+  const pct_from_52w_high = high52 > 0 ? ((current_price - high52) / high52) * 100 : 0;
+  const pct_from_52w_low = low52 > 0 ? ((current_price - low52) / low52) * 100 : 0;
+
+  return {
+    ticker: holding.ticker,
+    current_price: parseFloat(current_price.toFixed(2)),
+    avg_buy_price: parseFloat(avg_buy_price.toFixed(2)),
+    unrealized_gain_pct: parseFloat(unrealized_gain_pct.toFixed(2)),
+    trend_1m_pct: parseFloat(trend_1m_pct.toFixed(2)),
+    trend_3m_pct: parseFloat(trend_3m_pct.toFixed(2)),
+    trend_6m_pct: parseFloat(trend_6m_pct.toFixed(2)),
+    trend_1y_pct: parseFloat(trend_1y_pct.toFixed(2)),
+    dma50: parseFloat(dma50.toFixed(2)),
+    dma200: parseFloat(dma200.toFixed(2)),
+    above_50dma: current_price >= dma50,
+    above_200dma: current_price >= dma200,
+    high52: parseFloat(high52.toFixed(2)),
+    low52: parseFloat(low52.toFixed(2)),
+    pct_from_52w_high: parseFloat(pct_from_52w_high.toFixed(2)),
+    pct_from_52w_low: parseFloat(pct_from_52w_low.toFixed(2)),
+    volume_trend,
+    portfolio_weight_pct: parseFloat(portfolio_weight_pct.toFixed(1)),
+    sector
+  };
+}
+
+function computeQuantitativeRecommendation(signals) {
+  const {
+    ticker,
+    current_price,
+    avg_buy_price,
+    unrealized_gain_pct,
+    portfolio_weight_pct,
+    above_50dma,
+    above_200dma,
+    trend_1m_pct,
+    trend_3m_pct,
+    volume_trend,
+    pct_from_52w_high,
+    sector
+  } = signals;
+
+  const risk_flags = [];
+  let buyScore = 0;
+  let sellScore = 0;
+
+  // 1. Concentration Risk
+  if (portfolio_weight_pct > 25) {
+    risk_flags.push(`High concentration (${portfolio_weight_pct}% weight)`);
+    sellScore += portfolio_weight_pct > 40 ? 3 : 2;
+  }
+
+  // 2. Technical Moving Averages
+  if (above_50dma && above_200dma) {
+    buyScore += 2;
+  } else if (!above_200dma) {
+    sellScore += 2;
+    risk_flags.push('Trading below 200 DMA');
+  } else if (!above_50dma) {
+    sellScore += 1;
+    risk_flags.push('Trading below 50 DMA');
+  }
+
+  // 3. Momentum
+  if (trend_3m_pct > 10) {
+    buyScore += 1;
+  } else if (trend_3m_pct < -10) {
+    sellScore += 2;
+    risk_flags.push(`Negative 3M trend (${trend_3m_pct}%)`);
+  }
+
+  // 4. Overbought / Near 52W High
+  if (pct_from_52w_high >= -5 && unrealized_gain_pct > 100) {
+    risk_flags.push('Near 52W High (Profit booking zone)');
+    if (portfolio_weight_pct > 20) sellScore += 1;
+  }
+
+  // 5. Volume Trend
+  if (volume_trend === 'rising' && trend_1m_pct > 0) {
+    buyScore += 1;
+  } else if (volume_trend === 'falling' && trend_1m_pct < 0) {
+    sellScore += 1;
+    risk_flags.push('Volume declining with price');
+  }
+
+  // 6. Tax & Gain Magnitude
+  if (unrealized_gain_pct > 200) {
+    risk_flags.push(`Substantial Gain (+${unrealized_gain_pct}%)`);
+  } else if (unrealized_gain_pct < -20) {
+    risk_flags.push(`Unrealized Loss (${unrealized_gain_pct}%)`);
+  }
+
+  let action = 'HOLD';
+  let confidence = 'medium';
+
+  if (buyScore >= 3 && sellScore <= 1 && portfolio_weight_pct <= 25) {
+    action = 'BUY_MORE';
+    confidence = buyScore >= 4 ? 'high' : 'medium';
+  } else if (sellScore >= 3 || (portfolio_weight_pct > 35 && unrealized_gain_pct > 50)) {
+    action = 'SELL';
+    confidence = sellScore >= 4 ? 'high' : 'medium';
+  } else {
+    action = 'HOLD';
+    confidence = 'medium';
+  }
+
+  let reasoning = '';
+  if (action === 'BUY_MORE') {
+    reasoning = `${ticker} displays positive price momentum, trading above key 50-day and 200-day moving averages with ${volume_trend} volume. With portfolio weight at ${portfolio_weight_pct}%, adding shares maintains risk management while capturing upside.`;
+  } else if (action === 'SELL') {
+    if (portfolio_weight_pct > 25) {
+      reasoning = `${ticker} represents ${portfolio_weight_pct}% of your total portfolio, posing high single-stock concentration risk despite an unrealized P&L of +${unrealized_gain_pct}%. Trimming shares locks in profits and reduces non-systemic risk.`;
+    } else {
+      reasoning = `${ticker} shows technical weakness, trading below key moving averages with a 3-month trend of ${trend_3m_pct}%. Trimming or reallocating capital is recommended to protect portfolio value.`;
+    }
+  } else {
+    reasoning = `${ticker} is currently consolidating with ${unrealized_gain_pct >= 0 ? '+' : ''}${unrealized_gain_pct}% unrealized P&L and a ${portfolio_weight_pct}% portfolio weight. Maintaining a HOLD position balances technical momentum with risk control.`;
+  }
+
+  return {
+    action,
+    confidence,
+    reasoning,
+    risk_flags
+  };
+}
+
+function callGeminiForHoldingRecommendation(geminiKey, signals) {
+  const promptText = `You are a financial analysis assistant for an Indian retail investor platform. Given the structured stock data below, classify this holding as one of exactly three actions: BUY_MORE, HOLD, or SELL. Base your classification ONLY on the data provided — do not invent facts, price targets, or news you don't have. Consider: momentum/trend strength, position relative to moving averages and 52-week range, unrealized gain/loss magnitude, holding period (tax implications), and portfolio concentration risk. If portfolio weight > 25% for a single stock, factor in diversification risk regardless of price momentum.
+
+Stock Data:
+${JSON.stringify(signals, null, 2)}
+
+Respond ONLY in valid JSON matching this schema:
+{
+  "action": "BUY_MORE|HOLD|SELL",
+  "confidence": "low|medium|high",
+  "reasoning": "2-3 sentence plain-English explanation",
+  "risk_flags": ["array of short risk tags if any, e.g. 'high concentration', 'overbought', 'STCG applies'"]
+}
+This is NOT financial advice — always include that this is an informational tool only.`;
+
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: promptText }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['BUY_MORE', 'HOLD', 'SELL'] },
+            confidence: { type: 'string', enum: ['low', 'medium', 'high'] },
+            reasoning: { type: 'string' },
+            risk_flags: { type: 'array', items: { type: 'string' } }
+          },
+          required: ['action', 'confidence', 'reasoning', 'risk_flags']
+        }
+      }
+    });
+
+    const options = {
+      hostname: 'generativelanguage.googleapis.com',
+      port: 443,
+      path: `/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (res.statusCode >= 400) return reject(new Error(`Gemini API error ${res.statusCode}`));
+          const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!text) return reject(new Error('Empty Gemini response'));
+          resolve(JSON.parse(text));
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
+
+    req.on('error', (err) => reject(err));
+    req.write(payload);
+    req.end();
+  });
+}
+
+async function analyzeHoldingsBatch(holdings, isGeminiConfigured, geminiKey) {
+  let totalPortfolioValue = 0;
+  holdings.forEach(h => { totalPortfolioValue += h.qty * (h.ltp || h.price); });
+
+  const analyzed = [];
+  for (const h of holdings) {
+    const chartData = await fetchYahooHistoricalChart(h.ticker);
+    const signals = computeTechnicalSignals(h, totalPortfolioValue, chartData);
+
+    let recommendation = null;
+    if (isGeminiConfigured) {
+      try {
+        recommendation = await callGeminiForHoldingRecommendation(geminiKey, signals);
+      } catch (e) {
+        console.warn(`[AnalyzeHolding] Gemini LLM failed for ${h.ticker}, using quantitative fallback:`, e.message);
+        recommendation = computeQuantitativeRecommendation(signals);
+      }
+    } else {
+      recommendation = computeQuantitativeRecommendation(signals);
+    }
+
+    console.log(`[AuditLog] ${new Date().toISOString()} | Symbol: ${h.ticker} | Action: ${recommendation.action} | Confidence: ${recommendation.confidence} | Weight: ${signals.portfolio_weight_pct}%`);
+
+    analyzed.push({
+      ...h,
+      signals,
+      recommendation
+    });
+  }
+  return analyzed;
+}
+
+// ── POST /api/analyze-holding Route ──────────────────────────
+app.post('/api/analyze-holding', async (req, res) => {
+  try {
+    const rawHoldings = req.body.holdings || (req.body.holding ? [req.body.holding] : []);
+    if (!Array.isArray(rawHoldings) || rawHoldings.length === 0) {
+      return res.status(400).json({ status: 'FAILURE', error: 'Missing parameter: holdings array required' });
+    }
+
+    const holdings = await resolveLivePricesForHoldings(rawHoldings);
+    const geminiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : '';
+    const isGeminiConfigured = geminiKey && !geminiKey.includes('dummy_gemini_key');
+
+    const analyzedHoldings = await analyzeHoldingsBatch(holdings, isGeminiConfigured, geminiKey);
+
+    res.json({
+      status: 'SUCCESS',
+      data: analyzedHoldings,
+      disclaimer: 'AI-generated analysis for informational purposes only. Not investment advice. Consult a SEBI-registered financial advisor before trading.'
+    });
+  } catch (err) {
+    console.error('POST /api/analyze-holding Error:', err);
+    res.status(500).json({ status: 'FAILURE', error: err.message });
+  }
+});
+
 // ── Gemini AI Portfolio Insights Endpoint ────────────────────
 app.post('/api/ai-insights', async (req, res) => {
   try {
@@ -1418,12 +1768,15 @@ app.post('/api/ai-insights', async (req, res) => {
     const geminiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : '';
     const isGeminiConfigured = geminiKey && !geminiKey.includes('dummy_gemini_key');
 
+    const analyzedHoldings = await analyzeHoldingsBatch(holdings, isGeminiConfigured, geminiKey);
+
     if (!isGeminiConfigured) {
       console.warn('Gemini API key is not configured or is a placeholder. Using fallback engine.');
       const fallbackResult = getFallbackAIInsights(holdings);
       return res.json({
         status: 'SUCCESS',
         ...fallbackResult,
+        analyzedHoldings,
         engine: 'fallback'
       });
     }
@@ -1450,6 +1803,7 @@ Important: All insights and commentary must be framed as informational analysis,
       res.json({
         status: 'SUCCESS',
         ...geminiResult,
+        analyzedHoldings,
         engine: 'gemini-2.0-flash'
       });
     } catch (apiErr) {
@@ -1458,6 +1812,7 @@ Important: All insights and commentary must be framed as informational analysis,
       res.json({
         status: 'SUCCESS',
         ...fallbackResult,
+        analyzedHoldings,
         engine: 'fallback_after_error',
         errorMsg: apiErr.message
       });

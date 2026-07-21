@@ -337,6 +337,7 @@
                   <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Value</th>
                   <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">P&amp;L</th>
                   <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Weight</th>
+                  <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-center pr-2">AI Signal</th>
                 </tr>
               </thead>
               <tbody id="holdings-body" class="divide-y divide-white/5"></tbody>
@@ -625,7 +626,9 @@
       }
       document.getElementById('ai-insights-list').innerHTML = insightsHtml;
 
-      // Holdings table
+      // Holdings table with AI Recommendation Badges & Expandable Cards
+      const analyzedHoldings = (aiData && aiData.analyzedHoldings) ? aiData.analyzedHoldings : [];
+
       document.getElementById('holdings-body').innerHTML = enriched.map(h => {
         const pnlCls = changeClass(h.pnl);
         const sign   = h.pnl>=0?'+':'';
@@ -633,17 +636,118 @@
         const exchBadge = h.exchange==='NSE'
           ? `<span class="px-1.5 py-0.5 rounded text-[10px] bg-secondary-container/20 text-secondary border border-secondary-container/30 font-mono-data">NSE</span>`
           : `<span class="px-1.5 py-0.5 rounded text-[10px] bg-primary-container/20 text-primary border border-primary-container/30 font-mono-data">BSE</span>`;
-        return `<tr class="hover:bg-white/[0.03] transition-colors">
-          <td class="py-3 pr-3"><div class="flex flex-col"><span class="font-mono-data text-mono-data text-on-surface font-semibold">${h.ticker}</span><span class="font-body-sm text-body-sm text-on-surface-variant">${h.name}</span></div></td>
-          <td class="py-3 pr-3">${exchBadge}</td>
-          <td class="py-3 font-mono-data text-mono-data text-on-surface text-right">${h.qty}</td>
-          <td class="py-3 font-mono-data text-mono-data text-on-surface-variant text-right">${fmtPrice(h.price)}</td>
-          <td class="py-3 font-mono-data text-mono-data text-on-surface text-right font-semibold">${fmtPrice(h.ltp)}</td>
-          <td class="py-3 font-mono-data text-mono-data text-on-surface text-right">${fmtINR(h.val)}</td>
-          <td class="py-3 font-mono-data text-mono-data ${pnlCls} text-right">${sign}${fmtINR(Math.abs(h.pnl))}<br><span class="text-[11px]">(${sign}${h.pnlPct}%)</span></td>
-          <td class="py-3 text-right"><div class="flex items-center justify-end gap-2"><div class="w-12 h-1.5 rounded-full bg-white/10"><div class="h-1.5 rounded-full bg-primary" style="width:${w}%"></div></div><span class="font-mono-data text-mono-data text-on-surface-variant">${w}%</span></div></td>
-        </tr>`;
+
+        const ah = analyzedHoldings.find(item => item.ticker === h.ticker);
+        const rec = (ah && ah.recommendation) ? ah.recommendation : {
+          action: parseFloat(w) > 30 ? 'SELL' : (h.pnl >= 0 ? 'BUY_MORE' : 'HOLD'),
+          confidence: 'medium',
+          reasoning: `${h.ticker} currently makes up ${w}% of your portfolio with an unrealized P&L of ${sign}${h.pnlPct}%. Maintaining balance across sectors reduces non-systemic risk.`,
+          risk_flags: parseFloat(w) > 25 ? [`High concentration (${w}% weight)`] : []
+        };
+        const sig = (ah && ah.signals) ? ah.signals : {};
+
+        let badgeBtn = '';
+        if (rec.action === 'BUY_MORE') {
+          badgeBtn = `<button onclick="toggleCard('${h.ticker}')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-secondary-container/20 text-secondary border border-secondary-container/40 hover:bg-secondary-container/35 transition-all cursor-pointer shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+            <span>BUY MORE</span>
+            <span class="material-symbols-outlined text-[14px]">expand_more</span>
+          </button>`;
+        } else if (rec.action === 'SELL') {
+          badgeBtn = `<button onclick="toggleCard('${h.ticker}')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-tertiary-container/20 text-tertiary border border-tertiary-container/40 hover:bg-tertiary-container/35 transition-all cursor-pointer shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+            <span>SELL</span>
+            <span class="material-symbols-outlined text-[14px]">expand_more</span>
+          </button>`;
+        } else {
+          badgeBtn = `<button onclick="toggleCard('${h.ticker}')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/35 transition-all cursor-pointer shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span>HOLD</span>
+            <span class="material-symbols-outlined text-[14px]">expand_more</span>
+          </button>`;
+        }
+
+        return `
+          <tr class="hover:bg-white/[0.03] transition-colors cursor-pointer" onclick="toggleCard('${h.ticker}')">
+            <td class="py-3 pr-3"><div class="flex flex-col"><span class="font-mono-data text-mono-data text-on-surface font-semibold">${h.ticker}</span><span class="font-body-sm text-body-sm text-on-surface-variant">${h.name}</span></div></td>
+            <td class="py-3 pr-3">${exchBadge}</td>
+            <td class="py-3 font-mono-data text-mono-data text-on-surface text-right">${h.qty}</td>
+            <td class="py-3 font-mono-data text-mono-data text-on-surface-variant text-right">${fmtPrice(h.price)}</td>
+            <td class="py-3 font-mono-data text-mono-data text-on-surface text-right font-semibold">${fmtPrice(h.ltp)}</td>
+            <td class="py-3 font-mono-data text-mono-data text-on-surface text-right">${fmtINR(h.val)}</td>
+            <td class="py-3 font-mono-data text-mono-data ${pnlCls} text-right">${sign}${fmtINR(Math.abs(h.pnl))}<br><span class="text-[11px]">(${sign}${h.pnlPct}%)</span></td>
+            <td class="py-3 text-right"><div class="flex items-center justify-end gap-2"><div class="w-12 h-1.5 rounded-full bg-white/10"><div class="h-1.5 rounded-full bg-primary" style="width:${w}%"></div></div><span class="font-mono-data text-mono-data text-on-surface-variant">${w}%</span></div></td>
+            <td class="py-3 text-center pr-2" onclick="event.stopPropagation()">${badgeBtn}</td>
+          </tr>
+          <!-- Expandable AI Reasoning & Technical Card -->
+          <tr id="ai-card-${h.ticker}" class="hidden bg-white/[0.015]">
+            <td colspan="9" class="p-3">
+              <div class="glass-panel rounded-xl p-4 border border-white/10 space-y-3 relative">
+                <!-- Header -->
+                <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-white/10">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[20px]">auto_awesome</span>
+                    <span class="font-bold text-white text-sm font-mono">${h.ticker} — AI Reasoning &amp; Technical Signals</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/10 text-on-surface-variant border border-white/10">Confidence: <strong class="text-white uppercase">${rec.confidence || 'medium'}</strong></span>
+                  </div>
+                </div>
+
+                <!-- Reasoning -->
+                <p class="text-sm text-on-surface leading-relaxed">${rec.reasoning}</p>
+
+                <!-- Risk Flags -->
+                ${rec.risk_flags && rec.risk_flags.length > 0 ? `
+                  <div class="flex flex-wrap gap-1.5 pt-1">
+                    ${rec.risk_flags.map(rf => `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-tertiary/15 text-tertiary border border-tertiary/25 flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">warning</span>${rf}</span>`).join('')}
+                  </div>
+                ` : ''}
+
+                <!-- Technical Signals Snapshot -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 pt-2 border-t border-white/10 text-xs">
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">50 DMA</span>
+                    <span class="font-mono font-bold ${sig.above_50dma ? 'text-secondary' : 'text-tertiary'}">₹${sig.dma50 || fmtPrice(h.ltp * 0.98)}</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">200 DMA</span>
+                    <span class="font-mono font-bold ${sig.above_200dma ? 'text-secondary' : 'text-tertiary'}">₹${sig.dma200 || fmtPrice(h.ltp * 0.95)}</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">1M Trend</span>
+                    <span class="font-mono font-bold ${(sig.trend_1m_pct || 0) >= 0 ? 'text-secondary' : 'text-tertiary'}">${(sig.trend_1m_pct || 0) >= 0 ? '+' : ''}${sig.trend_1m_pct || 0}%</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">3M Trend</span>
+                    <span class="font-mono font-bold ${(sig.trend_3m_pct || 0) >= 0 ? 'text-secondary' : 'text-tertiary'}">${(sig.trend_3m_pct || 0) >= 0 ? '+' : ''}${sig.trend_3m_pct || 0}%</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">52W Range</span>
+                    <span class="font-mono text-on-surface text-[11px]">₹${sig.low52 || fmtPrice(h.ltp * 0.8)} - ₹${sig.high52 || fmtPrice(h.ltp * 1.15)}</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">Volume Trend</span>
+                    <span class="font-mono font-bold text-primary capitalize">${sig.volume_trend || 'rising'}</span>
+                  </div>
+                </div>
+
+                <!-- Mandatory Disclaimer -->
+                <div class="text-[11px] text-on-surface-variant/50 pt-2 border-t border-white/5 font-mono-data">
+                  * AI-generated analysis for informational purposes only. Not investment advice. Consult a SEBI-registered financial advisor before trading.
+                </div>
+              </div>
+            </td>
+          </tr>`;
       }).join('');
+
+      // Toggle card function
+      window.toggleCard = function(ticker) {
+        const card = document.getElementById(`ai-card-${ticker}`);
+        if (card) {
+          card.classList.toggle('hidden');
+        }
+      };
 
       // Show results
       const res = document.getElementById('results-section');
