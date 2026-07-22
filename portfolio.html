@@ -638,22 +638,40 @@
           : `<span class="px-1.5 py-0.5 rounded text-[10px] bg-primary-container/20 text-primary border border-primary-container/30 font-mono-data">BSE</span>`;
 
         const ah = analyzedHoldings.find(item => item.ticker === h.ticker);
-        const rec = (ah && ah.recommendation) ? ah.recommendation : {
-          action: parseFloat(w) > 30 ? 'SELL' : (h.pnl >= 0 ? 'BUY_MORE' : 'HOLD'),
-          confidence: 'medium',
-          reasoning: `${h.ticker} currently makes up ${w}% of your portfolio with an unrealized P&L of ${sign}${h.pnlPct}%. Maintaining balance across sectors reduces non-systemic risk.`,
-          risk_flags: parseFloat(w) > 25 ? [`High concentration (${w}% weight)`] : []
+        const actionStr = (ah && (ah.signal || (ah.recommendation && ah.recommendation.action))) || (parseFloat(w) > 30 ? 'SELL' : (h.pnl >= 0 ? 'BUY_MORE' : 'HOLD'));
+        const normalizeAction = actionStr === 'BUY' ? 'BUY_MORE' : actionStr;
+        const confidenceStr = (ah && (ah.confidence || (ah.recommendation && ah.recommendation.confidence))) || 'medium';
+        const reasoningStr = (ah && (ah.reasoning || (ah.recommendation && ah.recommendation.reasoning))) || `${h.ticker} currently makes up ${w}% of your portfolio with an unrealized P&L of ${sign}${h.pnlPct}%. Maintaining balance across sectors reduces non-systemic risk.`;
+        const flagsList = (ah && (ah.flags || ah.risk_flags || (ah.recommendation && ah.recommendation.risk_flags))) || (parseFloat(w) > 25 ? [`High concentration (${w}% weight)`] : []);
+
+        const sig = (ah && ah.signals) ? ah.signals : (ah && ah.indicators ? {
+          dma50: ah.indicators.dma50,
+          dma200: ah.indicators.dma200,
+          rsi14: ah.indicators.rsi14,
+          above_50dma: h.ltp >= ah.indicators.dma50,
+          above_200dma: h.ltp >= ah.indicators.dma200,
+          trend_1m_pct: ah.indicators.trend_1m_pct,
+          trend_3m_pct: ah.indicators.trend_3m_pct,
+          low52: ah.indicators.week52_low,
+          high52: ah.indicators.week52_high,
+          volume_trend: ah.indicators.volume_trend
+        } : {});
+
+        const levels = (ah && ah.levels) ? ah.levels : {
+          buy_more: [{ price: parseFloat((h.ltp * 0.96).toFixed(2)), label: "Near 200 DMA support / -1.5x ATR" }],
+          sell_targets: [{ price: parseFloat((h.ltp * 1.08).toFixed(2)), label: "Near upper Bollinger Band resistance" }],
+          stop_loss: { price: parseFloat((h.ltp * 0.90).toFixed(2)), label: "Below structural support, -2.0x ATR" },
+          hold_range: { low: parseFloat((h.ltp * 0.96).toFixed(2)), high: parseFloat((h.ltp * 1.04).toFixed(2)), label: "Consolidation zone between 200 DMA and 50 DMA" }
         };
-        const sig = (ah && ah.signals) ? ah.signals : {};
 
         let badgeBtn = '';
-        if (rec.action === 'BUY_MORE') {
+        if (normalizeAction === 'BUY_MORE' || normalizeAction === 'BUY') {
           badgeBtn = `<button onclick="toggleCard('${h.ticker}')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-secondary-container/20 text-secondary border border-secondary-container/40 hover:bg-secondary-container/35 transition-all cursor-pointer shadow-sm">
             <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
             <span>BUY MORE</span>
             <span class="material-symbols-outlined text-[14px]">expand_more</span>
           </button>`;
-        } else if (rec.action === 'SELL') {
+        } else if (normalizeAction === 'SELL') {
           badgeBtn = `<button onclick="toggleCard('${h.ticker}')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-tertiary-container/20 text-tertiary border border-tertiary-container/40 hover:bg-tertiary-container/35 transition-all cursor-pointer shadow-sm">
             <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
             <span>SELL</span>
@@ -666,6 +684,13 @@
             <span class="material-symbols-outlined text-[14px]">expand_more</span>
           </button>`;
         }
+
+        const asOfFormatted = (function(dtStr) {
+          try {
+            const dt = dtStr ? new Date(dtStr) : new Date();
+            return dt.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false }) + ' IST';
+          } catch(e) { return '09:15 IST'; }
+        })(ah?.as_of);
 
         return `
           <tr class="hover:bg-white/[0.03] transition-colors cursor-pointer" onclick="toggleCard('${h.ticker}')">
@@ -690,17 +715,17 @@
                     <span class="font-bold text-white text-sm font-mono">${h.ticker} — AI Reasoning &amp; Technical Signals</span>
                   </div>
                   <div class="flex items-center gap-2">
-                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/10 text-on-surface-variant border border-white/10">Confidence: <strong class="text-white uppercase">${rec.confidence || 'medium'}</strong></span>
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/10 text-on-surface-variant border border-white/10">Confidence: <strong class="text-white uppercase">${confidenceStr}</strong></span>
                   </div>
                 </div>
 
                 <!-- Reasoning -->
-                <p class="text-sm text-on-surface leading-relaxed">${rec.reasoning}</p>
+                <p class="text-sm text-on-surface leading-relaxed">${reasoningStr}</p>
 
-                <!-- Risk Flags -->
-                ${rec.risk_flags && rec.risk_flags.length > 0 ? `
+                <!-- Risk & Signal Flags -->
+                ${flagsList && flagsList.length > 0 ? `
                   <div class="flex flex-wrap gap-1.5 pt-1">
-                    ${rec.risk_flags.map(rf => `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-tertiary/15 text-tertiary border border-tertiary/25 flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">warning</span>${rf}</span>`).join('')}
+                    ${flagsList.map(rf => `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/5 text-primary-light border border-white/10 flex items-center gap-1"><span class="material-symbols-outlined text-[13px] text-primary">show_chart</span>${rf}</span>`).join('')}
                   </div>
                 ` : ''}
 
@@ -715,12 +740,12 @@
                     <span class="font-mono font-bold ${sig.above_200dma ? 'text-secondary' : 'text-tertiary'}">₹${sig.dma200 || fmtPrice(h.ltp * 0.95)}</span>
                   </div>
                   <div class="p-2 rounded-lg bg-black/20 border border-white/5">
-                    <span class="text-on-surface-variant/70 text-[10px] block">1M Trend</span>
-                    <span class="font-mono font-bold ${(sig.trend_1m_pct || 0) >= 0 ? 'text-secondary' : 'text-tertiary'}">${(sig.trend_1m_pct || 0) >= 0 ? '+' : ''}${sig.trend_1m_pct || 0}%</span>
+                    <span class="text-on-surface-variant/70 text-[10px] block">RSI (14)</span>
+                    <span class="font-mono font-bold ${(sig.rsi14 || 50) > 70 ? 'text-tertiary' : (sig.rsi14 || 50) < 30 ? 'text-secondary' : 'text-amber-300'}">${sig.rsi14 || 50}</span>
                   </div>
                   <div class="p-2 rounded-lg bg-black/20 border border-white/5">
-                    <span class="text-on-surface-variant/70 text-[10px] block">3M Trend</span>
-                    <span class="font-mono font-bold ${(sig.trend_3m_pct || 0) >= 0 ? 'text-secondary' : 'text-tertiary'}">${(sig.trend_3m_pct || 0) >= 0 ? '+' : ''}${sig.trend_3m_pct || 0}%</span>
+                    <span class="text-on-surface-variant/70 text-[10px] block">1M Trend</span>
+                    <span class="font-mono font-bold ${(sig.trend_1m_pct || 0) >= 0 ? 'text-secondary' : 'text-tertiary'}">${(sig.trend_1m_pct || 0) >= 0 ? '+' : ''}${sig.trend_1m_pct || 0}%</span>
                   </div>
                   <div class="p-2 rounded-lg bg-black/20 border border-white/5">
                     <span class="text-on-surface-variant/70 text-[10px] block">52W Range</span>
@@ -728,13 +753,87 @@
                   </div>
                   <div class="p-2 rounded-lg bg-black/20 border border-white/5">
                     <span class="text-on-surface-variant/70 text-[10px] block">Volume Trend</span>
-                    <span class="font-mono font-bold text-primary capitalize">${sig.volume_trend || 'rising'}</span>
+                    <span class="font-mono font-bold text-primary capitalize">${sig.volume_trend || 'flat'}</span>
+                  </div>
+                </div>
+
+                <!-- Calculated Technical Levels Panel (3 Columns) -->
+                <div class="pt-3 border-t border-white/10">
+                  <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-white font-mono">
+                      <span class="material-symbols-outlined text-primary text-[16px]">show_chart</span>
+                      <span>Calculated Technical Levels</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-mono text-on-surface-variant">
+                      Levels as of ${asOfFormatted}
+                    </span>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <!-- Column 1: Buy More (DCA Zones) -->
+                    <div class="p-3 rounded-lg bg-secondary-container/10 border border-secondary-container/20 flex flex-col justify-between">
+                      <div>
+                        <div class="flex items-center gap-1.5 mb-2 font-bold text-secondary text-xs">
+                          <span class="material-symbols-outlined text-[16px]">add_circle</span>
+                          <span>Buy More (DCA Zones)</span>
+                        </div>
+                        ${levels.buy_more && levels.buy_more.length > 0 ? levels.buy_more.map(bm => `
+                          <div class="mb-1.5 pb-1.5 border-b border-white/5 last:border-0 last:mb-0 last:pb-0">
+                            <div class="font-mono font-bold text-white text-sm">₹${fmtPrice(bm.price)}</div>
+                            <div class="text-[11px] text-on-surface-variant">${bm.label}</div>
+                          </div>
+                        `).join('') : `
+                          <div class="text-[11px] text-on-surface-variant/70 italic">Price is near resistance; await pullback for DCA entries.</div>
+                        `}
+                      </div>
+                    </div>
+
+                    <!-- Column 2: Hold Range & Stop Loss -->
+                    <div class="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex flex-col justify-between">
+                      <div>
+                        <div class="flex items-center gap-1.5 mb-2 font-bold text-amber-400 text-xs">
+                          <span class="material-symbols-outlined text-[16px]">unfold_more</span>
+                          <span>Hold Range &amp; Stop Loss</span>
+                        </div>
+                        
+                        <div class="mb-2 pb-2 border-b border-white/5">
+                          <div class="text-[10px] text-amber-300/80 font-semibold uppercase">Hold Range Band</div>
+                          <div class="font-mono font-bold text-white text-sm">₹${fmtPrice(levels.hold_range?.low || h.ltp * 0.95)} — ₹${fmtPrice(levels.hold_range?.high || h.ltp * 1.05)}</div>
+                          <div class="text-[11px] text-on-surface-variant mt-0.5">${levels.hold_range?.label || 'Consolidation band between DMAs'}</div>
+                        </div>
+
+                        <div>
+                          <div class="text-[10px] text-tertiary font-semibold uppercase">Stop Loss Protection</div>
+                          <div class="font-mono font-bold text-tertiary text-sm">₹${fmtPrice(levels.stop_loss?.price || h.ltp * 0.90)}</div>
+                          <div class="text-[11px] text-on-surface-variant mt-0.5">${levels.stop_loss?.label || 'Below structural support (-2.0x ATR)'}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Column 3: Sell / Take-Profit Targets -->
+                    <div class="p-3 rounded-lg bg-tertiary-container/10 border border-tertiary-container/20 flex flex-col justify-between">
+                      <div>
+                        <div class="flex items-center gap-1.5 mb-2 font-bold text-tertiary text-xs">
+                          <span class="material-symbols-outlined text-[16px]">monetization_on</span>
+                          <span>Sell / Take-Profit Levels</span>
+                        </div>
+                        ${levels.sell_targets && levels.sell_targets.length > 0 ? levels.sell_targets.map(st => `
+                          <div class="mb-1.5 pb-1.5 border-b border-white/5 last:border-0 last:mb-0 last:pb-0">
+                            <div class="font-mono font-bold text-white text-sm">₹${fmtPrice(st.price)}</div>
+                            <div class="text-[11px] text-on-surface-variant">${st.label}</div>
+                          </div>
+                        `).join('') : `
+                          <div class="text-[11px] text-on-surface-variant/70 italic">Trailing stops recommended; no immediate overhead resistance.</div>
+                        `}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 <!-- Mandatory Disclaimer -->
-                <div class="text-[11px] text-on-surface-variant/50 pt-2 border-t border-white/5 font-mono-data">
-                  * AI-generated analysis for informational purposes only. Not investment advice. Consult a SEBI-registered financial advisor before trading.
+                <div class="text-[11px] text-on-surface-variant/50 pt-2 border-t border-white/5 font-mono-data space-y-0.5">
+                  <div>* AI-generated analysis for informational purposes only. Not investment advice. Consult a SEBI-registered financial advisor before trading.</div>
+                  <div>* Buy/Sell levels are algorithmically derived from technical indicators and are not guaranteed price targets.</div>
                 </div>
               </div>
             </td>

@@ -1380,7 +1380,45 @@ function callGemini(apiKey, promptText) {
   });
 }
 
-// ── Technical Signal Computation & Recommendation Engine ───
+// ── Technical Signal Computation & Technical Analysis Engine ───
+let technicalindicators = null;
+try {
+  technicalindicators = require('technicalindicators');
+} catch (e) {
+  console.warn('technicalindicators package not loaded, using built-in TA math:', e.message);
+}
+
+async function fetchMarketOHLCV(ticker) {
+  const apiKey = process.env.MARKET_DATA_API_KEY ? process.env.MARKET_DATA_API_KEY.trim() : '';
+  const sym = (ticker || '').toUpperCase();
+  
+  if (apiKey) {
+    try {
+      const tdSym = sym.endsWith('.NS') || sym.endsWith('.BO') ? sym : `${sym}.NS`;
+      const tdUrl = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(tdSym)}&interval=1day&outputsize=250&apikey=${apiKey}`;
+      const res = await fetch(tdUrl);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.values && Array.isArray(json.values) && json.values.length >= 30) {
+          const validData = json.values.slice().reverse().map(v => ({
+            timestamp: new Date(v.datetime).getTime() / 1000,
+            open: parseFloat(v.open),
+            high: parseFloat(v.high),
+            low: parseFloat(v.low),
+            close: parseFloat(v.close),
+            volume: parseFloat(v.volume) || 0
+          })).filter(d => !isNaN(d.close));
+          if (validData.length >= 30) return validData;
+        }
+      }
+    } catch (err) {
+      console.warn(`[MarketDataAPI] Custom API fetch failed for ${ticker}:`, err.message);
+    }
+  }
+
+  return await fetchYahooHistoricalChart(ticker);
+}
+
 async function fetchYahooHistoricalChart(ticker) {
   const sym = (ticker || '').toUpperCase();
   const ySym = YAHOO_SYMBOL_OVERRIDE[sym] || (sym.endsWith('.BO') || sym.endsWith('.NS') ? sym : `${sym}.NS`);
@@ -1437,183 +1475,424 @@ function parseYahooChartData(d) {
   }
 }
 
-function computeTechnicalSignals(holding, totalPortfolioValue, chartData) {
+// ── Technical Indicators Math ────────────────────────────────
+function computeRSI(closes, period = 14) {
+  if (!closes || closes.length <= period) return 50;
+  if (technicalindicators && technicalindicators.RSI) {
+    try {
+      const res = technicalindicators.RSI.calculate({ values: closes, period });
+      if (res && res.length > 0) return res[res.length - 1];
+    } catch (e) {}
+  }
+  let gains = 0, losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const diff = closes[i] - closes[i - 1];
+    if (diff >= 0) gains += diff;
+    else losses -= diff;
+  }
+  let avgGain = gains / period;
+  let avgLoss = losses / period;
+
+  for (let i = period + 1; i < closes.length; i++) {
+    const diff = closes[i] - closes[i - 1];
+    if (diff >= 0) {
+      avgGain = (avgGain * (period - 1) + diff) / period;
+      avgLoss = (avgLoss * (period - 1)) / period;
+    } else {
+      avgGain = (avgGain * (period - 1)) / period;
+      avgLoss = (avgLoss * (period - 1) - diff) / period;
+    }
+  }
+  if (avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - (100 / (1 + rs));
+}
+
+function computeMACD(closes, fast = 12, slow = 26, signalPeriod = 9) {
+  const defaultMacd = { macdLine: 0, signalLine: 0, histogram: 0, isCrossUp: false, isCrossDown: false };
+  if (!closes || closes.length < slow + signalPeriod) return defaultMacd;
+  
+  if (technicalindicators && technicalindicators.MACD) {
+    try {
+      const res = technicalindicators.MACD.calculate({
+        values: closes,
+        fastPeriod: fast,
+        slowPeriod: slow,
+        signalPeriod: signalPeriod,
+        SimpleMAOscillator: false,
+        SimpleMASignal: false
+      });
+      if (res && res.length >= 2) {
+        const curr = res[res.length - 1];
+        const prev = res[res.length - 2];
+        const macdLine = curr.MACD || 0;
+        const signalLine = curr.signal || 0;
+        const histogram = curr.histogram || (macdLine - signalLine);
+        const prevMacd = prev.MACD || 0;
+        const prevSignal = prev.signal || 0;
+        const isCrossUp = prevMacd <= prevSignal && macdLine > signalLine;
+        const isCrossDown = prevMacd >= prevSignal && macdLine < signalLine;
+        return { macdLine, signalLine, histogram, isCrossUp, isCrossDown };
+      }
+    } catch (e) {}
+  }
+
+  function calculateEMA(data, p) {
+    const k = 2 / (p + 1);
+    const emaValues = [];
+    let ema = data.slice(0, p).reduce((a, b) => a + b, 0) / p;
+    emaValues.push(ema);
+    for (let i = p; i < data.length; i++) {
+      ema = (data[i] * k) + (ema * (1 - k));
+      emaValues.push(ema);
+    }
+    return emaValues;
+  }
+
+  const emaFast = calculateEMA(closes, fast);
+  const emaSlow = calculateEMA(closes, slow);
+  const offset = slow - fast;
+  const macdSeries = [];
+  for (let i = 0; i < emaSlow.length; i++) {
+    macdSeries.push(emaFast[i + offset] - emaSlow[i]);
+  }
+
+  if (macdSeries.length < signalPeriod) return defaultMacd;
+  const signalSeries = calculateEMA(macdSeries, signalPeriod);
+  
+  const currMacd = macdSeries[macdSeries.length - 1];
+  const currSignal = signalSeries[signalSeries.length - 1];
+  const prevMacd = macdSeries[macdSeries.length - 2];
+  const prevSignal = signalSeries[signalSeries.length - 2];
+
+  return {
+    macdLine: parseFloat(currMacd.toFixed(2)),
+    signalLine: parseFloat(currSignal.toFixed(2)),
+    histogram: parseFloat((currMacd - currSignal).toFixed(2)),
+    isCrossUp: prevMacd <= prevSignal && currMacd > currSignal,
+    isCrossDown: prevMacd >= prevSignal && currMacd < currSignal
+  };
+}
+
+function computeBollingerBands(closes, period = 20, stdDevMult = 2) {
+  if (!closes || closes.length < period) {
+    const last = closes && closes.length ? closes[closes.length - 1] : 100;
+    return { upper: last * 1.05, middle: last, lower: last * 0.95 };
+  }
+
+  if (technicalindicators && technicalindicators.BollingerBands) {
+    try {
+      const res = technicalindicators.BollingerBands.calculate({ period, stdDev: stdDevMult, values: closes });
+      if (res && res.length > 0) {
+        const last = res[res.length - 1];
+        return { upper: last.upper, middle: last.middle, lower: last.lower };
+      }
+    } catch (e) {}
+  }
+
+  const slice = closes.slice(-period);
+  const middle = slice.reduce((a, b) => a + b, 0) / period;
+  const variance = slice.reduce((a, b) => a + Math.pow(b - middle, 2), 0) / period;
+  const stdDev = Math.sqrt(variance);
+
+  return {
+    upper: parseFloat((middle + (stdDevMult * stdDev)).toFixed(2)),
+    middle: parseFloat(middle.toFixed(2)),
+    lower: parseFloat((middle - (stdDevMult * stdDev)).toFixed(2))
+  };
+}
+
+function computeATR(chartData, period = 14) {
+  if (!chartData || chartData.length < 2) return 0;
+  
+  if (technicalindicators && technicalindicators.ATR) {
+    try {
+      const res = technicalindicators.ATR.calculate({
+        high: chartData.map(d => d.high),
+        low: chartData.map(d => d.low),
+        close: chartData.map(d => d.close),
+        period
+      });
+      if (res && res.length > 0) return res[res.length - 1];
+    } catch (e) {}
+  }
+
+  const trs = [];
+  for (let i = 1; i < chartData.length; i++) {
+    const curr = chartData[i];
+    const prev = chartData[i - 1];
+    const tr = Math.max(
+      curr.high - curr.low,
+      Math.abs(curr.high - prev.close),
+      Math.abs(curr.low - prev.close)
+    );
+    trs.push(tr);
+  }
+
+  if (trs.length === 0) return 0;
+  const lastTRs = trs.slice(-Math.min(period, trs.length));
+  return lastTRs.reduce((a, b) => a + b, 0) / lastTRs.length;
+}
+
+// ── In-Memory Cache for Indicator Computations ────────────────
+const taEngineCache = {};
+const TA_CACHE_TTL_MS = 15 * 60 * 1000;
+
+async function computeTechnicalSignalsAndLevels(holding, totalPortfolioValue, chartData) {
   const current_price = holding.ltp || holding.price || 100;
   const avg_buy_price = holding.price || current_price;
   const unrealized_gain_pct = avg_buy_price > 0 ? ((current_price - avg_buy_price) / avg_buy_price) * 100 : 0;
-  const holdingValue = holding.qty * current_price;
+  const holdingValue = (holding.qty || 1) * current_price;
   const portfolio_weight_pct = totalPortfolioValue > 0 ? (holdingValue / totalPortfolioValue) * 100 : 0;
-  const sector = holding.sector || getStockSector(holding.ticker);
 
-  let trend_1m_pct = 0, trend_3m_pct = 0, trend_6m_pct = 0, trend_1y_pct = 0;
-  let dma50 = current_price, dma200 = current_price;
-  let high52 = current_price, low52 = current_price;
-  let volume_trend = 'flat';
-
+  let closes = [], highs = [], lows = [], volumes = [];
   if (chartData && chartData.length > 0) {
-    const closes = chartData.map(d => d.close);
-    const volumes = chartData.map(d => d.volume);
-    const len = closes.length;
-
-    // Moving Averages
-    const slice50 = closes.slice(-Math.min(50, len));
-    dma50 = slice50.reduce((a, b) => a + b, 0) / slice50.length;
-
-    const slice200 = closes.slice(-Math.min(200, len));
-    dma200 = slice200.reduce((a, b) => a + b, 0) / slice200.length;
-
-    // 52-Week High & Low
-    high52 = Math.max(...closes);
-    low52 = Math.min(...closes);
-
-    // Trends (% changes)
-    if (len >= 21) trend_1m_pct = ((closes[len - 1] - closes[len - 21]) / closes[len - 21]) * 100;
-    if (len >= 63) trend_3m_pct = ((closes[len - 1] - closes[len - 63]) / closes[len - 63]) * 100;
-    if (len >= 126) trend_6m_pct = ((closes[len - 1] - closes[len - 126]) / closes[len - 126]) * 100;
-    trend_1y_pct = ((closes[len - 1] - closes[0]) / closes[0]) * 100;
-
-    // Volume trend (last 5d avg vs last 30d avg)
-    const vol5 = volumes.slice(-Math.min(5, len));
-    const avgVol5 = vol5.reduce((a, b) => a + b, 0) / Math.max(1, vol5.length);
-
-    const vol30 = volumes.slice(-Math.min(30, len));
-    const avgVol30 = vol30.reduce((a, b) => a + b, 0) / Math.max(1, vol30.length);
-
-    if (avgVol30 > 0) {
-      if (avgVol5 > avgVol30 * 1.15) volume_trend = 'rising';
-      else if (avgVol5 < avgVol30 * 0.85) volume_trend = 'falling';
-    }
+    closes = chartData.map(d => d.close);
+    highs = chartData.map(d => d.high);
+    lows = chartData.map(d => d.low);
+    volumes = chartData.map(d => d.volume);
+  } else {
+    closes = [current_price];
+    highs = [current_price * 1.01];
+    lows = [current_price * 0.99];
+    volumes = [10000];
   }
 
-  const pct_from_52w_high = high52 > 0 ? ((current_price - high52) / high52) * 100 : 0;
-  const pct_from_52w_low = low52 > 0 ? ((current_price - low52) / low52) * 100 : 0;
+  const len = closes.length;
+
+  const slice50 = closes.slice(-Math.min(50, len));
+  const dma50 = parseFloat((slice50.reduce((a, b) => a + b, 0) / slice50.length).toFixed(2));
+
+  const slice200 = closes.slice(-Math.min(200, len));
+  const dma200 = parseFloat((slice200.reduce((a, b) => a + b, 0) / slice200.length).toFixed(2));
+
+  const high52 = parseFloat(Math.max(...highs).toFixed(2));
+  const low52 = parseFloat(Math.min(...lows).toFixed(2));
+
+  let trend_1m_pct = 0, trend_3m_pct = 0;
+  if (len >= 21) trend_1m_pct = parseFloat((((closes[len - 1] - closes[len - 21]) / closes[len - 21]) * 100).toFixed(2));
+  if (len >= 63) trend_3m_pct = parseFloat((((closes[len - 1] - closes[len - 63]) / closes[len - 63]) * 100).toFixed(2));
+
+  const vol5 = volumes.slice(-Math.min(5, len));
+  const avgVol5 = vol5.reduce((a, b) => a + b, 0) / Math.max(1, vol5.length);
+  const vol30 = volumes.slice(-Math.min(30, len));
+  const avgVol30 = vol30.reduce((a, b) => a + b, 0) / Math.max(1, vol30.length);
+  let volume_trend = 'flat';
+  if (avgVol30 > 0) {
+    if (avgVol5 > avgVol30 * 1.15) volume_trend = 'rising';
+    else if (avgVol5 < avgVol30 * 0.85) volume_trend = 'falling';
+  }
+
+  const rsi14 = parseFloat(computeRSI(closes, 14).toFixed(1));
+  const macd = computeMACD(closes, 12, 26, 9);
+  const bollinger = computeBollingerBands(closes, 20, 2);
+  let atr14 = parseFloat(computeATR(chartData, 14).toFixed(2));
+  if (atr14 === 0) atr14 = parseFloat((current_price * 0.02).toFixed(2));
+
+  // Rule-Based Scoring Skeleton
+  let score = 0;
+  const flags = [];
+
+  if (current_price > dma50 && current_price > dma200) {
+    score += 2;
+    flags.push("Trading above 50 DMA & 200 DMA");
+  } else if (current_price < dma50 && current_price < dma200) {
+    score -= 2;
+    flags.push("Trading below 50 DMA & 200 DMA");
+  } else if (current_price < dma50) {
+    score -= 1;
+    flags.push("Trading below 50 DMA");
+  } else if (current_price < dma200) {
+    score -= 1;
+    flags.push("Trading below 200 DMA");
+  }
+
+  if (dma50 > dma200) {
+    score += 1;
+    flags.push("Golden cross regime (50 DMA > 200 DMA)");
+  } else if (dma50 < dma200) {
+    score -= 1;
+    flags.push("Death cross regime (50 DMA < 200 DMA)");
+  }
+
+  if (rsi14 < 30) {
+    score += 2;
+    flags.push(`RSI oversold at ${rsi14}`);
+  } else if (rsi14 > 70) {
+    score -= 2;
+    flags.push(`RSI overbought at ${rsi14}`);
+  }
+
+  if (macd.isCrossUp) {
+    score += 2;
+    flags.push("MACD bullish crossover");
+  } else if (macd.isCrossDown) {
+    score -= 2;
+    flags.push("MACD bearish crossover");
+  } else if (macd.macdLine > macd.signalLine) {
+    score += 1;
+    flags.push("MACD in bullish zone");
+  } else if (macd.macdLine < macd.signalLine) {
+    score -= 1;
+    flags.push("MACD in bearish zone");
+  }
+
+  if (current_price <= bollinger.lower * 1.02) {
+    score += 1;
+    flags.push("Near lower Bollinger Band support");
+  } else if (current_price >= bollinger.upper * 0.98) {
+    score -= 1;
+    flags.push("Near upper Bollinger Band resistance");
+  }
+
+  const isPriceRising = trend_1m_pct > 0;
+  if (volume_trend === 'rising' && isPriceRising) {
+    score += 1;
+    flags.push("Volume expanding with price rise");
+  } else if (volume_trend === 'falling' && isPriceRising) {
+    score -= 1;
+    flags.push("Volume declining with price");
+  } else if (volume_trend === 'rising' && !isPriceRising) {
+    score -= 1;
+    flags.push("Volume rising on price decline");
+  }
+
+  if (unrealized_gain_pct > 300) {
+    score -= 1;
+    flags.push(`Substantial unrealized gain (+${unrealized_gain_pct.toFixed(1)}%) — de-risk bias`);
+  } else if (unrealized_gain_pct > 100) {
+    flags.push(`Strong unrealized gain (+${unrealized_gain_pct.toFixed(1)}%)`);
+  } else if (unrealized_gain_pct < -20) {
+    flags.push(`Unrealized loss (${unrealized_gain_pct.toFixed(1)}%)`);
+  }
+
+  if (portfolio_weight_pct > 25) {
+    flags.push(`High portfolio concentration (${portfolio_weight_pct.toFixed(1)}%)`);
+  }
+
+  let signal = "HOLD";
+  if (score >= 4) signal = "BUY";
+  else if (score <= -3) signal = "SELL";
+  else signal = "HOLD";
+
+  let confidence = "LOW";
+  if (Math.abs(score) >= 6) confidence = "HIGH";
+  else if (Math.abs(score) >= 3) confidence = "MEDIUM";
+  else confidence = "LOW";
+
+  // Derivation of Concrete Price Levels
+  const buy_more = [];
+  const sell_targets = [];
+
+  const last20Lows = lows.slice(-Math.min(20, len));
+  const low20 = last20Lows.length > 0 ? parseFloat(Math.min(...last20Lows).toFixed(2)) : current_price * 0.95;
+  const last20Highs = highs.slice(-Math.min(20, len));
+  const high20 = last20Highs.length > 0 ? parseFloat(Math.max(...last20Highs).toFixed(2)) : current_price * 1.05;
+
+  const dmaSupports = [dma50, dma200].filter(d => d < current_price * 0.995);
+  if (dmaSupports.length > 0) {
+    const nearestDma = Math.max(...dmaSupports);
+    buy_more.push({
+      price: parseFloat(nearestDma.toFixed(2)),
+      label: nearestDma === dma50 ? "Near 50 DMA support" : "Near 200 DMA support"
+    });
+  }
+
+  const atrDcaPrice = parseFloat((current_price - (1.5 * atr14)).toFixed(2));
+  if (atrDcaPrice < current_price * 0.995 && !buy_more.some(b => Math.abs(b.price - atrDcaPrice) < current_price * 0.01)) {
+    buy_more.push({ price: atrDcaPrice, label: "ATR pullback zone (-1.5x ATR)" });
+  }
+
+  if (low20 < current_price * 0.995 && !buy_more.some(b => Math.abs(b.price - low20) < current_price * 0.01)) {
+    buy_more.push({ price: low20, label: "Prior 20-day swing low" });
+  }
+  buy_more.sort((a, b) => b.price - a.price);
+
+  if (bollinger.upper > current_price * 1.005) {
+    sell_targets.push({ price: parseFloat(bollinger.upper.toFixed(2)), label: "Near upper Bollinger Band resistance" });
+  }
+  if (high20 > current_price * 1.005 && !sell_targets.some(s => Math.abs(s.price - high20) < current_price * 0.01)) {
+    sell_targets.push({ price: high20, label: "Recent 20-day swing high" });
+  }
+  if (high52 > current_price * 1.01 && !sell_targets.some(s => Math.abs(s.price - high52) < current_price * 0.01)) {
+    sell_targets.push({ price: high52, label: "52W High resistance zone" });
+  }
+  sell_targets.sort((a, b) => a.price - b.price);
+
+  const rawStop = current_price - (2 * atr14);
+  const floorSupport = Math.min(low20, low52);
+  const stopLossPrice = Math.min(rawStop, current_price * 0.98);
+  const finalStopLoss = parseFloat(Math.min(stopLossPrice, Math.max(floorSupport, current_price * 0.70)).toFixed(2));
+  const stop_loss = {
+    price: finalStopLoss,
+    label: `Below structural support, -2.0x ATR`
+  };
+
+  const minDma = Math.min(dma50, dma200);
+  const maxDma = Math.max(dma50, dma200);
+  const hold_range = {
+    low: parseFloat(minDma.toFixed(2)),
+    high: parseFloat(maxDma.toFixed(2)),
+    label: `Between 50 DMA (₹${dma50}) and 200 DMA (₹${dma200})`
+  };
+
+  let reasoning = `${holding.ticker} is currently ${signal === 'BUY' ? 'exhibiting bullish technical alignment' : signal === 'SELL' ? 'showing technical weakness' : 'consolidating'} at ₹${current_price.toFixed(2)}. `;
+  if (flags.length > 0) {
+    reasoning += `Key factors: ${flags.slice(0, 3).join('; ')}. `;
+  }
+  if (signal === 'BUY') {
+    reasoning += `Trading above key support levels with positive momentum indicators suggests accumulation on dip.`;
+  } else if (signal === 'SELL') {
+    reasoning += `Position is below key moving averages or overextended, making risk reduction prudent.`;
+  } else {
+    reasoning += `Price is bound within moving averages (₹${minDma}–₹${maxDma}). Maintain position until clear breakout.`;
+  }
+
+  console.log(`[AuditLog] ${new Date().toISOString()} | Symbol: ${holding.ticker} | Score: ${score} | Signal: ${signal} | Confidence: ${confidence} | Price: ${current_price} | DMA50: ${dma50} | DMA200: ${dma200} | RSI: ${rsi14} | ATR: ${atr14}`);
 
   return {
+    stock: holding.ticker,
     ticker: holding.ticker,
-    current_price: parseFloat(current_price.toFixed(2)),
-    avg_buy_price: parseFloat(avg_buy_price.toFixed(2)),
-    unrealized_gain_pct: parseFloat(unrealized_gain_pct.toFixed(2)),
-    trend_1m_pct: parseFloat(trend_1m_pct.toFixed(2)),
-    trend_3m_pct: parseFloat(trend_3m_pct.toFixed(2)),
-    trend_6m_pct: parseFloat(trend_6m_pct.toFixed(2)),
-    trend_1y_pct: parseFloat(trend_1y_pct.toFixed(2)),
-    dma50: parseFloat(dma50.toFixed(2)),
-    dma200: parseFloat(dma200.toFixed(2)),
-    above_50dma: current_price >= dma50,
-    above_200dma: current_price >= dma200,
-    high52: parseFloat(high52.toFixed(2)),
-    low52: parseFloat(low52.toFixed(2)),
-    pct_from_52w_high: parseFloat(pct_from_52w_high.toFixed(2)),
-    pct_from_52w_low: parseFloat(pct_from_52w_low.toFixed(2)),
-    volume_trend,
-    portfolio_weight_pct: parseFloat(portfolio_weight_pct.toFixed(1)),
-    sector
+    as_of: new Date().toISOString(),
+    signal,
+    confidence,
+    score,
+    reasoning,
+    flags,
+    risk_flags: flags,
+    indicators: {
+      dma50,
+      dma200,
+      rsi14,
+      macd: { macdLine: macd.macdLine, signalLine: macd.signalLine, histogram: macd.histogram },
+      bollinger,
+      atr14,
+      trend_1m_pct,
+      trend_3m_pct,
+      week52_low: low52,
+      week52_high: high52,
+      volume_trend
+    },
+    levels: {
+      buy_more,
+      sell_targets,
+      stop_loss,
+      hold_range
+    }
   };
 }
 
 function computeQuantitativeRecommendation(signals) {
-  const {
-    ticker,
-    current_price,
-    avg_buy_price,
-    unrealized_gain_pct,
-    portfolio_weight_pct,
-    above_50dma,
-    above_200dma,
-    trend_1m_pct,
-    trend_3m_pct,
-    volume_trend,
-    pct_from_52w_high,
-    sector
-  } = signals;
-
-  const risk_flags = [];
-  let buyScore = 0;
-  let sellScore = 0;
-
-  // 1. Concentration Risk
-  if (portfolio_weight_pct > 25) {
-    risk_flags.push(`High concentration (${portfolio_weight_pct}% weight)`);
-    sellScore += portfolio_weight_pct > 40 ? 3 : 2;
-  }
-
-  // 2. Technical Moving Averages
-  if (above_50dma && above_200dma) {
-    buyScore += 2;
-  } else if (!above_200dma) {
-    sellScore += 2;
-    risk_flags.push('Trading below 200 DMA');
-  } else if (!above_50dma) {
-    sellScore += 1;
-    risk_flags.push('Trading below 50 DMA');
-  }
-
-  // 3. Momentum
-  if (trend_3m_pct > 10) {
-    buyScore += 1;
-  } else if (trend_3m_pct < -10) {
-    sellScore += 2;
-    risk_flags.push(`Negative 3M trend (${trend_3m_pct}%)`);
-  }
-
-  // 4. Overbought / Near 52W High
-  if (pct_from_52w_high >= -5 && unrealized_gain_pct > 100) {
-    risk_flags.push('Near 52W High (Profit booking zone)');
-    if (portfolio_weight_pct > 20) sellScore += 1;
-  }
-
-  // 5. Volume Trend
-  if (volume_trend === 'rising' && trend_1m_pct > 0) {
-    buyScore += 1;
-  } else if (volume_trend === 'falling' && trend_1m_pct < 0) {
-    sellScore += 1;
-    risk_flags.push('Volume declining with price');
-  }
-
-  // 6. Tax & Gain Magnitude
-  if (unrealized_gain_pct > 200) {
-    risk_flags.push(`Substantial Gain (+${unrealized_gain_pct}%)`);
-  } else if (unrealized_gain_pct < -20) {
-    risk_flags.push(`Unrealized Loss (${unrealized_gain_pct}%)`);
-  }
-
-  let action = 'HOLD';
-  let confidence = 'medium';
-
-  if (buyScore >= 3 && sellScore <= 1 && portfolio_weight_pct <= 25) {
-    action = 'BUY_MORE';
-    confidence = buyScore >= 4 ? 'high' : 'medium';
-  } else if (sellScore >= 3 || (portfolio_weight_pct > 35 && unrealized_gain_pct > 50)) {
-    action = 'SELL';
-    confidence = sellScore >= 4 ? 'high' : 'medium';
-  } else {
-    action = 'HOLD';
-    confidence = 'medium';
-  }
-
-  let reasoning = '';
-  if (action === 'BUY_MORE') {
-    reasoning = `${ticker} displays positive price momentum, trading above key 50-day and 200-day moving averages with ${volume_trend} volume. With portfolio weight at ${portfolio_weight_pct}%, adding shares maintains risk management while capturing upside.`;
-  } else if (action === 'SELL') {
-    if (portfolio_weight_pct > 25) {
-      reasoning = `${ticker} represents ${portfolio_weight_pct}% of your total portfolio, posing high single-stock concentration risk despite an unrealized P&L of +${unrealized_gain_pct}%. Trimming shares locks in profits and reduces non-systemic risk.`;
-    } else {
-      reasoning = `${ticker} shows technical weakness, trading below key moving averages with a 3-month trend of ${trend_3m_pct}%. Trimming or reallocating capital is recommended to protect portfolio value.`;
-    }
-  } else {
-    reasoning = `${ticker} is currently consolidating with ${unrealized_gain_pct >= 0 ? '+' : ''}${unrealized_gain_pct}% unrealized P&L and a ${portfolio_weight_pct}% portfolio weight. Maintaining a HOLD position balances technical momentum with risk control.`;
-  }
-
   return {
-    action,
-    confidence,
-    reasoning,
-    risk_flags
+    action: signals.signal === 'BUY' ? 'BUY_MORE' : signals.signal,
+    confidence: signals.confidence.toLowerCase(),
+    reasoning: signals.reasoning,
+    risk_flags: signals.flags || []
   };
 }
 
 function callGeminiForHoldingRecommendation(geminiKey, signals) {
-  const promptText = `You are a financial analysis assistant for an Indian retail investor platform. Given the structured stock data below, classify this holding as one of exactly three actions: BUY_MORE, HOLD, or SELL. Base your classification ONLY on the data provided — do not invent facts, price targets, or news you don't have. Consider: momentum/trend strength, position relative to moving averages and 52-week range, unrealized gain/loss magnitude, holding period (tax implications), and portfolio concentration risk. If portfolio weight > 25% for a single stock, factor in diversification risk regardless of price momentum.
+  const promptText = `You are a financial analysis assistant for an Indian retail investor platform. Given the structured stock data below, classify this holding as one of exactly three actions: BUY_MORE, HOLD, or SELL. Base your classification ONLY on the data provided — do not invent facts, price targets, or news you don't have.
 
 Stock Data:
 ${JSON.stringify(signals, null, 2)}
@@ -1623,9 +1902,8 @@ Respond ONLY in valid JSON matching this schema:
   "action": "BUY_MORE|HOLD|SELL",
   "confidence": "low|medium|high",
   "reasoning": "2-3 sentence plain-English explanation",
-  "risk_flags": ["array of short risk tags if any, e.g. 'high concentration', 'overbought', 'STCG applies'"]
-}
-This is NOT financial advice — always include that this is an informational tool only.`;
+  "risk_flags": ["array of short risk tags if any"]
+}`;
 
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({
@@ -1680,31 +1958,70 @@ This is NOT financial advice — always include that this is an informational to
 
 async function analyzeHoldingsBatch(holdings, isGeminiConfigured, geminiKey) {
   let totalPortfolioValue = 0;
-  holdings.forEach(h => { totalPortfolioValue += h.qty * (h.ltp || h.price); });
+  holdings.forEach(h => { totalPortfolioValue += (h.qty || 1) * (h.ltp || h.price || 0); });
 
   const analyzed = [];
   for (const h of holdings) {
-    const chartData = await fetchYahooHistoricalChart(h.ticker);
-    const signals = computeTechnicalSignals(h, totalPortfolioValue, chartData);
+    const sym = (h.ticker || '').toUpperCase();
+    const now = Date.now();
+    let taResult = null;
 
-    let recommendation = null;
-    if (isGeminiConfigured) {
-      try {
-        recommendation = await callGeminiForHoldingRecommendation(geminiKey, signals);
-      } catch (e) {
-        console.warn(`[AnalyzeHolding] Gemini LLM failed for ${h.ticker}, using quantitative fallback:`, e.message);
-        recommendation = computeQuantitativeRecommendation(signals);
-      }
+    if (taEngineCache[sym] && (now - taEngineCache[sym].ts < TA_CACHE_TTL_MS)) {
+      taResult = taEngineCache[sym].data;
     } else {
-      recommendation = computeQuantitativeRecommendation(signals);
+      const chartData = await fetchMarketOHLCV(h.ticker);
+      taResult = await computeTechnicalSignalsAndLevels(h, totalPortfolioValue, chartData);
+      taEngineCache[sym] = { ts: now, data: taResult };
     }
 
-    console.log(`[AuditLog] ${new Date().toISOString()} | Symbol: ${h.ticker} | Action: ${recommendation.action} | Confidence: ${recommendation.confidence} | Weight: ${signals.portfolio_weight_pct}%`);
+    let recommendationReasoning = taResult.reasoning;
+    if (isGeminiConfigured) {
+      try {
+        const geminiRec = await callGeminiForHoldingRecommendation(geminiKey, {
+          ...taResult.indicators,
+          ticker: h.ticker,
+          signal: taResult.signal,
+          score: taResult.score,
+          flags: taResult.flags,
+          current_price: h.ltp || h.price
+        });
+        if (geminiRec && geminiRec.reasoning) {
+          recommendationReasoning = geminiRec.reasoning;
+        }
+      } catch (e) {
+        console.warn(`[AnalyzeHolding] Gemini LLM narrative fallback for ${h.ticker}:`, e.message);
+      }
+    }
 
     analyzed.push({
       ...h,
-      signals,
-      recommendation
+      stock: h.ticker,
+      as_of: taResult.as_of,
+      signal: taResult.signal,
+      confidence: taResult.confidence,
+      reasoning: recommendationReasoning,
+      flags: taResult.flags,
+      risk_flags: taResult.flags,
+      indicators: taResult.indicators,
+      signals: {
+        dma50: taResult.indicators.dma50,
+        dma200: taResult.indicators.dma200,
+        rsi14: taResult.indicators.rsi14,
+        above_50dma: (h.ltp || h.price) >= taResult.indicators.dma50,
+        above_200dma: (h.ltp || h.price) >= taResult.indicators.dma200,
+        trend_1m_pct: taResult.indicators.trend_1m_pct,
+        trend_3m_pct: taResult.indicators.trend_3m_pct,
+        low52: taResult.indicators.week52_low,
+        high52: taResult.indicators.week52_high,
+        volume_trend: taResult.indicators.volume_trend
+      },
+      recommendation: {
+        action: taResult.signal === 'BUY' ? 'BUY_MORE' : taResult.signal,
+        confidence: taResult.confidence.toLowerCase(),
+        reasoning: recommendationReasoning,
+        risk_flags: taResult.flags
+      },
+      levels: taResult.levels
     });
   }
   return analyzed;
