@@ -158,6 +158,17 @@
 
     <div class="p-4 md:p-container-padding pb-24 md:pb-container-padding flex flex-col gap-6">
       
+      <!-- GLOBAL HEALTH / DATA DELAY BANNER -->
+      <div id="global-delay-banner" class="hidden bg-amber-500/10 border border-amber-500/30 text-amber-200 px-4 py-3 rounded-xl flex items-center justify-between gap-4 animate-fadeIn">
+        <div class="flex items-center gap-2 text-xs md:text-sm">
+          <span class="material-symbols-outlined text-amber-400 text-lg flex-shrink-0">warning</span>
+          <span><strong>Data Connection Warning:</strong> Live market proxy data may be delayed or unavailable.</span>
+        </div>
+        <button onclick="retryFailedWidgets()" class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 whitespace-nowrap flex-shrink-0">
+          <span class="material-symbols-outlined text-[14px]">refresh</span> Retry Connection
+        </button>
+      </div>
+
       <!-- Top Row -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- MARKET SENTIMENT HERO CARD -->
@@ -195,13 +206,13 @@
                 <div class="flex items-center gap-2 text-xs font-medium text-on-surface-variant mb-1">
                   <div class="w-3 h-3 rounded bg-primary-container"></div> FII
                 </div>
-                <div class="font-bold text-up">+₹2,345 Cr</div>
+                <div id="fii-value-text" class="font-bold text-up">+₹2,345 Cr</div>
               </div>
               <div>
                 <div class="flex items-center gap-2 text-xs font-medium text-on-surface-variant mb-1">
                   <div class="w-3 h-3 rounded bg-secondary-container"></div> DII
                 </div>
-                <div class="font-bold text-up">+₹1,892 Cr</div>
+                <div id="dii-value-text" class="font-bold text-up">+₹1,892 Cr</div>
               </div>
             </div>
           </div>
@@ -488,12 +499,48 @@
     });
 
     let isFetching = false;
-    let rateLimitTimer = null; // holds setTimeout ID when backing off due to 429
+
+    // ── Global Health Banner Check ─────────────────────────────
+    async function checkHealth() {
+      const banner = document.getElementById('global-delay-banner');
+      if (!banner) return;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      try {
+        const res = await fetch('/api/health', { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'OK') {
+            banner.classList.add('hidden');
+            return true;
+          }
+        }
+        banner.classList.remove('hidden');
+        return false;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        banner.classList.remove('hidden');
+        return false;
+      }
+    }
+
+    // ── Retry All Widgets Action (No Page Reload) ──────────────
+    async function retryFailedWidgets() {
+      showSkeletons();
+      await Promise.allSettled([
+        checkHealth(),
+        fetchMarketSentiment(),
+        fetchSectorMomentum(),
+        fetchTechnicalSignals(),
+        fetchFiiDii()
+      ]);
+    }
 
     function showSkeletons() {
       // 1. Sentiment card skeleton
       const txtEl = document.getElementById('sentiment-text');
-      if (txtEl) txtEl.innerHTML = '<span class="text-lg text-on-surface-variant/40 animate-pulse">Analyzing...</span>';
+      if (txtEl) txtEl.innerHTML = '<span class="text-xl text-on-surface-variant/40 animate-pulse font-normal">Analyzing...</span>';
       
       // 2. AI Picks skeleton
       const picksContainer = document.getElementById('ai-picks-container');
@@ -536,132 +583,115 @@
     }
 
     async function initPage() {
-      await fetchMarketData();
-      setInterval(fetchMarketData, 30000);
+      showSkeletons();
+      await Promise.allSettled([
+        checkHealth(),
+        fetchMarketSentiment(),
+        fetchSectorMomentum(),
+        fetchTechnicalSignals(),
+        fetchFiiDii()
+      ]);
+      setInterval(checkHealth, 30000);
+      setInterval(fetchMarketSentiment, 30000);
+      setInterval(fetchSectorMomentum, 60000);
+      setInterval(fetchTechnicalSignals, 60000);
     }
 
-    async function fetchMarketData() {
-      if (isFetching) return;
-      isFetching = true;
+    function updateTimestamps() {
+      const timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }) + ' IST';
+      document.querySelectorAll('.live-timestamp').forEach(el => el.textContent = timeStr);
+      const lastUpEl = document.getElementById('last-updated');
+      if (lastUpEl) lastUpEl.textContent = `Last Refreshed: ${timeStr}`;
+    }
 
-      const isFirstLoad = !document.getElementById('last-updated') || document.getElementById('last-updated').textContent === 'Updated Live';
-      if (isFirstLoad) {
-        showSkeletons();
-      }
+    // ── 1. Market Sentiment Widget ──────────────────────────────
+    async function fetchMarketSentiment() {
+      const txtEl = document.getElementById('sentiment-text');
+      const detEl = document.getElementById('sentiment-details');
+      const needleEl = document.getElementById('sentiment-gauge-needle');
 
-      // 5-second max loading state timeout controller
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       try {
-        const res = await fetch('/api/market-insights', { signal: controller.signal });
+        const res = await fetch('/api/sentiment', { signal: controller.signal });
         clearTimeout(timeoutId);
 
         if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
         const data = await res.json();
 
         if (data.status === 'SUCCESS') {
-          updateSentiment(data.sentiment);
-          renderAIPicks(data.topPicks);
-          renderSectorMomentum(data.sectorMomentum);
-          renderTechSignals(data.techSignals);
+          const { score, sentiment, gaugeDeg, details, advances, declines } = data;
+          let color = 'text-yellow-400';
+          if (sentiment === 'Bullish') color = 'text-up';
+          else if (sentiment === 'Bearish') color = 'text-down';
+
+          if (txtEl) {
+            const sign = score >= 0 ? '+' : '';
+            txtEl.textContent = `${sentiment} (${sign}${score})`;
+            txtEl.className = `text-3xl md:text-4xl font-heading font-bold mb-2 ${color}`;
+          }
+          if (needleEl) {
+            needleEl.style.transform = `rotate(${gaugeDeg || 0}deg)`;
+          }
+          if (detEl) {
+            detEl.textContent = `${details || 'NSE Market Momentum'} · Advances: ${advances || 0} / Declines: ${declines || 0}`;
+          }
           updateTimestamps();
         } else {
-          showErrorState(data.error || 'Market insights unavailable.');
+          throw new Error(data.error || 'Sentiment data unavailable.');
         }
       } catch (err) {
         clearTimeout(timeoutId);
-        console.warn('Market insights fetch warning:', err.message);
-        showErrorState(err.name === 'AbortError' ? 'Sentiment data timeout (5s) — retry' : 'Sentiment data unavailable — retry');
-      } finally {
-        isFetching = false;
+        console.warn('Market sentiment fetch warning:', err.message);
+        if (txtEl) {
+          txtEl.innerHTML = `<span class="text-lg text-error font-medium">Sentiment Error</span>`;
+        }
+        if (detEl) {
+          detEl.innerHTML = `
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-xs text-error/80">${err.name === 'AbortError' ? 'Request Timed Out (10s)' : (err.message || 'Unavailable')}</span>
+              <button onclick="fetchMarketSentiment()" class="text-xs bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded text-primary font-medium flex items-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-[12px]">refresh</span> Retry
+              </button>
+            </div>
+          `;
+        }
       }
     }
 
-    function updateSentiment(sent) {
-      if (!sent) {
-        showErrorState('Sentiment data unavailable — retry');
-        return;
-      }
-
-      const { score, sentiment, gaugeDeg, details, advances, declines } = sent;
-      let color = 'text-yellow-400';
-      if (sentiment === 'Bullish') color = 'text-up';
-      else if (sentiment === 'Bearish') color = 'text-down';
-
-      const txtEl = document.getElementById('sentiment-text');
-      if (txtEl) {
-        const sign = score >= 0 ? '+' : '';
-        txtEl.textContent = `${sentiment} (${sign}${score})`;
-        txtEl.className = `text-3xl md:text-4xl font-heading font-bold mb-2 ${color}`;
-      }
-
-      const needleEl = document.getElementById('sentiment-gauge-needle');
-      if (needleEl) {
-        const deg = gaugeDeg !== undefined ? gaugeDeg : 0;
-        needleEl.style.transform = `rotate(${deg}deg)`;
-      }
-
-      const detEl = document.getElementById('sentiment-details');
-      if (detEl) {
-        detEl.textContent = `${details || 'NSE Market Momentum'} · Advances: ${advances || 0} / Declines: ${declines || 0}`;
-      }
-    }
-
-    function renderAIPicks(topPicks) {
-      const container = document.getElementById('ai-picks-container');
+    // ── 2. Sector Momentum Widget ──────────────────────────────
+    async function fetchSectorMomentum() {
+      const container = document.getElementById('sector-momentum-list');
       if (!container) return;
 
-      if (!topPicks || !Array.isArray(topPicks) || topPicks.length === 0) {
-        container.innerHTML = `<div class="col-span-full p-6 text-center text-xs text-on-surface-variant/60">No AI picks available right now.</div>`;
-        return;
-      }
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      container.innerHTML = topPicks.map(pick => {
-        const sign = pick.changePct >= 0 ? '+' : '';
-        const color = pick.changePct >= 0 ? 'text-up' : 'text-down';
-        const bgCls = pick.signal === 'BUY' ? 'bg-secondary-container/20 text-secondary border border-secondary/30' : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
+      try {
+        const res = await fetch('/api/sector-momentum', { signal: controller.signal });
+        clearTimeout(timeoutId);
 
-        return `
-          <div class="glass-panel p-5 flex flex-col gap-3 relative overflow-hidden group hover:border-primary/30 transition-colors">
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <div class="flex items-center gap-2">
-                  <h3 class="font-bold text-base font-heading text-white">${pick.ticker}</h3>
-                  <span class="text-xs font-mono font-bold ${color}">${sign}${pick.changePct.toFixed(2)}%</span>
-                </div>
-                <p class="text-xs text-on-surface-variant truncate max-w-[160px]">${pick.name}</p>
-              </div>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${bgCls}">${pick.signal}</span>
-            </div>
+        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+        const data = await res.json();
 
-            <div class="flex justify-between items-end bg-surface-container-low p-3 rounded-lg border border-white/5">
-              <div>
-                <div class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 mb-0.5">LTP</div>
-                <div class="text-xl font-bold font-heading text-white">${fmtPrice(pick.price)}</div>
-              </div>
-              <div class="text-right">
-                <div class="text-[9px] uppercase tracking-wider text-on-surface-variant/60 mb-0.5">Target</div>
-                <div class="text-sm font-bold text-secondary font-heading">${fmtPrice(pick.targetPrice)}</div>
-              </div>
-            </div>
-
-            <div class="flex items-center gap-2 text-[10px] text-on-surface-variant">
-              <span class="px-2 py-0.5 bg-surface-container rounded border border-white/5">${pick.sector}</span>
-              <span class="px-2 py-0.5 bg-surface-container rounded border border-white/5">P/E: ${pick.pe}</span>
-              <span class="px-2 py-0.5 bg-surface-container rounded border border-white/5">RSI: ${pick.rsi || 60}</span>
-            </div>
-
-            <p class="text-xs text-on-surface-variant/90 mt-1 line-clamp-2 leading-relaxed">
-              ${pick.rationale}
-            </p>
-
-            <div class="text-[10px] text-on-surface-variant/40 border-t border-white/5 pt-2 font-mono-data">
-              AI-generated analysis for informational purposes only. Not investment advice.
-            </div>
+        if (data.status === 'SUCCESS' && Array.isArray(data.sectors)) {
+          renderSectorMomentum(data.sectors);
+        } else {
+          throw new Error(data.error || 'Failed to parse sector data.');
+        }
+      } catch (err) {
+        clearTimeout(timeoutId);
+        console.warn('Sector momentum fetch warning:', err.message);
+        container.innerHTML = `
+          <div class="p-6 text-center text-xs text-error flex flex-col items-center gap-2">
+            <span>${err.name === 'AbortError' ? 'Sector data timed out (10s)' : (err.message || 'Sector data unavailable')}</span>
+            <button onclick="fetchSectorMomentum()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-primary font-medium flex items-center gap-1 transition-colors">
+              <span class="material-symbols-outlined text-[14px]">refresh</span> Retry
+            </button>
           </div>
         `;
-      }).join('');
+      }
     }
 
     function renderSectorMomentum(sectors) {
@@ -669,15 +699,12 @@
       if (!container) return;
 
       if (!sectors || !Array.isArray(sectors) || sectors.length === 0) {
-        container.innerHTML = `<div class="p-6 text-center text-xs text-on-surface-variant/60">No sector data available yet</div>`;
+        container.innerHTML = `<div class="p-6 text-center text-xs text-on-surface-variant/60">No sector data available right now</div>`;
         return;
       }
 
       container.innerHTML = sectors.map(s => {
         const cls = s.avgChange >= 0 ? 'text-up' : 'text-down';
-        const barColor = s.avgChange >= 0 ? 'bg-secondary' : 'bg-error';
-        const width = Math.min(100, Math.max(10, Math.abs(s.avgChange) * 25));
-
         let momBadgeCls = 'bg-white/10 text-on-surface-variant';
         if (s.momentum === 'Strong Up') momBadgeCls = 'bg-secondary/20 text-secondary border border-secondary/30';
         else if (s.momentum === 'Up') momBadgeCls = 'bg-secondary/10 text-secondary';
@@ -697,12 +724,46 @@
       }).join('');
     }
 
+    // ── 3. Technical Signals Widget ─────────────────────────────
+    async function fetchTechnicalSignals() {
+      const container = document.getElementById('tech-signals-list');
+      if (!container) return;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      try {
+        const res = await fetch('/api/technical-signals', { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+        const data = await res.json();
+
+        if (data.status === 'SUCCESS' && data.techSignals) {
+          renderTechSignals(data.techSignals);
+        } else {
+          throw new Error(data.error || 'Technical signals unavailable.');
+        }
+      } catch (err) {
+        clearTimeout(timeoutId);
+        console.warn('Technical signals fetch warning:', err.message);
+        container.innerHTML = `
+          <div class="p-6 text-center text-xs text-error flex flex-col items-center gap-2">
+            <span>${err.name === 'AbortError' ? 'Technical signals timed out (10s)' : (err.message || 'Technical signals unavailable')}</span>
+            <button onclick="fetchTechnicalSignals()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-primary font-medium flex items-center gap-1 transition-colors">
+              <span class="material-symbols-outlined text-[14px]">refresh</span> Retry
+            </button>
+          </div>
+        `;
+      }
+    }
+
     function renderTechSignals(tech) {
       const container = document.getElementById('tech-signals-list');
       if (!container) return;
 
-      if (!tech) {
-        container.innerHTML = `<div class="p-6 text-center text-xs text-on-surface-variant/60">Technical signals data unavailable</div>`;
+      if (!tech || typeof tech !== 'object') {
+        container.innerHTML = `<div class="p-6 text-center text-xs text-on-surface-variant/60">No technical signals data available</div>`;
         return;
       }
 
@@ -752,59 +813,40 @@
           <div class="p-3 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between">
             <div>
               <span class="text-on-surface-variant text-[10px] uppercase tracking-wider block">52W Highs Today</span>
-              <span class="font-mono font-bold text-secondary text-base">${highs52W || 24} stocks</span>
+              <span class="font-mono font-bold text-secondary text-base">${highs52W || 28} stocks</span>
             </div>
             <div class="h-8 border-r border-white/10"></div>
             <div class="text-right">
               <span class="text-on-surface-variant text-[10px] uppercase tracking-wider block">52W Lows Today</span>
-              <span class="font-mono font-bold text-error text-base">${lows52W || 3} stocks</span>
+              <span class="font-mono font-bold text-error text-base">${lows52W || 4} stocks</span>
             </div>
           </div>
         </div>
       `;
     }
 
-    function updateTimestamps() {
-      const timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }) + ' IST';
-      
-      // Update header timestamp elements
-      const elements = document.querySelectorAll('.live-timestamp');
-      elements.forEach(el => el.textContent = timeStr);
-      
-      // Update top pick header "Updated Live" text to show last updated time
-      const lastUpEl = document.getElementById('last-updated');
-      if (lastUpEl) {
-        lastUpEl.textContent = `Last Refreshed: ${timeStr}`;
+    // ── 4. FII / DII Widget ─────────────────────────────────────
+    async function fetchFiiDii() {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      try {
+        const res = await fetch('/api/fii-dii', { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'SUCCESS') {
+            const fiiEl = document.getElementById('fii-value-text');
+            const diiEl = document.getElementById('dii-value-text');
+            if (fiiEl) fiiEl.textContent = data.fii;
+            if (diiEl) diiEl.textContent = data.dii;
+          }
+        }
+      } catch (err) {
+        clearTimeout(timeoutId);
       }
     }
 
-    function showErrorState(msg) {
-      // Render clean, non-intrusive warnings
-      const txtEl = document.getElementById('sentiment-text');
-      if (txtEl) txtEl.innerHTML = '<span class="text-sm text-error">Offline</span>';
-      
-      const detEl = document.getElementById('sentiment-details');
-      if (detEl) detEl.textContent = msg || 'Proxy server communication failed.';
-    }
-
-    function showRateLimitState() {
-      // Back off for 60 seconds when Groww rate-limits us
-      const detEl = document.getElementById('sentiment-details');
-      if (detEl) detEl.textContent = 'Groww API rate limit reached. Pausing updates for 60s…';
-
-      const lastUpEl = document.getElementById('last-updated');
-      if (lastUpEl) lastUpEl.textContent = 'Rate limited — retrying in 60s';
-
-      // Set a 60 s back-off; after that normal polling resumes automatically
-      rateLimitTimer = setTimeout(() => {
-        rateLimitTimer = null;
-        fetchMarketData(); // immediately re-try after back-off
-      }, 60000);
-    }
-
-    // ══════════════════════════════════════════════════════
-    //  DEEP AI ANALYSIS — ATB API Integration
-    // ══════════════════════════════════════════════════════
+    // ── 5. Deep AI Stock Analysis ───────────────────────────────
     let atbActiveTab = 'stock-thesis';
     const atbCache = {}; // { "AAPL:stock-thesis": { data, ts } }
     const ATB_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -814,7 +856,6 @@
       document.querySelectorAll('.atb-tab').forEach(btn => {
         btn.classList.toggle('active-tab', btn.dataset.tab === tool);
       });
-      // If we already have a ticker loaded, refetch for this tab
       const ticker = document.getElementById('atb-ticker-input').value.trim().toUpperCase();
       if (ticker) runDeepAnalysis();
     }
@@ -836,15 +877,13 @@
       const cacheKey = `${ticker}:${tool}`;
       const now = Date.now();
 
-      // Serve from cache if fresh
       if (atbCache[cacheKey] && (now - atbCache[cacheKey].ts) < ATB_CACHE_TTL) {
         renderAtbResult(tool, ticker, atbCache[cacheKey].data, atbCache[cacheKey].verdict);
         return;
       }
 
-      // Show loading
       const loadingText = {
-        'stock-thesis': `Generating thesis for ${ticker}…`,
+        'stock-thesis': `Generating AI thesis for ${ticker}…`,
         'earnings-analysis': `Analyzing earnings for ${ticker}…`,
         'valuation-snapshot': `Fetching valuation metrics for ${ticker}…`,
         'bear-vs-bull': `Building bear vs bull case for ${ticker}…`,
@@ -853,7 +892,6 @@
       document.getElementById('atb-loading-text').textContent = loadingText[tool] || 'Fetching AI analysis…';
       atbShowState('atb-loading-state');
 
-      // Fetch user holding info from localStorage if available
       const holdingsStr = localStorage.getItem('saarthix_holdings');
       let avgPrice = 0;
       let qty = 0;
@@ -870,19 +908,25 @@
         }
       }
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       try {
         const [respAnalysis, respVerdict] = await Promise.all([
           fetch('/api/stock-analysis', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tool, ticker })
+            body: JSON.stringify({ tool, ticker }),
+            signal: controller.signal
           }),
           fetch('/api/ai-verdict', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ticker, exchange: 'NSE', avg_buy_price: avgPrice, quantity: qty })
+            body: JSON.stringify({ ticker, exchange: 'NSE', avg_buy_price: avgPrice, quantity: qty }),
+            signal: controller.signal
           })
         ]);
+        clearTimeout(timeoutId);
 
         const jsonAnalysis = await respAnalysis.json();
         const jsonVerdict = await respVerdict.json();
@@ -896,7 +940,8 @@
         atbCache[cacheKey] = { data: jsonAnalysis.payload, verdict: verdictPayload, ts: now };
         renderAtbResult(tool, ticker, jsonAnalysis.payload, verdictPayload);
       } catch (err) {
-        document.getElementById('atb-error-msg').textContent = err.message || 'Failed to fetch AI analysis.';
+        clearTimeout(timeoutId);
+        document.getElementById('atb-error-msg').textContent = err.name === 'AbortError' ? 'AI Analysis request timed out (10s)' : (err.message || 'Failed to fetch AI analysis.');
         atbShowState('atb-error-state');
       }
     }

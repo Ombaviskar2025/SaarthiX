@@ -2956,9 +2956,25 @@ Response must be in JSON format:
   }
 });
 
+// ── Mount Dedicated Backend Proxy Function Handlers ───────────
+const sentimentHandler = require('./sentiment.js');
+const sectorMomentumHandler = require('./sector-momentum.js');
+const technicalSignalsHandler = require('./technical-signals.js');
+const stockAnalysisHandler = require('./stock-analysis.js');
+const fiiDiiHandler = require('./fii-dii.js');
+const healthHandler = require('./health.js');
+
+app.get('/api/sentiment', sentimentHandler);
+app.get('/api/sector-momentum', sectorMomentumHandler);
+app.get('/api/technical-signals', technicalSignalsHandler);
+app.all('/api/stock-analysis', stockAnalysisHandler);
+app.get('/api/fii-dii', fiiDiiHandler);
+app.get('/api/health', healthHandler);
+
 // Fallback to serve login page
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'login.html'));
 });
 
 module.exports = app;
+
