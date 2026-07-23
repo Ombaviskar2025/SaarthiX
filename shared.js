@@ -202,11 +202,12 @@ function changeIcon(val) {
 
 function buildNav(activePageId) {
   const pages = [
-    { id:'dashboard',    label:'Dashboard',    icon:'dashboard',         href:'dashboard.html' },
-    { id:'market-watch', label:'Market Watch', icon:'show_chart',        href:'market-watch.html' },
+    { id:'dashboard',    label:'Dashboard',    icon:'dashboard',              href:'dashboard.html' },
+    { id:'market-watch', label:'Market Watch', icon:'show_chart',             href:'market-watch.html' },
     { id:'portfolio',    label:'Portfolio',    icon:'account_balance_wallet', href:'portfolio.html' },
-    { id:'ai-insights',  label:'AI Insights',  icon:'auto_awesome',      href:'ai-insights.html' },
-    { id:'news',         label:'Market News',  icon:'newspaper',         href:'news.html' }
+    { id:'mutual-funds', label:'Mutual Funds', icon:'pie_chart',              href:'mutual-funds.html' },
+    { id:'ai-insights',  label:'AI Insights',  icon:'auto_awesome',           href:'ai-insights.html' },
+    { id:'news',         label:'Market News',  icon:'newspaper',              href:'news.html' }
   ];
 
   let navLinks = '';

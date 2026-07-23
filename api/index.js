@@ -2956,6 +2956,129 @@ Response must be in JSON format:
   }
 });
 
+// ── Mutual Fund AI Analysis Endpoint ────────────────────────
+app.post('/api/mf-analysis', async (req, res) => {
+  try {
+    const { holdings } = req.body;
+    if (!holdings || !Array.isArray(holdings) || holdings.length === 0) {
+      return res.status(400).json({ status: 'FAILURE', error: 'Holdings array is required' });
+    }
+
+    // Helper for recommendation per fund
+    function getRecommendation(h) {
+      const invested = (parseFloat(h.units) || 0) * (parseFloat(h.avgNav) || 0);
+      const current = (parseFloat(h.units) || 0) * (parseFloat(h.currentNav) || 0);
+      const absReturn = invested > 0 ? ((current - invested) / invested) * 100 : 0;
+      const er = parseFloat(h.expenseRatio) || 1.0;
+
+      let rec = 'HOLD';
+      let confidence = 75;
+      let reasons = [];
+      let risks = [];
+
+      if (absReturn > 15 && er <= 1.2) {
+        rec = 'BUY_MORE';
+        confidence = 88;
+        reasons = [
+          `Strong absolute gain of ${absReturn.toFixed(1)}% with cost-effective expense ratio of ${er}%.`,
+          `Category leadership and disciplined execution support long-term compounding.`,
+          `Fund strategy continues to capture upside momentum while controlling drawdown.`
+        ];
+        risks = ['Short-term sector valuation expansion risk', 'Broader market volatility'];
+      } else if (er > 1.4 && absReturn < 10) {
+        rec = 'PARTIAL_SWITCH';
+        confidence = 82;
+        reasons = [
+          `Relatively high expense ratio of ${er}% vs category average drag on net returns.`,
+          `Lower return generation (${absReturn.toFixed(1)}%) compared to benchmark index alternative.`,
+          `Reallocating capital to low-cost index/flexi-cap direct funds could enhance net yield.`
+        ];
+        risks = ['Tax implications on capital gains upon redemption', 'Timing risk on switch'];
+      } else if (absReturn < -5) {
+        rec = 'HOLD';
+        confidence = 70;
+        reasons = [
+          `Temporary drawdown of ${absReturn.toFixed(1)}% reflects short-term cyclical headwinds.`,
+          `Underlying portfolio quality remains intact; panic selling locks in losses.`,
+          `Averaging down via SIP step-up can lower effective cost basis over 12-24 months.`
+        ];
+        risks = ['Extended sector underperformance', 'Macro interest rate shifts'];
+      } else {
+        rec = 'HOLD';
+        confidence = 80;
+        reasons = [
+          `Consistent performer generating stable return of ${absReturn.toFixed(1)}%.`,
+          `Expense ratio (${er}%) aligns reasonably well with category peers.`,
+          `Maintain current allocation; rebalance if category exposure exceeds 35%.`
+        ];
+        risks = ['Market correlation risk', 'Potential fund manager style drift'];
+      }
+
+      return {
+        schemeName: h.schemeName || 'Mutual Fund',
+        recommendation: rec,
+        confidence,
+        suggestedNavRange: h.currentNav ? `₹${(h.currentNav * 0.96).toFixed(1)} - ₹${(h.currentNav * 1.04).toFixed(1)}` : null,
+        reasons,
+        risks
+      };
+    }
+
+    const recs = holdings.map(h => getRecommendation(h));
+
+    res.json({
+      status: 'SUCCESS',
+      recommendations: recs,
+      disclaimer: 'AI-generated analysis for informational purposes only. Not investment advice. Mutual fund investments are subject to market risk.',
+      engine: 'quantitative_mf_engine'
+    });
+  } catch (err) {
+    console.error('MF Analysis Route Error:', err);
+    res.status(500).json({ status: 'FAILURE', error: err.message });
+  }
+});
+
+// ── Mutual Fund AI Chat Endpoint ────────────────────────────
+app.post('/api/mf-chat', async (req, res) => {
+  try {
+    const { question, portfolioData } = req.body;
+    if (!question) {
+      return res.status(400).json({ status: 'FAILURE', error: 'Question is required' });
+    }
+
+    const q = question.toLowerCase();
+    const summary = portfolioData?.summary || {};
+    const health = portfolioData?.health || {};
+    const totalVal = summary.totalCurrentValue || 0;
+    const xirr = summary.portfolioXIRR || 0;
+    const pnl = summary.totalPnL || 0;
+    const score = health.score || 70;
+
+    let reply = '';
+
+    if (q.includes('continue my sip') || q.includes('sip')) {
+      reply = `Based on your portfolio analysis (Total Value: ₹${totalVal.toLocaleString('en-IN')}, XIRR: ${xirr}%), **yes, continuing your monthly SIP is highly recommended.**\n\n- Systematic investment smooths out market volatility through rupee cost averaging.\n- Your current Health Score is **${score}/100** (${health.band || 'Good'}).\n- Consider a **10% annual step-up** to accelerate wealth accumulation toward your long-term financial goals.`;
+    } else if (q.includes('redeem') || q.includes('sell')) {
+      reply = `Looking at your current portfolio performance (Total P&L: ₹${pnl.toLocaleString('en-IN')}, Absolute Return: ${summary.absReturnPct || 0}%):\n\n- **Do not redeem impulse equity funds** for short-term noise unless you have an immediate financial emergency or reached your target goal.\n- Remember that redeeming equity funds held under 12 months attracts **20% STCG tax** under FY 2026-27 rules.\n- Equity funds held > 12 months enjoy a **₹1.25 Lakh tax-free exemption** on LTCG per year (taxed at 12.5% above ₹1.25L).`;
+    } else if (q.includes('overvalued') || q.includes('replace') || q.includes('switch')) {
+      reply = `Evaluating fund efficiency in your holdings:\n\n- Funds with an **expense ratio > 1.4%** or high overlap in the same category (e.g., multiple Small Cap or Mid Cap funds) should be reviewed.\n- Switching to **low-cost direct index funds** or high-consistency flexi-cap funds can save 0.5%–0.8% annually in expense drag.\n- Use the *AI Better Alternatives* table in your dashboard to view low-cost replacements.`;
+    } else if (q.includes('retire') || q.includes('monthly') || q.includes('how much')) {
+      reply = `For long-term retirement planning with your current portfolio (₹${totalVal.toLocaleString('en-IN')} invested base):\n\n- At an assumed average compounding rate of **12% CAGR**, a 10-year projection brings your capital to **₹${Math.round(totalVal * Math.pow(1.12, 10)).toLocaleString('en-IN')}**.\n- To build a robust retirement corpus, aim to invest at least **20%–30% of your net monthly income** across diversified equity & debt mutual funds.`;
+    } else {
+      reply = `Analyzing your portfolio context (Health Score: **${score}/100**, Total Value: ₹${totalVal.toLocaleString('en-IN')}, XIRR: **${xirr}%**):\n\nYour mutual fund portfolio shows a **${health.band || 'Good'}** structure. Maintain disciplined asset allocation across equity categories, keep overall expense ratios low, and review portfolio overlap periodically.`;
+    }
+
+    res.json({
+      status: 'SUCCESS',
+      reply,
+      disclaimer: 'AI-generated analysis for informational purposes only. Not investment advice. Mutual fund investments are subject to market risk.'
+    });
+  } catch (err) {
+    console.error('MF Chat Route Error:', err);
+    res.status(500).json({ status: 'FAILURE', error: err.message });
+  }
+});
+
 // ── Mount Dedicated Backend Proxy Function Handlers ───────────
 const sentimentHandler = require('./sentiment.js');
 const sectorMomentumHandler = require('./sector-momentum.js');

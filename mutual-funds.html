@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SaarthiX - AI Mutual Fund Analyser</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+  <meta name="description" content="Institutional-grade AI mutual fund analysis for Indian equity and debt funds. XIRR, FY26-27 tax, overlap detection, health score, and portfolio optimization."/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode:'class',
+      theme:{extend:{
+        colors:{
+          'surface-bright':'#353943','on-secondary-container':'#00311f','on-surface-variant':'#c2c6d6',
+          'tertiary-container':'#ff516a','primary':'#adc6ff','on-primary':'#002e6a',
+          'secondary-fixed-dim':'#4edea3','inverse-primary':'#005ac2','secondary-fixed':'#6ffbbe',
+          'on-background':'#dfe2ef','surface-container-highest':'#31353f','error-container':'#93000a',
+          'tertiary':'#ffb2b7','surface-container-lowest':'#0a0e17','on-primary-fixed':'#001a42',
+          'surface-container-high':'#262a34','surface-container-low':'#181b25','tertiary-fixed':'#ffdadb',
+          'surface-tint':'#adc6ff','on-error':'#690005','primary-container':'#4d8eff',
+          'secondary-container':'#00a572','inverse-on-surface':'#2c303a','error':'#ffb4ab',
+          'primary-fixed':'#d8e2ff','outline-variant':'#424754','surface-container':'#1c1f29',
+          'background':'#0f131c','inverse-surface':'#dfe2ef','surface-variant':'#31353f',
+          'on-surface':'#dfe2ef','surface-dim':'#0f131c','primary-fixed-dim':'#adc6ff',
+          'secondary':'#4edea3','surface':'#0f131c','on-secondary':'#003824','outline':'#8c909f',
+          'on-primary-container':'#00285d'
+        },
+        borderRadius:{DEFAULT:'0.25rem',lg:'0.5rem',xl:'0.75rem',full:'9999px'},
+        spacing:{unit:'4px','element-gap':'12px','section-gap':'32px',gutter:'16px','container-padding':'24px'},
+        fontFamily:{
+          'headline-lg':['Geist'],'headline-xl':['Geist'],'body-sm':['Inter'],'label-sm':['Geist'],
+          'label-md':['Geist'],'body-md':['Inter'],'headline-md':['Geist'],'body-lg':['Inter'],
+          'headline-lg-mobile':['Geist'],'mono-data':['Geist']
+        },
+        fontSize:{
+          'headline-lg':['32px',{lineHeight:'40px',letterSpacing:'-0.01em',fontWeight:'600'}],
+          'headline-xl':['40px',{lineHeight:'48px',letterSpacing:'-0.02em',fontWeight:'700'}],
+          'body-sm':['14px',{lineHeight:'20px',fontWeight:'400'}],
+          'label-sm':['12px',{lineHeight:'14px',letterSpacing:'0.05em',fontWeight:'500'}],
+          'label-md':['14px',{lineHeight:'16px',letterSpacing:'0.02em',fontWeight:'500'}],
+          'body-md':['16px',{lineHeight:'24px',fontWeight:'400'}],
+          'headline-md':['24px',{lineHeight:'32px',fontWeight:'600'}],
+          'body-lg':['18px',{lineHeight:'28px',fontWeight:'400'}],
+          'headline-lg-mobile':['24px',{lineHeight:'32px',fontWeight:'600'}],
+          'mono-data':['14px',{lineHeight:'20px',letterSpacing:'-0.01em',fontWeight:'500'}]
+        }
+      }}
+    }
+  </script>
+  <style>
+    @media (min-width: 768px) {
+      .md\:ml-\[280px\] {
+        margin-left: 280px !important;
+      }
+    }
+    .glass-panel{background:rgba(22,27,38,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);transition:all .25s ease}
+    .glass-panel:hover{border-color:rgba(255,255,255,.18);box-shadow:0 0 24px rgba(77,142,255,.08)}
+    .glass-input{background:#0a0e17 !important;border:1px solid rgba(255,255,255,.1) !important;color:#dfe2ef !important;transition:border-color .2s ease,box-shadow .2s ease}
+    .glass-input:focus{outline:none;border-color:#4d8eff !important;box-shadow:0 0 12px rgba(77,142,255,.22) !important}
+    .glass-input::placeholder{color:rgba(194,198,214,.35) !important}
+    .ai-insight-border{position:relative}
+    .ai-insight-border::before{content:'';position:absolute;inset:-1px;background:linear-gradient(135deg,#4d8eff 0%,#4edea3 100%);z-index:-1;border-radius:inherit;opacity:.55}
+    .pulse-button{animation:pulse-blue 2s infinite}
+    @keyframes pulse-blue{0%{box-shadow:0 0 0 0 rgba(77,142,255,.45)}70%{box-shadow:0 0 0 12px rgba(77,142,255,0)}100%{box-shadow:0 0 0 0 rgba(77,142,255,0)}}
+    ::-webkit-scrollbar{width:7px;height:7px}
+    ::-webkit-scrollbar-track{background:#0a0e17}
+    ::-webkit-scrollbar-thumb{background:#31353f;border-radius:4px}
+    ::-webkit-scrollbar-thumb:hover{background:#424754}
+    #results-section{display:none !important}
+    #results-section.show-results{display:flex !important;animation:fadeIn .5s ease-out}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .toast-msg{position:fixed;bottom:24px;right:24px;z-index:9999;background:#1c1f29;border:1px solid #4d8eff;color:#dfe2ef;padding:12px 20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.8);animation:slideUp .3s ease-out}
+    @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex font-sans selection:bg-primary-container selection:text-on-primary-container">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Loading Overlay -->
+  <div class="fixed inset-0 z-[100] hidden flex-col items-center justify-center bg-background/80 backdrop-blur-sm" id="loading-overlay">
+    <div class="relative w-28 h-28 mb-6">
+      <div class="absolute inset-0 border-4 border-primary/15 rounded-full"></div>
+      <div class="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
+      <div class="absolute inset-4 border-2 border-secondary/30 rounded-full border-b-transparent animate-spin" style="animation-direction:reverse;animation-duration:1.5s"></div>
+    </div>
+    <h2 class="text-headline-md font-headline-md text-primary animate-pulse">Analysing Mutual Funds...</h2>
+    <p class="text-on-surface-variant text-body-md mt-2">Computing XIRR, Overlap &amp; FY26-27 Tax Rules</p>
+    <div class="flex gap-2 mt-4">
+      <span class="w-2 h-2 bg-secondary/60 rounded-full animate-bounce" style="animation-delay:0s"></span>
+      <span class="w-2 h-2 bg-secondary/60 rounded-full animate-bounce" style="animation-delay:.15s"></span>
+      <span class="w-2 h-2 bg-secondary/60 rounded-full animate-bounce" style="animation-delay:.3s"></span>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <nav class="hidden md:flex flex-col h-full py-container-padding fixed left-0 top-0 w-[280px] border-r border-white/10 bg-surface-container/80 backdrop-blur-xl shadow-2xl z-50">
+    <div class="px-gutter mb-8">
+      <div class="flex items-center gap-3">
+        <img src="logo.png" class="w-14 h-14 object-contain flex-shrink-0" alt="SaarthiX Logo"/>
+        <div>
+          <h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight leading-none">SaarthiX</h1>
+          <p class="font-label-sm text-label-sm text-on-surface-variant/60">AMFI · NSE · BSE · India</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1 px-gutter flex-1" id="nav-links"></div>
+    <div class="px-gutter mt-auto mb-5">
+      <button onclick="runAnalysis()" class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-3 rounded-lg hover:bg-primary-fixed transition-colors pulse-button flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">rocket_launch</span>Analyse Mutual Funds
+      </button>
+    </div>
+    <div class="px-gutter flex flex-col gap-1 pt-4 border-t border-white/10">
+      <div class="flex items-center gap-2 px-4 py-2 text-on-surface-variant/60">
+        <span id="market-status" class="font-label-sm text-label-sm flex items-center gap-1"></span>
+        <span class="font-label-sm text-label-sm ml-auto" id="ist-time"></span>
+      </div>
+      <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all" href="#">
+        <span class="material-symbols-outlined text-[18px]">help</span>
+        <span class="font-label-sm text-label-sm">Support</span>
+      </a>
+      <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all" href="login.html">
+        <span class="material-symbols-outlined text-[18px]">logout</span>
+        <span class="font-label-sm text-label-sm">Log Out</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col min-w-0 overflow-x-hidden pb-20 md:pb-0">
+
+    <!-- Top Bar Header -->
+    <header class="hidden md:flex justify-between items-center h-16 px-gutter bg-surface-dim/80 backdrop-blur-md border-b border-white/10 sticky top-0 z-40 w-full">
+      <nav class="flex items-center gap-6">
+        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="market-watch.html">Markets</a>
+        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="news.html">News</a>
+        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="portfolio.html">Portfolio</a>
+        <a class="font-label-md text-label-md text-primary font-bold border-b-2 border-primary pb-1" href="mutual-funds.html" aria-current="page">Mutual Funds</a>
+        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="ai-insights.html">AI Insights</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <!-- Live Index Strip -->
+        <div class="flex items-center gap-4 text-mono-data font-mono-data border-r border-white/10 pr-4">
+          <span class="flex items-center gap-1">
+            <span class="text-on-surface-variant/60 text-[11px]">SENSEX</span>
+            <span id="hdr-sensex" class="text-on-surface"></span>
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="text-on-surface-variant/60 text-[11px]">NIFTY</span>
+            <span id="hdr-nifty" class="text-on-surface"></span>
+          </span>
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+          <input class="glass-input pl-8 pr-4 py-1.5 rounded-full text-body-sm w-44 focus:w-60 transition-all duration-300" placeholder="Search Mutual Funds..." type="text"/>
+        </div>
+        <button class="text-on-surface-variant hover:text-primary p-2 rounded-full hover:bg-white/5 relative">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-tertiary-container rounded-full"></span>
+        </button>
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-container/50 to-secondary-container/30 border border-white/20 flex items-center justify-center cursor-pointer">
+          <span class="material-symbols-outlined text-[18px] text-primary">person</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content Container -->
+    <div class="p-4 md:p-container-padding flex flex-col gap-section-gap max-w-[1400px] mx-auto w-full">
+
+      <!-- Page Header -->
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-primary-container/20 border border-primary-container/30 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings:'FILL' 1">pie_chart</span>
+          </div>
+          <div>
+            <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">AI Mutual Fund Analyser</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant flex flex-wrap items-center gap-x-3">
+              <span>AMFI · ₹ Indian Rupee · LTCG/STCG Tax Estimate</span>
+              <span class="live-timestamp font-mono text-xs text-secondary"></span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connect Investment Platform Banner -->
+      <div class="glass-panel rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-l-4 border-primary-container/60">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary-container text-3xl" style="font-variation-settings:'FILL' 1">account_balance_wallet</span>
+          <div>
+            <p class="font-label-md text-label-md text-on-surface font-semibold">Connect your investment account for live mutual fund holdings</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Supports Groww, Zerodha Coin, ET Money, Kuvera, Paytm Money, INDmoney, Angel One &amp; more</p>
+          </div>
+        </div>
+        <button onclick="showToast('Coming soon! Please use Manual Entry below to analyse your funds.')" class="flex-shrink-0 bg-primary-container text-on-primary-container font-label-md text-label-md px-5 py-2 rounded-lg hover:bg-primary-fixed transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">link</span>Connect Account
+        </button>
+      </div>
+
+      <!-- Manual Entry Card -->
+      <section class="glass-panel rounded-xl p-container-padding" id="input-section">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">add_circle</span>
+            Manual Entry
+          </h3>
+          <div class="flex items-center gap-3">
+            <button class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary flex items-center gap-1 transition-colors" onclick="clearAllRows()">
+              <span class="material-symbols-outlined text-[16px]">clear_all</span>Clear All
+            </button>
+            <button class="text-primary font-label-sm text-label-sm hover:text-primary-container flex items-center gap-1 transition-colors" onclick="importCsvStub()">
+              <span class="material-symbols-outlined text-[16px]">upload_file</span>Import CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Table headers (desktop) -->
+        <div class="hidden md:grid md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1.5fr_2.5rem] gap-2 mb-2 px-3 text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider">
+          <span>Mutual Fund Scheme</span>
+          <span>AMC</span>
+          <span>Category</span>
+          <span class="text-right">Units</span>
+          <span class="text-right">Avg NAV (₹)</span>
+          <span class="text-right">Current NAV (₹)</span>
+          <span>Type</span>
+          <span>Start / Purchase Date</span>
+          <span></span>
+        </div>
+
+        <div class="flex flex-col gap-3" id="mf-inputs-container"></div>
+
+        <div class="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <button onclick="addMfRow()" class="font-label-md text-label-md text-primary flex items-center gap-2 hover:bg-white/5 px-4 py-2 rounded-lg transition-colors border border-dashed border-primary/30 w-full md:w-auto justify-center">
+            <span class="material-symbols-outlined text-[18px]">add</span>+ Add Another Mutual Fund
+          </button>
+          <button onclick="runAnalysis()" class="bg-primary text-on-primary font-label-md text-label-md px-8 py-3 rounded-lg hover:bg-primary-container transition-colors pulse-button w-full md:w-auto flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+            <span class="material-symbols-outlined text-[18px]">rocket_launch</span>Run AI Analysis
+          </button>
+        </div>
+      </section>
+
+      <!-- AI Analysis Dashboard -->
+      <section id="results-section" class="flex-col gap-section-gap">
+
+        <!-- Persistent Non-dismissible SEBI Disclaimer Banner -->
+        <div class="glass-panel border-l-4 border-amber-500 rounded-xl p-4 flex items-center gap-3 bg-amber-500/10">
+          <span class="material-symbols-outlined text-amber-400 text-2xl">info</span>
+          <p class="font-body-sm text-body-sm text-on-surface">
+            <strong>SEBI Compliance Disclosure:</strong> AI-generated analysis for informational purposes only. Not investment advice. Mutual fund investments are subject to market risk. Read all scheme related documents carefully.
+          </p>
+        </div>
+
+        <!-- 1. Portfolio Summary Stat Row -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass-panel rounded-xl p-5">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Current Value</p>
+            <p class="font-headline-md text-headline-md text-on-surface font-bold" id="res-current-value">—</p>
+            <p class="font-body-sm text-body-sm mt-1 flex items-center gap-1" id="res-pnl-strip">—</p>
+          </div>
+          <div class="glass-panel rounded-xl p-5">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Invested Amount</p>
+            <p class="font-headline-md text-headline-md text-on-surface font-bold" id="res-invested-value">—</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1" id="res-holdings-count">—</p>
+          </div>
+          <div class="glass-panel rounded-xl p-5">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Portfolio XIRR</p>
+            <p class="font-headline-md text-headline-md text-secondary font-bold" id="res-xirr">—</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1" id="res-abs-return">Abs Return: —</p>
+          </div>
+          <div class="glass-panel rounded-xl p-5 ai-insight-border">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Health Score</p>
+            <p class="font-headline-md text-headline-md text-secondary font-bold" id="res-health-score">—</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1" id="res-health-band">—</p>
+          </div>
+        </div>
+
+        <!-- 2. AI Portfolio Health Score Detail -->
+        <div class="glass-panel rounded-xl p-container-padding">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-white/10 pb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-secondary/10 border border-secondary/30 flex items-center justify-center">
+                <span class="material-symbols-outlined text-secondary text-2xl" style="font-variation-settings:'FILL' 1">stars</span>
+              </div>
+              <div>
+                <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                  AI Portfolio Health Score
+                  <span id="res-star-rating" class="text-amber-400 text-sm"></span>
+                </h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Composite rating derived from 5 quantitative dimensions</p>
+              </div>
+            </div>
+            <button onclick="toggleHealthBreakdown()" class="text-primary font-label-md text-label-md hover:bg-primary/10 px-4 py-2 rounded-lg border border-primary/30 transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-[18px]">tune</span>Weighting Breakdown
+            </button>
+          </div>
+
+          <!-- Weighting Breakdown Grid (Expandable) -->
+          <div id="health-breakdown-panel" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="bg-white/[0.02] p-4 rounded-xl border border-white/5">
+              <div class="flex justify-between text-xs text-on-surface-variant mb-1">
+                <span>Diversification</span>
+                <span>25% Wt</span>
+              </div>
+              <p class="text-lg font-bold text-white" id="score-div">—</p>
+              <p class="text-[11px] text-on-surface-variant/60 mt-1">Category concentration penalty</p>
+            </div>
+            <div class="bg-white/[0.02] p-4 rounded-xl border border-white/5">
+              <div class="flex justify-between text-xs text-on-surface-variant mb-1">
+                <span>Overlap</span>
+                <span>20% Wt</span>
+              </div>
+              <p class="text-lg font-bold text-white" id="score-overlap">—</p>
+              <p class="text-[11px] text-on-surface-variant/60 mt-1">Duplicate fund style penalty</p>
+            </div>
+            <div class="bg-white/[0.02] p-4 rounded-xl border border-white/5">
+              <div class="flex justify-between text-xs text-on-surface-variant mb-1">
+                <span>Cost Efficiency</span>
+                <span>15% Wt</span>
+              </div>
+              <p class="text-lg font-bold text-white" id="score-cost">—</p>
+              <p class="text-[11px] text-on-surface-variant/60 mt-1">Expense ratio vs benchmark</p>
+            </div>
+            <div class="bg-white/[0.02] p-4 rounded-xl border border-white/5">
+              <div class="flex justify-between text-xs text-on-surface-variant mb-1">
+                <span>Consistency</span>
+                <span>25% Wt</span>
+              </div>
+              <p class="text-lg font-bold text-white" id="score-perf">—</p>
+              <p class="text-[11px] text-on-surface-variant/60 mt-1">Absolute &amp; XIRR yield</p>
+            </div>
+            <div class="bg-white/[0.02] p-4 rounded-xl border border-white/5">
+              <div class="flex justify-between text-xs text-on-surface-variant mb-1">
+                <span>Risk Alignment</span>
+                <span>15% Wt</span>
+              </div>
+              <p class="text-lg font-bold text-white" id="score-risk">—</p>
+              <p class="text-[11px] text-on-surface-variant/60 mt-1">Target risk score band</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. AI Recommendation per Fund (Cards Grid) -->
+        <div class="glass-panel rounded-xl p-container-padding">
+          <h3 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">auto_awesome</span>
+            AI Fund Recommendations
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="recommendations-grid"></div>
+        </div>
+
+        <!-- 4. Diversification Donut + Sector Allocation Bar -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- Diversification Donut -->
+          <div class="glass-panel rounded-xl p-container-padding flex flex-col gap-4">
+            <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">donut_large</span>
+              Category Diversification
+            </h4>
+            <div class="flex items-center justify-center my-2">
+              <canvas id="diversification-canvas" width="200" height="200"></canvas>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs" id="diversification-legend"></div>
+          </div>
+
+          <!-- Sector Allocation Bar -->
+          <div class="glass-panel rounded-xl p-container-padding flex flex-col gap-4">
+            <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-secondary">bar_chart</span>
+              Sector Allocation
+            </h4>
+            <div class="flex flex-col gap-3 flex-1 justify-center" id="sector-bars-container"></div>
+            <p class="font-label-sm text-label-sm text-on-surface-variant/40 mt-auto">* Estimated from category averages, not live portfolio disclosure.</p>
+          </div>
+        </div>
+
+        <!-- 5. Risk Meter & Overlap Detector Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- Risk Meter Gauge -->
+          <div class="glass-panel rounded-xl p-container-padding flex flex-col justify-between">
+            <div>
+              <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-amber-400">speed</span>
+                Portfolio Risk Meter
+              </h4>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Weighted category risk index (1=Low, 5=High)</p>
+            </div>
+            <div class="my-6">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-label-md text-label-md text-on-surface">Weighted Score: <strong id="risk-score-val" class="text-secondary">—</strong></span>
+                <span id="risk-level-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-secondary/20 text-secondary border border-secondary/30">—</span>
+              </div>
+              <div class="w-full bg-surface-container-highest rounded-full h-4 relative overflow-hidden">
+                <div id="risk-gauge-bar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 transition-all duration-700" style="width: 50%;"></div>
+              </div>
+              <div class="flex justify-between text-[10px] text-on-surface-variant mt-1 font-mono">
+                <span>1.0 (Low)</span>
+                <span>2.5 (Medium)</span>
+                <span>5.0 (High)</span>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant/60" id="risk-description">Portfolio maintains a balanced risk profile between capital preservation and growth.</p>
+          </div>
+
+          <!-- Overlap Detector Panel -->
+          <div class="glass-panel rounded-xl p-container-padding flex flex-col justify-between">
+            <div>
+              <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-primary">layers</span>
+                Overlap Detector
+              </h4>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Detects potential holding overlap between similar category funds</p>
+            </div>
+            <div class="my-4 flex flex-col gap-3" id="overlap-list-container"></div>
+            <p class="font-label-sm text-label-sm text-on-surface-variant/40 mt-auto">* Based on category similarity — connect your account for stock-level overlap analysis.</p>
+          </div>
+        </div>
+
+        <!-- 6. SIP Optimizer & Tax Estimator Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- SIP Optimizer -->
+          <div class="glass-panel rounded-xl p-container-padding flex flex-col justify-between">
+            <div>
+              <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-secondary">trending_up</span>
+                SIP Step-Up Optimizer
+              </h4>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Smart allocation strategy for annual SIP step-up</p>
+            </div>
+            <div class="my-4 p-4 rounded-xl bg-white/[0.02] border border-white/5" id="sip-optimizer-box"></div>
+          </div>
+
+          <!-- Tax Estimator Card -->
+          <div class="glass-panel rounded-xl p-container-padding flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary">receipt_long</span>
+                  Tax Estimator (FY 2026-27)
+                </h4>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-on-surface-variant">Slab Rate:</span>
+                  <select id="tax-slab-select" onchange="updateTaxSlab()" class="glass-input rounded-lg px-2 py-1 text-xs font-mono">
+                    <option value="10">10%</option>
+                    <option value="20">20%</option>
+                    <option value="30" selected>30%</option>
+                  </select>
+                </div>
+              </div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Sec 112A equity exemption (₹1.25L) &amp; debt slab rules</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="tax-cards-grid"></div>
+            <p class="font-label-sm text-label-sm text-on-surface-variant/40 mt-4">* Estimate only — excludes surcharge and 4% health &amp; education cess. Confirm with a tax advisor before filing.</p>
+          </div>
+        </div>
+
+        <!-- 7. AI Better Alternatives Table -->
+        <div class="glass-panel rounded-xl p-container-padding">
+          <h4 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary">swap_horiz</span>
+            AI Better Alternatives
+          </h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-white/10 text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider">
+                  <th class="pb-3">Current Holding</th>
+                  <th class="pb-3 text-right">Expense Ratio</th>
+                  <th class="pb-3">Suggested Alternative</th>
+                  <th class="pb-3 text-right">Alt Expense</th>
+                  <th class="pb-3 text-right">3Y CAGR</th>
+                  <th class="pb-3">Why Consider</th>
+                </tr>
+              </thead>
+              <tbody id="better-alternatives-body" class="divide-y divide-white/5 text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 8. Future Projection Chart -->
+        <div class="glass-panel rounded-xl p-container-padding">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+            <div>
+              <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">show_chart</span>
+                Future Growth Projection
+              </h4>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Compound growth projection over 10-year horizon</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-on-surface-variant">Assumed CAGR:</span>
+              <input type="range" id="cagr-range" min="6" max="20" value="12" step="0.5" oninput="updateProjectionChart()" class="w-28 accent-primary cursor-pointer"/>
+              <span id="cagr-val-label" class="font-mono text-sm font-bold text-primary">12.0%</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="bg-white/[0.02] p-4 rounded-xl border border-white/5">
+              <span class="text-xs text-on-surface-variant">Current Base</span>
+              <p class="text-lg font-bold text-white" id="proj-base-val">—</p>
+            </div>
+            <div class="bg-white/[0.02] p-4 rounded-xl border border-white/5">
+              <span class="text-xs text-on-surface-variant">5-Year Projected</span>
+              <p class="text-lg font-bold text-secondary" id="proj-5y-val">—</p>
+            </div>
+            <div class="bg-white/[0.02] p-4 rounded-xl border border-white/5">
+              <span class="text-xs text-on-surface-variant">10-Year Projected</span>
+              <p class="text-lg font-bold text-primary" id="proj-10y-val">—</p>
+            </div>
+          </div>
+
+          <div class="flex justify-center items-center h-48 my-2">
+            <canvas id="projection-canvas" width="700" height="180"></canvas>
+          </div>
+        </div>
+
+        <!-- 9. AI Chat Panel -->
+        <div class="glass-panel rounded-xl p-container-padding flex flex-col gap-4">
+          <div class="flex items-center gap-2 border-b border-white/10 pb-3">
+            <span class="material-symbols-outlined text-secondary text-2xl">forum</span>
+            <div>
+              <h4 class="font-headline-md text-headline-md text-on-surface">AI Portfolio Assistant</h4>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Ask questions grounded in your computed mutual fund numbers</p>
+            </div>
+          </div>
+
+          <!-- Starter Chips -->
+          <div class="flex flex-wrap gap-2">
+            <button onclick="askAiChat('Should I continue my SIP?')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20 transition-all">Should I continue my SIP?</button>
+            <button onclick="askAiChat('Should I redeem now?')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20 transition-all">Should I redeem now?</button>
+            <button onclick="askAiChat('Is this fund overvalued?')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20 transition-all">Is this fund overvalued?</button>
+            <button onclick="askAiChat('Which fund should I replace?')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20 transition-all">Which fund should I replace?</button>
+            <button onclick="askAiChat('Can I retire with this portfolio?')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20 transition-all">Can I retire with this portfolio?</button>
+            <button onclick="askAiChat('How much should I invest monthly?')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20 transition-all">How much should I invest monthly?</button>
+          </div>
+
+          <!-- Chat Output Container -->
+          <div id="chat-messages-container" class="flex flex-col gap-3 max-h-80 overflow-y-auto p-3 bg-black/20 rounded-xl border border-white/5">
+            <div class="flex gap-3 items-start">
+              <div class="w-8 h-8 rounded-full bg-primary-container/20 border border-primary-container/40 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-primary text-sm">smart_toy</span>
+              </div>
+              <div class="bg-white/[0.04] p-3 rounded-xl border border-white/5 text-xs text-on-surface max-w-[85%]">
+                Hello! I have loaded your mutual fund portfolio metrics. Ask me any question about your SIPs, tax planning, asset allocation, or retirement targets!
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Input Form -->
+          <form onsubmit="submitChatForm(event)" class="flex gap-2">
+            <input id="chat-input" class="flex-1 glass-input rounded-xl px-4 py-2 text-xs" placeholder="Ask AI Assistant about your mutual funds..." type="text"/>
+            <button type="submit" class="bg-primary text-on-primary px-5 py-2 rounded-xl hover:bg-primary-container transition-colors flex items-center gap-1 font-label-md text-label-md">
+              <span class="material-symbols-outlined text-sm">send</span>Send
+            </button>
+          </form>
+          <p class="font-label-sm text-label-sm text-on-surface-variant/40 text-center">* AI responses are generated for educational analysis only and do not constitute formal financial advice.</p>
+        </div>
+
+        <!-- Re-analyze Action Button -->
+        <div class="flex justify-end">
+          <button onclick="resetAnalysis()" class="flex items-center gap-2 text-on-surface-variant hover:text-on-surface font-label-md text-label-md border border-white/10 px-5 py-2 rounded-lg hover:bg-white/5 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">refresh</span>Edit &amp; Re-analyse
+          </button>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Nav -->
+  <nav id="mobile-nav" class="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-surface-container/95 backdrop-blur-xl border-t border-white/10 flex justify-around items-center h-16 px-2"></nav>
+
+  <script src="shared.js"></script>
+  <script src="lib/mutualFundMath.js"></script>
+  <script src="lib/useMutualFundPortfolio.js"></script>
+
+  <script>
+    // Default Sample Mutual Fund Holdings
+    const DEFAULT_MF_HOLDINGS = [
+      {
+        schemeName: 'Parag Parikh Flexi Cap Fund Direct-Growth',
+        amc: 'PPFAS',
+        category: 'Flexi Cap',
+        units: 450.25,
+        avgNav: 48.50,
+        currentNav: 76.20,
+        investType: 'SIP',
+        startDate: '2023-01-15',
+        expenseRatio: 0.58
+      },
+      {
+        schemeName: 'SBI Small Cap Fund Direct-Growth',
+        amc: 'SBI MF',
+        category: 'Small Cap',
+        units: 280.00,
+        avgNav: 110.40,
+        currentNav: 168.90,
+        investType: 'SIP',
+        startDate: '2023-04-10',
+        expenseRatio: 0.69
+      },
+      {
+        schemeName: 'HDFC Mid-Cap Opportunities Direct-Growth',
+        amc: 'HDFC MF',
+        category: 'Mid Cap',
+        units: 320.50,
+        avgNav: 85.00,
+        currentNav: 142.30,
+        investType: 'Lumpsum',
+        purchaseDate: '2023-06-20',
+        expenseRatio: 0.78
+      },
+      {
+        schemeName: 'UTI Nifty 50 Index Fund Direct-Growth',
+        amc: 'UTI MF',
+        category: 'Index',
+        units: 600.00,
+        avgNav: 120.00,
+        currentNav: 154.60,
+        investType: 'SIP',
+        startDate: '2022-09-01',
+        expenseRatio: 0.18
+      }
+    ];
+
+    let rowCounter = 0;
+    let currentPortfolioData = null;
+
+    function fmtINR(val) {
+      if (val === undefined || val === null || isNaN(val)) return '₹0.00';
+      return '₹' + Number(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const div = document.createElement('div');
+      div.className = 'toast-msg';
+      div.textContent = msg;
+      container.appendChild(div);
+      setTimeout(() => div.remove(), 4000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof buildNav === 'function') {
+        const { navLinks, mobileLinks, statusDot } = buildNav('mutual-funds');
+        document.getElementById('nav-links').innerHTML = navLinks;
+        document.getElementById('mobile-nav').innerHTML = mobileLinks;
+        document.getElementById('market-status').innerHTML = statusDot;
+      }
+
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      const saved = localStorage.getItem('saarthix_mf_holdings');
+      const initialList = saved ? JSON.parse(saved) : DEFAULT_MF_HOLDINGS;
+      initialList.forEach(h => addMfRow(h));
+    });
+
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: true });
+      document.querySelectorAll('.live-timestamp').forEach(el => el.textContent = `Last updated: ${timeStr} IST`);
+      const istEl = document.getElementById('ist-time');
+      if (istEl) istEl.textContent = timeStr;
+    }
+
+    function createMfRow(h = {}) {
+      rowCounter++;
+      const id = rowCounter;
+      const div = document.createElement('div');
+      div.className = 'mf-row flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1.5fr_2.5rem] gap-2 items-center p-3 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors border border-white/5 relative';
+      div.dataset.rowId = id;
+
+      const isSip = (!h.investType || h.investType === 'SIP');
+
+      div.innerHTML = `
+        <div class="w-full">
+          <label class="block md:hidden text-[10px] text-on-surface-variant mb-1">Scheme Name</label>
+          <input class="w-full glass-input rounded-lg px-3 py-1.5 text-xs mf-scheme" placeholder="Scheme Name..." value="${h.schemeName || ''}" type="text"/>
+        </div>
+        <div class="w-full">
+          <label class="block md:hidden text-[10px] text-on-surface-variant mb-1">AMC</label>
+          <input class="w-full glass-input rounded-lg px-2 py-1.5 text-xs mf-amc" placeholder="AMC" value="${h.amc || ''}" type="text"/>
+        </div>
+        <div class="w-full">
+          <label class="block md:hidden text-[10px] text-on-surface-variant mb-1">Category</label>
+          <select class="w-full glass-input rounded-lg px-2 py-1.5 text-xs mf-category appearance-none">
+            <option value="Flexi Cap" ${h.category==='Flexi Cap'?'selected':''}>Flexi Cap</option>
+            <option value="Large Cap" ${h.category==='Large Cap'?'selected':''}>Large Cap</option>
+            <option value="Mid Cap" ${h.category==='Mid Cap'?'selected':''}>Mid Cap</option>
+            <option value="Small Cap" ${h.category==='Small Cap'?'selected':''}>Small Cap</option>
+            <option value="ELSS" ${h.category==='ELSS'?'selected':''}>ELSS Tax Saver</option>
+            <option value="Debt" ${h.category==='Debt'?'selected':''}>Debt</option>
+            <option value="Hybrid" ${h.category==='Hybrid'?'selected':''}>Hybrid</option>
+            <option value="Index" ${h.category==='Index'?'selected':''}>Index</option>
+            <option value="Gold" ${h.category==='Gold'?'selected':''}>Gold</option>
+          </select>
+        </div>
+        <div class="w-full">
+          <label class="block md:hidden text-[10px] text-on-surface-variant mb-1">Units</label>
+          <input class="w-full glass-input rounded-lg px-2 py-1.5 text-xs text-right mf-units" placeholder="0.000" type="number" step="0.001" value="${h.units || ''}"/>
+        </div>
+        <div class="w-full">
+          <label class="block md:hidden text-[10px] text-on-surface-variant mb-1">Avg NAV (₹)</label>
+          <input class="w-full glass-input rounded-lg px-2 py-1.5 text-xs text-right mf-avg-nav" placeholder="0.00" type="number" step="0.01" value="${h.avgNav || ''}"/>
+        </div>
+        <div class="w-full">
+          <label class="block md:hidden text-[10px] text-on-surface-variant mb-1">Current NAV (₹)</label>
+          <input class="w-full glass-input rounded-lg px-2 py-1.5 text-xs text-right mf-current-nav" placeholder="0.00" type="number" step="0.01" value="${h.currentNav || ''}"/>
+        </div>
+        <div class="w-full">
+          <label class="block md:hidden text-[10px] text-on-surface-variant mb-1">Type</label>
+          <select class="w-full glass-input rounded-lg px-2 py-1.5 text-xs mf-invest-type appearance-none">
+            <option value="SIP" ${isSip?'selected':''}>SIP</option>
+            <option value="Lumpsum" ${!isSip?'selected':''}>Lumpsum</option>
+          </select>
+        </div>
+        <div class="w-full">
+          <label class="block md:hidden text-[10px] text-on-surface-variant mb-1">Date</label>
+          <input class="w-full glass-input rounded-lg px-2 py-1.5 text-xs mf-date" type="date" value="${h.startDate || h.purchaseDate || '2023-01-15'}"/>
+        </div>
+        <button onclick="removeRow(${id})" class="p-2 rounded-lg border border-error/20 text-error hover:bg-error/10 transition-colors flex justify-center" title="Remove">
+          <span class="material-symbols-outlined text-[18px]">delete</span>
+        </button>
+      `;
+      return div;
+    }
+
+    function addMfRow(h) {
+      document.getElementById('mf-inputs-container').appendChild(createMfRow(h));
+    }
+
+    function removeRow(id) {
+      const row = document.querySelector(`[data-row-id="${id}"]`);
+      if (row) row.remove();
+    }
+
+    function clearAllRows() {
+      document.getElementById('mf-inputs-container').innerHTML = '';
+      addMfRow();
+      localStorage.removeItem('saarthix_mf_holdings');
+    }
+
+    function importCsvStub() {
+      const sampleCsv = `Scheme Name,AMC,Category,Units,Avg NAV,Current NAV,Type,Date
+Parag Parikh Flexi Cap,PPFAS,Flexi Cap,500,50,78,SIP,2023-01-15
+SBI Small Cap,SBI MF,Small Cap,300,100,165,SIP,2023-04-10
+ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05-10`;
+
+      const input = prompt("Paste your CSV content below (Scheme Name, AMC, Category, Units, Avg NAV, Current NAV, Type, Date):", sampleCsv);
+      if (!input) return;
+
+      const lines = input.trim().split('\n');
+      if (lines.length < 2) return;
+
+      document.getElementById('mf-inputs-container').innerHTML = '';
+      for (let i = 1; i < lines.length; i++) {
+        const parts = lines[i].split(',');
+        if (parts.length >= 6) {
+          addMfRow({
+            schemeName: parts[0].trim(),
+            amc: parts[1].trim(),
+            category: parts[2].trim(),
+            units: parseFloat(parts[3]) || 0,
+            avgNav: parseFloat(parts[4]) || 0,
+            currentNav: parseFloat(parts[5]) || 0,
+            investType: (parts[6] || 'SIP').trim(),
+            startDate: (parts[7] || '2023-01-15').trim()
+          });
+        }
+      }
+      showToast('CSV imported successfully!');
+    }
+
+    function collectHoldingsFromDom() {
+      const rows = document.querySelectorAll('.mf-row');
+      const holdings = [];
+
+      rows.forEach(r => {
+        const schemeName = r.querySelector('.mf-scheme').value.trim();
+        const amc = r.querySelector('.mf-amc').value.trim();
+        const category = r.querySelector('.mf-category').value;
+        const units = parseFloat(r.querySelector('.mf-units').value) || 0;
+        const avgNav = parseFloat(r.querySelector('.mf-avg-nav').value) || 0;
+        const currentNav = parseFloat(r.querySelector('.mf-current-nav').value) || avgNav;
+        const investType = r.querySelector('.mf-invest-type').value;
+        const dt = r.querySelector('.mf-date').value;
+
+        if (schemeName && units > 0 && avgNav > 0) {
+          holdings.push({
+            schemeName,
+            amc: amc || 'AMC',
+            category,
+            units,
+            avgNav,
+            currentNav,
+            investType,
+            startDate: investType === 'SIP' ? dt : null,
+            purchaseDate: investType === 'Lumpsum' ? dt : null
+          });
+        }
+      });
+
+      return holdings;
+    }
+
+    async function runAnalysis() {
+      const holdings = collectHoldingsFromDom();
+      if (!holdings.length) {
+        alert('Please fill in at least one mutual fund with units and average NAV.');
+        return;
+      }
+
+      localStorage.setItem('saarthix_mf_holdings', JSON.stringify(holdings));
+
+      document.getElementById('loading-overlay').style.display = 'flex';
+
+      try {
+        const slabRate = parseInt(document.getElementById('tax-slab-select').value) || 30;
+        currentPortfolioData = useMutualFundPortfolio(holdings, slabRate);
+
+        let aiRecommendations = [];
+        try {
+          const res = await fetch('/api/mf-analysis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ holdings })
+          });
+          const json = await res.json();
+          if (json.status === 'SUCCESS') {
+            aiRecommendations = json.recommendations;
+          }
+        } catch (e) {
+          console.warn('Backend AI analysis call failed, using fallback:', e.message);
+        }
+
+        setTimeout(() => {
+          buildDashboardUI(currentPortfolioData, aiRecommendations);
+          document.getElementById('loading-overlay').style.display = 'none';
+          const resultsSec = document.getElementById('results-section');
+          resultsSec.classList.add('show-results');
+          resultsSec.scrollIntoView({ behavior: 'smooth' });
+        }, 700);
+
+      } catch (err) {
+        console.error('Analysis error:', err);
+        document.getElementById('loading-overlay').style.display = 'none';
+      }
+    }
+
+    function buildDashboardUI(computed, aiRecommendations) {
+      const summary = computed.summary;
+      const health = computed.health;
+
+      // Summary Stat Row
+      document.getElementById('res-current-value').textContent = fmtINR(summary.totalCurrentValue);
+      document.getElementById('res-invested-value').textContent = fmtINR(summary.totalInvested);
+      document.getElementById('res-holdings-count').textContent = `${computed.holdings.length} scheme${computed.holdings.length > 1 ? 's' : ''}`;
+      document.getElementById('res-xirr').textContent = `${summary.portfolioXIRR}%`;
+      document.getElementById('res-abs-return').textContent = `Abs Return: ${summary.absReturnPct}%`;
+      document.getElementById('res-health-score').textContent = `${summary.healthScore} / 100`;
+      document.getElementById('res-health-band').textContent = health.band;
+
+      const pnlEl = document.getElementById('res-pnl-strip');
+      const isPositive = summary.totalPnL >= 0;
+      pnlEl.className = `font-body-sm text-body-sm mt-1 flex items-center gap-1 ${isPositive ? 'text-secondary' : 'text-error'}`;
+      pnlEl.innerHTML = `
+        <span class="material-symbols-outlined text-[14px]">${isPositive ? 'arrow_upward' : 'arrow_downward'}</span>
+        ${isPositive ? '+' : ''}${fmtINR(summary.totalPnL)} (${summary.absReturnPct}%)
+      `;
+
+      // Health Score Stars & Breakdown
+      const starStr = '★'.repeat(health.stars) + '☆'.repeat(5 - health.stars);
+      document.getElementById('res-star-rating').textContent = starStr;
+      document.getElementById('score-div').textContent = `${health.breakdown.diversification}/100`;
+      document.getElementById('score-overlap').textContent = `${health.breakdown.overlap}/100`;
+      document.getElementById('score-cost').textContent = `${health.breakdown.costEfficiency}/100`;
+      document.getElementById('score-perf').textContent = `${health.breakdown.performance}/100`;
+      document.getElementById('score-risk').textContent = `${health.breakdown.riskAlignment}/100`;
+
+      // AI Recommendations Grid
+      const recsGrid = document.getElementById('recommendations-grid');
+      recsGrid.innerHTML = '';
+
+      computed.holdings.forEach((h, i) => {
+        const aiRec = aiRecommendations.find(r => r.schemeName === h.schemeName) || {
+          recommendation: h.absReturnPct >= 15 ? 'BUY_MORE' : 'HOLD',
+          confidence: 85,
+          suggestedNavRange: `₹${(h.currentNav * 0.95).toFixed(1)}-${(h.currentNav * 1.05).toFixed(1)}`,
+          reasons: ['Consistent historical return generation.', 'Expense ratio aligns with category average.'],
+          risks: ['Market volatility and macro rate shifts.']
+        };
+
+        const pillStyles = {
+          'BUY_MORE': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+          'HOLD': 'bg-blue-500/20 text-blue-400 border-blue-500/40',
+          'PARTIAL_SWITCH': 'bg-amber-500/20 text-amber-400 border-amber-500/40',
+          'SELL': 'bg-red-500/20 text-red-400 border-red-500/40'
+        };
+
+        const card = document.createElement('div');
+        card.className = 'glass-panel rounded-xl p-5 flex flex-col justify-between gap-4 hover:border-primary/40 transition-all';
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-start gap-2 mb-2">
+              <h5 class="font-bold text-sm text-white line-clamp-1" title="${h.schemeName}">${h.schemeName}</h5>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${pillStyles[aiRec.recommendation] || pillStyles.HOLD}">${aiRec.recommendation}</span>
+            </div>
+            <p class="text-xs text-on-surface-variant mb-3">${h.category} · AMC: ${h.amc}</p>
+
+            <div class="grid grid-cols-2 gap-2 text-xs bg-white/[0.02] p-2.5 rounded-lg mb-3">
+              <div>
+                <span class="text-on-surface-variant text-[10px]">Current Value</span>
+                <p class="font-bold text-white">${fmtINR(h.currentVal)}</p>
+              </div>
+              <div>
+                <span class="text-on-surface-variant text-[10px]">Abs Return</span>
+                <p class="font-bold ${h.pnl >= 0 ? 'text-secondary' : 'text-error'}">${h.absReturnPct >= 0 ? '+' : ''}${h.absReturnPct}%</p>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <span class="text-[11px] font-bold text-primary flex items-center gap-1 mb-1">
+                <span class="material-symbols-outlined text-xs">verified</span>Confidence: ${aiRec.confidence}%
+              </span>
+              <ul class="list-disc list-inside text-xs text-on-surface-variant space-y-1">
+                ${aiRec.reasons.map(r => `<li>${r}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/5 text-[11px] text-amber-400/80">
+            <strong>Risks:</strong> ${aiRec.risks.join(' · ')}
+          </div>
+        `;
+        recsGrid.appendChild(card);
+      });
+
+      // Render Charts & Panels
+      drawDiversificationChart(computed.diversification);
+      renderSectorBars(computed.sectorAllocation);
+      renderRiskMeter(computed.riskMeter);
+      renderOverlapPanel(computed.overlap);
+      renderSipOptimizer(computed.sipOptimizer);
+      renderTaxEstimator(computed.taxEstimator);
+      renderBetterAlternatives(computed.betterAlternatives);
+      updateProjectionChart();
+    }
+
+    function toggleHealthBreakdown() {
+      const panel = document.getElementById('health-breakdown-panel');
+      panel.classList.toggle('hidden');
+    }
+
+    function drawDiversificationChart(list) {
+      const canvas = document.getElementById('diversification-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 200, 200);
+
+      const total = list.reduce((s, item) => s + item.value, 0);
+      if (!total) return;
+
+      let startAngle = -Math.PI / 2;
+      list.forEach(item => {
+        const sliceAngle = (item.value / total) * 2 * Math.PI;
+        ctx.beginPath();
+        ctx.arc(100, 100, 80, startAngle, startAngle + sliceAngle);
+        ctx.arc(100, 100, 50, startAngle + sliceAngle, startAngle, true);
+        ctx.closePath();
+        ctx.fillStyle = item.color;
+        ctx.fill();
+        startAngle += sliceAngle;
+      });
+
+      const legend = document.getElementById('diversification-legend');
+      legend.innerHTML = list.map(item => `
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:${item.color}"></span>
+          <span class="truncate text-on-surface-variant">${item.category} (${item.percentage}%)</span>
+        </div>
+      `).join('');
+    }
+
+    function renderSectorBars(sectors) {
+      const container = document.getElementById('sector-bars-container');
+      if (!sectors.length) {
+        container.innerHTML = '<p class="text-xs text-on-surface-variant">No sector data available.</p>';
+        return;
+      }
+
+      container.innerHTML = sectors.slice(0, 6).map(sec => `
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-on-surface font-medium">${sec.sector}</span>
+            <span class="text-primary font-mono">${sec.percentage}%</span>
+          </div>
+          <div class="w-full bg-surface-container-highest rounded-full h-2 overflow-hidden">
+            <div class="bg-primary h-full rounded-full transition-all duration-500" style="width:${sec.percentage}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderRiskMeter(risk) {
+      document.getElementById('risk-score-val').textContent = risk.score;
+      document.getElementById('risk-level-badge').textContent = risk.label;
+      document.getElementById('risk-gauge-bar').style.width = `${risk.pct}%`;
+    }
+
+    function renderOverlapPanel(overlapList) {
+      const container = document.getElementById('overlap-list-container');
+      if (!overlapList.length) {
+        container.innerHTML = `
+          <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span>
+            No portfolio overlap detected! Funds are cleanly diversified across categories.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = overlapList.map(pair => `
+        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between gap-3 text-xs">
+          <div>
+            <p class="font-bold text-white">${pair.fund1} <span class="text-on-surface-variant font-normal">vs</span> ${pair.fund2}</p>
+            <p class="text-[11px] text-on-surface-variant">${pair.category} Category Overlap</p>
+          </div>
+          <div class="text-right">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${pair.risk === 'High' ? 'bg-error/20 text-error border border-error/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">~${pair.estimatedOverlapPct}% Overlap</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderSipOptimizer(opt) {
+      const box = document.getElementById('sip-optimizer-box');
+      box.innerHTML = `
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-on-surface-variant">Estimated Monthly SIP:</span>
+          <span class="font-bold text-white text-sm">${fmtINR(opt.currentSipEst)} / mo</span>
+        </div>
+        <div class="flex justify-between items-center mb-4 p-2.5 rounded-lg bg-secondary/10 border border-secondary/20">
+          <span class="text-xs text-secondary font-bold">Recommended Step-Up (+10%):</span>
+          <span class="font-bold text-secondary text-sm">+${fmtINR(opt.suggestedIncrease)} / mo</span>
+        </div>
+        <p class="text-xs text-on-surface-variant font-bold mb-2">Target Step-Up Allocation:</p>
+        <div class="space-y-2">
+          ${opt.recommendations.map(r => `
+            <div class="flex justify-between items-center text-xs bg-white/[0.03] p-2 rounded-lg">
+              <span class="text-white truncate max-w-[200px]">${r.fund}</span>
+              <span class="text-primary font-bold">+${fmtINR(r.increase)}/mo</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderTaxEstimator(tax) {
+      const grid = document.getElementById('tax-cards-grid');
+      grid.innerHTML = `
+        <div class="tax-card stcg-card glass-panel rounded-lg p-4">
+          <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Equity STCG (≤ 12 Months)</p>
+          <p class="font-headline-md text-headline-md text-primary font-bold">${fmtINR(tax.equityStcgTax)}</p>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">20% Flat Rate · Gain: ${fmtINR(tax.totalEquityStcgGain)}</p>
+        </div>
+        <div class="tax-card ltcg-card glass-panel rounded-lg p-4">
+          <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Equity LTCG (> 12 Months)</p>
+          <p class="font-headline-md text-headline-md text-secondary font-bold">${fmtINR(tax.equityLtcgTax)}</p>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">12.5% above ₹1.25L Exemption · Gain: ${fmtINR(tax.totalEquityLtcgGain)}</p>
+        </div>
+        <div class="tax-card glass-panel rounded-lg p-4 border-l-4 border-amber-500">
+          <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Debt Fund Tax (Income Slab)</p>
+          <p class="font-headline-md text-headline-md text-amber-400 font-bold">${fmtINR(tax.debtSlabTax)}</p>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Taxed @ ${tax.slabRatePct}% Slab Rate · Gain: ${fmtINR(tax.totalDebtSlabGain)}</p>
+        </div>
+        <div class="tax-card glass-panel rounded-lg p-4 border-l-4 border-purple-500">
+          <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Total Estimated Tax Liability</p>
+          <p class="font-headline-md text-headline-md text-white font-bold">${fmtINR(tax.totalEstTax)}</p>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Combined capital gains tax estimate</p>
+        </div>
+      `;
+    }
+
+    function updateTaxSlab() {
+      if (!currentPortfolioData) return;
+      const slab = parseInt(document.getElementById('tax-slab-select').value) || 30;
+      const updatedTax = MFMath.calcTaxEstimator(currentPortfolioData.holdings, slab);
+      renderTaxEstimator(updatedTax);
+    }
+
+    function renderBetterAlternatives(list) {
+      const tbody = document.getElementById('better-alternatives-body');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-on-surface-variant">Your portfolio is well optimized with low expense ratios!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => `
+        <tr class="hover:bg-white/[0.02]">
+          <td class="py-3 font-bold text-white">${item.currentFund}</td>
+          <td class="py-3 text-right text-amber-400">${item.currentExpenseRatio}%</td>
+          <td class="py-3 text-primary font-bold">${item.suggestedFund}</td>
+          <td class="py-3 text-right text-secondary">${item.suggestedExpenseRatio}%</td>
+          <td class="py-3 text-right text-white font-mono">${item.threeYrReturn}</td>
+          <td class="py-3 text-on-surface-variant">${item.reason}</td>
+        </tr>
+      `).join('');
+    }
+
+    function updateProjectionChart() {
+      if (!currentPortfolioData) return;
+      const cagr = parseFloat(document.getElementById('cagr-range').value) || 12;
+      document.getElementById('cagr-val-label').textContent = `${cagr.toFixed(1)}%`;
+
+      const baseVal = currentPortfolioData.summary.totalCurrentValue;
+      const points = MFMath.calcFutureProjection(baseVal, cagr, 10);
+
+      document.getElementById('proj-base-val').textContent = fmtINR(baseVal);
+      document.getElementById('proj-5y-val').textContent = fmtINR(points[5].value);
+      document.getElementById('proj-10y-val').textContent = fmtINR(points[10].value);
+
+      // Draw projection canvas line
+      const canvas = document.getElementById('projection-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 700, 180);
+
+      const maxVal = points[10].value || 1;
+      const width = 700;
+      const height = 180;
+      const padding = 30;
+
+      ctx.beginPath();
+      ctx.strokeStyle = '#3B82F6';
+      ctx.lineWidth = 3;
+
+      points.forEach((p, idx) => {
+        const x = padding + (idx / 10) * (width - 2 * padding);
+        const y = height - padding - (p.value / maxVal) * (height - 2 * padding);
+
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Area fill
+      ctx.lineTo(width - padding, height - padding);
+      ctx.lineTo(padding, height - padding);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 0, 0, height);
+      grad.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+      grad.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    async function askAiChat(qText) {
+      document.getElementById('chat-input').value = qText;
+      submitChatForm(new Event('submit'));
+    }
+
+    async function submitChatForm(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const q = input.value.trim();
+      if (!q) return;
+
+      const container = document.getElementById('chat-messages-container');
+
+      // User Message
+      const userDiv = document.createElement('div');
+      userDiv.className = 'flex gap-3 items-start justify-end';
+      userDiv.innerHTML = `
+        <div class="bg-primary/20 p-3 rounded-xl border border-primary/30 text-xs text-white max-w-[85%]">
+          ${q}
+        </div>
+      `;
+      container.appendChild(userDiv);
+      input.value = '';
+      container.scrollTop = container.scrollHeight;
+
+      // Loading Bot Indicator
+      const botDiv = document.createElement('div');
+      botDiv.className = 'flex gap-3 items-start';
+      botDiv.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-primary-container/20 border border-primary-container/40 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-primary text-sm animate-spin">sync</span>
+        </div>
+        <div class="bg-white/[0.04] p-3 rounded-xl border border-white/5 text-xs text-on-surface animate-pulse">
+          Thinking...
+        </div>
+      `;
+      container.appendChild(botDiv);
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const res = await fetch('/api/mf-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: q, portfolioData: currentPortfolioData })
+        });
+        const json = await res.json();
+        const reply = json.reply || 'Analysis completed.';
+
+        botDiv.querySelector('.material-symbols-outlined').className = 'material-symbols-outlined text-primary text-sm';
+        botDiv.querySelector('.material-symbols-outlined').textContent = 'smart_toy';
+        botDiv.querySelector('.bg-white\/\\[0\\.04\\]').className = 'bg-white/[0.04] p-3 rounded-xl border border-white/5 text-xs text-on-surface max-w-[85%]';
+        botDiv.querySelector('.bg-white\/\\[0\\.04\\]').innerHTML = reply.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      } catch (err) {
+        botDiv.querySelector('.bg-white\/\\[0\\.04\\]').textContent = 'Analysis could not be generated. Please try again.';
+      }
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function resetAnalysis() {
+      document.getElementById('input-section').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
