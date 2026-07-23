@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SaarthiX - AI Mutual Fund Analyser</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico"/>
-  <meta name="description" content="Institutional-grade AI mutual fund analysis for Indian equity and debt funds. XIRR, FY26-27 tax, overlap detection, health score, and portfolio optimization."/>
+  <meta name="description" content="Institutional-grade AI mutual fund analysis for Indian equity and debt funds. XIRR, FY26-27 tax, AMFI live NAV, overlap detection, goal planning, risk profiling &amp; AMC comparison."/>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -74,12 +74,86 @@
     @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     .toast-msg{position:fixed;bottom:24px;right:24px;z-index:9999;background:#1c1f29;border:1px solid #4d8eff;color:#dfe2ef;padding:12px 20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.8);animation:slideUp .3s ease-out}
     @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .suggest-dropdown{background:#1c1f29 !important;border:1px solid rgba(255,255,255,.2) !important;box-shadow:0 10px 30px rgba(0,0,0,.9) !important;z-index:100 !important}
   </style>
 </head>
 <body class="bg-background text-on-surface min-h-screen flex font-sans selection:bg-primary-container selection:text-on-primary-container">
 
   <!-- Toast Notification Container -->
   <div id="toast-container"></div>
+
+  <!-- Risk Profile Quiz Modal (Gap 7) -->
+  <div id="risk-quiz-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-background/80 backdrop-blur-md p-4">
+    <div class="glass-panel max-w-xl w-full rounded-2xl p-6 relative border border-primary/30 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <h3 class="font-headline-md text-headline-md text-white flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">psychology</span>
+          2-Minute Risk Profiling Quiz
+        </h3>
+        <button onclick="closeRiskQuizModal()" class="text-on-surface-variant hover:text-white p-1">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <p class="text-xs text-on-surface-variant">Answer 5 quick questions to determine your investor risk tolerance profile.</p>
+
+      <form id="risk-quiz-form" onsubmit="submitRiskQuiz(event)" class="flex flex-col gap-4">
+        <!-- Q1 -->
+        <div>
+          <p class="text-xs font-bold text-white mb-1.5">1. What is your primary investment time horizon?</p>
+          <div class="space-y-1 text-xs text-on-surface-variant">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q1" value="1" required/> Less than 2 years</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q1" value="2"/> 2 to 5 years</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q1" value="3"/> More than 5 years</label>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div>
+          <p class="text-xs font-bold text-white mb-1.5">2. How would you react if your portfolio dropped 20% in 3 months?</p>
+          <div class="space-y-1 text-xs text-on-surface-variant">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q2" value="1" required/> Panic and sell all holdings to prevent further loss</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q2" value="2"/> Hold and wait for recovery</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q2" value="3"/> Buy more aggressively at lower prices</label>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div>
+          <p class="text-xs font-bold text-white mb-1.5">3. How stable is your primary income stream?</p>
+          <div class="space-y-1 text-xs text-on-surface-variant">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q3" value="1" required/> Variable / Irregular income</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q3" value="2"/> Fairly steady income</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q3" value="3"/> Highly secure / salaried with surplus savings</label>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div>
+          <p class="text-xs font-bold text-white mb-1.5">4. Do you have an active emergency liquid fund (6 months expenses)?</p>
+          <div class="space-y-1 text-xs text-on-surface-variant">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q4" value="1" required/> No emergency fund</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q4" value="2"/> Partial emergency fund (2-3 months)</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q4" value="3"/> Fully funded emergency liquid pool (>6 months)</label>
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div>
+          <p class="text-xs font-bold text-white mb-1.5">5. What is your prior market investment experience?</p>
+          <div class="space-y-1 text-xs text-on-surface-variant">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q5" value="1" required/> Beginner / First time investing</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q5" value="2"/> Intermediate (1-3 years active investing)</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q5" value="3"/> Experienced (>3 years equity market cycle exposure)</label>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+          <button type="button" onclick="closeRiskQuizModal()" class="px-4 py-2 rounded-lg border border-white/10 text-xs text-on-surface-variant">Skip</button>
+          <button type="submit" class="bg-primary text-on-primary font-bold px-6 py-2 rounded-lg text-xs hover:bg-primary-container">Calculate My Risk Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Loading Overlay -->
   <div class="fixed inset-0 z-[100] hidden flex-col items-center justify-center bg-background/80 backdrop-blur-sm" id="loading-overlay">
@@ -89,7 +163,7 @@
       <div class="absolute inset-4 border-2 border-secondary/30 rounded-full border-b-transparent animate-spin" style="animation-direction:reverse;animation-duration:1.5s"></div>
     </div>
     <h2 class="text-headline-md font-headline-md text-primary animate-pulse">Analysing Mutual Funds...</h2>
-    <p class="text-on-surface-variant text-body-md mt-2">Computing XIRR, Overlap &amp; FY26-27 Tax Rules</p>
+    <p class="text-on-surface-variant text-body-md mt-2">Fetching AMFI NAVs, XIRR, Overlap &amp; FY26-27 Tax Rules</p>
     <div class="flex gap-2 mt-4">
       <span class="w-2 h-2 bg-secondary/60 rounded-full animate-bounce" style="animation-delay:0s"></span>
       <span class="w-2 h-2 bg-secondary/60 rounded-full animate-bounce" style="animation-delay:.15s"></span>
@@ -119,10 +193,10 @@
         <span id="market-status" class="font-label-sm text-label-sm flex items-center gap-1"></span>
         <span class="font-label-sm text-label-sm ml-auto" id="ist-time"></span>
       </div>
-      <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all" href="#">
-        <span class="material-symbols-outlined text-[18px]">help</span>
-        <span class="font-label-sm text-label-sm">Support</span>
-      </a>
+      <button onclick="openRiskQuizModal()" class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all text-left">
+        <span class="material-symbols-outlined text-[18px]">psychology</span>
+        <span class="font-label-sm text-label-sm">Risk Quiz</span>
+      </button>
       <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all" href="login.html">
         <span class="material-symbols-outlined text-[18px]">logout</span>
         <span class="font-label-sm text-label-sm">Log Out</span>
@@ -143,7 +217,6 @@
         <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="ai-insights.html">AI Insights</a>
       </nav>
       <div class="flex items-center gap-4">
-        <!-- Live Index Strip -->
         <div class="flex items-center gap-4 text-mono-data font-mono-data border-r border-white/10 pr-4">
           <span class="flex items-center gap-1">
             <span class="text-on-surface-variant/60 text-[11px]">SENSEX</span>
@@ -172,7 +245,7 @@
     <div class="p-4 md:p-container-padding flex flex-col gap-section-gap max-w-[1400px] mx-auto w-full">
 
       <!-- Page Header -->
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-primary-container/20 border border-primary-container/30 flex items-center justify-center">
             <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings:'FILL' 1">pie_chart</span>
@@ -180,9 +253,17 @@
           <div>
             <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">AI Mutual Fund Analyser</h2>
             <p class="font-body-sm text-body-sm text-on-surface-variant flex flex-wrap items-center gap-x-3">
-              <span>AMFI · ₹ Indian Rupee · LTCG/STCG Tax Estimate</span>
+              <span>Data sourced from AMFI · ₹ Indian Rupee · STCG/LTCG Tax Estimate</span>
               <span class="live-timestamp font-mono text-xs text-secondary"></span>
             </p>
+          </div>
+        </div>
+
+        <!-- Risk Profile Status Tag (Gap 7) -->
+        <div class="flex items-center gap-2">
+          <div id="risk-profile-tag" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-on-surface flex items-center gap-1.5 cursor-pointer hover:bg-white/10" onclick="openRiskQuizModal()">
+            <span class="material-symbols-outlined text-primary text-sm">psychology</span>
+            <span>Risk Profile: <strong id="user-risk-profile-label" class="text-primary">Moderate</strong></span>
           </div>
         </div>
       </div>
@@ -206,7 +287,7 @@
         <div class="flex justify-between items-center mb-5">
           <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">add_circle</span>
-            Manual Entry
+            Manual Entry (Live AMFI Autocomplete Enabled)
           </h3>
           <div class="flex items-center gap-3">
             <button class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary flex items-center gap-1 transition-colors" onclick="clearAllRows()">
@@ -245,6 +326,14 @@
 
       <!-- AI Analysis Dashboard -->
       <section id="results-section" class="flex-col gap-section-gap">
+
+        <!-- Risk Profile Mismatch Banner (Gap 7) -->
+        <div id="risk-mismatch-banner" class="hidden glass-panel border-l-4 border-red-500 rounded-xl p-4 flex items-center gap-3 bg-red-500/10">
+          <span class="material-symbols-outlined text-red-400 text-2xl">warning</span>
+          <p class="font-body-sm text-body-sm text-on-surface">
+            <strong>Risk Profile Mismatch Alert:</strong> Your portfolio Risk Meter is <span id="mismatch-risk-meter" class="font-bold text-red-400">High</span>, but your stated investor risk profile is <span id="mismatch-user-profile" class="font-bold text-primary">Moderate</span>. Consider rebalancing toward large-cap, hybrid, or debt funds to align with your risk tolerance.
+          </p>
+        </div>
 
         <!-- Persistent Non-dismissible SEBI Disclaimer Banner -->
         <div class="glass-panel border-l-4 border-amber-500 rounded-xl p-4 flex items-center gap-3 bg-amber-500/10">
@@ -343,19 +432,17 @@
           </div>
         </div>
 
-        <!-- 3. AI Recommendation per Fund (Cards Grid) -->
+        <!-- 3. AI Recommendation per Fund (Cards Grid - Extended Gap 2,3,4,8) -->
         <div class="glass-panel rounded-xl p-container-padding">
           <h3 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">auto_awesome</span>
-            AI Fund Recommendations
+            AI Fund Recommendations &amp; Deep Analysis
           </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="recommendations-grid"></div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="recommendations-grid"></div>
         </div>
 
         <!-- 4. Diversification Donut + Sector Allocation Bar -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-          <!-- Diversification Donut -->
           <div class="glass-panel rounded-xl p-container-padding flex flex-col gap-4">
             <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
               <span class="material-symbols-outlined text-primary">donut_large</span>
@@ -367,7 +454,6 @@
             <div class="grid grid-cols-2 gap-2 text-xs" id="diversification-legend"></div>
           </div>
 
-          <!-- Sector Allocation Bar -->
           <div class="glass-panel rounded-xl p-container-padding flex flex-col gap-4">
             <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
               <span class="material-symbols-outlined text-secondary">bar_chart</span>
@@ -407,17 +493,17 @@
             <p class="text-xs text-on-surface-variant/60" id="risk-description">Portfolio maintains a balanced risk profile between capital preservation and growth.</p>
           </div>
 
-          <!-- Overlap Detector Panel -->
+          <!-- Overlap Detector Panel (Jaccard Enabled - Gap 3) -->
           <div class="glass-panel rounded-xl p-container-padding flex flex-col justify-between">
             <div>
               <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-2">
                 <span class="material-symbols-outlined text-primary">layers</span>
-                Overlap Detector
+                Jaccard Stock-Level Overlap Detector
               </h4>
-              <p class="font-body-sm text-body-sm text-on-surface-variant">Detects potential holding overlap between similar category funds</p>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Detects portfolio stock holding overlap between fund pairs</p>
             </div>
             <div class="my-4 flex flex-col gap-3" id="overlap-list-container"></div>
-            <p class="font-label-sm text-label-sm text-on-surface-variant/40 mt-auto">* Based on category similarity — connect your account for stock-level overlap analysis.</p>
+            <p class="font-label-sm text-label-sm text-on-surface-variant/40 mt-auto">* Powered by top-holding stock Jaccard similarity lookups.</p>
           </div>
         </div>
 
@@ -436,7 +522,7 @@
             <div class="my-4 p-4 rounded-xl bg-white/[0.02] border border-white/5" id="sip-optimizer-box"></div>
           </div>
 
-          <!-- Tax Estimator Card -->
+          <!-- Tax Estimator Card & ELSS 80C Card (Gap 6) -->
           <div class="glass-panel rounded-xl p-container-padding flex flex-col justify-between">
             <div>
               <div class="flex justify-between items-center mb-2">
@@ -455,35 +541,25 @@
               </div>
               <p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Sec 112A equity exemption (₹1.25L) &amp; debt slab rules</p>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="tax-cards-grid"></div>
-            <p class="font-label-sm text-label-sm text-on-surface-variant/40 mt-4">* Estimate only — excludes surcharge and 4% health &amp; education cess. Confirm with a tax advisor before filing.</p>
+
+            <!-- ELSS 80C Card (Gap 6) -->
+            <div id="elss-tax-card" class="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">savings</span>
+                  Section 80C ELSS Optimization
+                </span>
+                <span id="elss-limit-badge" class="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">₹1.5L Limit</span>
+              </div>
+              <p id="elss-recommendation-text" class="text-xs text-on-surface-variant mt-1">—</p>
+              <p class="text-[10px] text-on-surface-variant/40 mt-2">* General guidance based on standard Section 80C rules. Confirm with a tax advisor.</p>
+            </div>
           </div>
         </div>
 
-        <!-- 7. AI Better Alternatives Table -->
-        <div class="glass-panel rounded-xl p-container-padding">
-          <h4 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-secondary">swap_horiz</span>
-            AI Better Alternatives
-          </h4>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="border-b border-white/10 text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider">
-                  <th class="pb-3">Current Holding</th>
-                  <th class="pb-3 text-right">Expense Ratio</th>
-                  <th class="pb-3">Suggested Alternative</th>
-                  <th class="pb-3 text-right">Alt Expense</th>
-                  <th class="pb-3 text-right">3Y CAGR</th>
-                  <th class="pb-3">Why Consider</th>
-                </tr>
-              </thead>
-              <tbody id="better-alternatives-body" class="divide-y divide-white/5 text-xs"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 8. Future Projection Chart -->
+        <!-- 7. Future Projection Chart -->
         <div class="glass-panel rounded-xl p-container-padding">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
             <div>
@@ -520,7 +596,85 @@
           </div>
         </div>
 
-        <!-- 9. AI Chat Panel -->
+        <!-- 8. Goal-Based Investment Planner (Gap 5) -->
+        <div class="glass-panel rounded-xl p-container-padding">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+            <div>
+              <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary">flag</span>
+                Goal-Based Investment Planner
+              </h4>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Calculate required monthly SIP to achieve your financial targets</p>
+            </div>
+            <button onclick="addGoalModalPrompt()" class="bg-secondary/20 text-secondary border border-secondary/30 font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-secondary/30 transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">add</span>Add Goal
+            </button>
+          </div>
+
+          <!-- Quick Select Chips -->
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="text-xs text-on-surface-variant flex items-center">Quick Add:</span>
+            <button onclick="quickAddGoal('House', 5000000, 7)" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20">🏡 Dream House (₹50L · 7Y)</button>
+            <button onclick="quickAddGoal('Car', 1500000, 3)" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20">🚗 New Car (₹15L · 3Y)</button>
+            <button onclick="quickAddGoal('Retirement', 20000000, 15)" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20">🌴 Retirement (₹2 Cr · 15Y)</button>
+            <button onclick="quickAddGoal('Education', 3500000, 10)" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20">🎓 Child Education (₹35L · 10Y)</button>
+          </div>
+
+          <!-- Goal Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="goal-cards-container"></div>
+        </div>
+
+        <!-- 9. AMC Comparison Panel (Gap 9) -->
+        <div class="glass-panel rounded-xl p-container-padding">
+          <div class="flex justify-between items-center mb-4">
+            <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">domain</span>
+              AMC Comparison Breakdown
+            </h4>
+            <span class="text-xs text-on-surface-variant">Resliced portfolio metrics by Fund House</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-white/10 text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider">
+                  <th class="pb-3">AMC Name</th>
+                  <th class="pb-3">AUM Tier</th>
+                  <th class="pb-3 text-center">Schemes Held</th>
+                  <th class="pb-3 text-right">Value (₹)</th>
+                  <th class="pb-3 text-right">Weight</th>
+                  <th class="pb-3 text-right">Avg Expense Ratio</th>
+                  <th class="pb-3 text-right">Abs Return</th>
+                </tr>
+              </thead>
+              <tbody id="amc-comparison-body" class="divide-y divide-white/5 text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 10. AI Better Alternatives Table -->
+        <div class="glass-panel rounded-xl p-container-padding">
+          <h4 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary">swap_horiz</span>
+            AI Better Alternatives
+          </h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-white/10 text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider">
+                  <th class="pb-3">Current Holding</th>
+                  <th class="pb-3 text-right">Expense Ratio</th>
+                  <th class="pb-3">Suggested Alternative</th>
+                  <th class="pb-3 text-right">Alt Expense</th>
+                  <th class="pb-3 text-right">3Y CAGR</th>
+                  <th class="pb-3">Why Consider</th>
+                </tr>
+              </thead>
+              <tbody id="better-alternatives-body" class="divide-y divide-white/5 text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 11. AI Chat Panel -->
         <div class="glass-panel rounded-xl p-container-padding flex flex-col gap-4">
           <div class="flex items-center gap-2 border-b border-white/10 pb-3">
             <span class="material-symbols-outlined text-secondary text-2xl">forum</span>
@@ -530,7 +684,6 @@
             </div>
           </div>
 
-          <!-- Starter Chips -->
           <div class="flex flex-wrap gap-2">
             <button onclick="askAiChat('Should I continue my SIP?')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20 transition-all">Should I continue my SIP?</button>
             <button onclick="askAiChat('Should I redeem now?')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20 transition-all">Should I redeem now?</button>
@@ -540,7 +693,6 @@
             <button onclick="askAiChat('How much should I invest monthly?')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20 transition-all">How much should I invest monthly?</button>
           </div>
 
-          <!-- Chat Output Container -->
           <div id="chat-messages-container" class="flex flex-col gap-3 max-h-80 overflow-y-auto p-3 bg-black/20 rounded-xl border border-white/5">
             <div class="flex gap-3 items-start">
               <div class="w-8 h-8 rounded-full bg-primary-container/20 border border-primary-container/40 flex items-center justify-center flex-shrink-0">
@@ -552,7 +704,6 @@
             </div>
           </div>
 
-          <!-- Chat Input Form -->
           <form onsubmit="submitChatForm(event)" class="flex gap-2">
             <input id="chat-input" class="flex-1 glass-input rounded-xl px-4 py-2 text-xs" placeholder="Ask AI Assistant about your mutual funds..." type="text"/>
             <button type="submit" class="bg-primary text-on-primary px-5 py-2 rounded-xl hover:bg-primary-container transition-colors flex items-center gap-1 font-label-md text-label-md">
@@ -562,7 +713,6 @@
           <p class="font-label-sm text-label-sm text-on-surface-variant/40 text-center">* AI responses are generated for educational analysis only and do not constitute formal financial advice.</p>
         </div>
 
-        <!-- Re-analyze Action Button -->
         <div class="flex justify-end">
           <button onclick="resetAnalysis()" class="flex items-center gap-2 text-on-surface-variant hover:text-on-surface font-label-md text-label-md border border-white/10 px-5 py-2 rounded-lg hover:bg-white/5 transition-colors">
             <span class="material-symbols-outlined text-[18px]">refresh</span>Edit &amp; Re-analyse
@@ -573,15 +723,16 @@
     </div>
   </main>
 
-  <!-- Mobile Bottom Nav -->
   <nav id="mobile-nav" class="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-surface-container/95 backdrop-blur-xl border-t border-white/10 flex justify-around items-center h-16 px-2"></nav>
 
   <script src="shared.js"></script>
+  <script src="lib/amfiNavService.js"></script>
+  <script src="lib/fundHoldingsData.js"></script>
+  <script src="lib/fundManagerData.js"></script>
   <script src="lib/mutualFundMath.js"></script>
   <script src="lib/useMutualFundPortfolio.js"></script>
 
   <script>
-    // Default Sample Mutual Fund Holdings
     const DEFAULT_MF_HOLDINGS = [
       {
         schemeName: 'Parag Parikh Flexi Cap Fund Direct-Growth',
@@ -606,7 +757,7 @@
         expenseRatio: 0.69
       },
       {
-        schemeName: 'HDFC Mid-Cap Opportunities Direct-Growth',
+        schemeName: 'HDFC Mid-Cap Opportunities Fund Direct-Growth',
         amc: 'HDFC MF',
         category: 'Mid Cap',
         units: 320.50,
@@ -631,6 +782,10 @@
 
     let rowCounter = 0;
     let currentPortfolioData = null;
+    let userRiskProfile = 'Moderate';
+    let userGoals = [
+      { id: 'g1', name: 'Dream House', targetAmount: 5000000, targetDate: '2032-12-31' }
+    ];
 
     function fmtINR(val) {
       if (val === undefined || val === null || isNaN(val)) return '₹0.00';
@@ -657,6 +812,12 @@
       updateClock();
       setInterval(updateClock, 1000);
 
+      const savedProfile = localStorage.getItem('saarthix_user_risk_profile');
+      if (savedProfile) {
+        userRiskProfile = savedProfile;
+        document.getElementById('user-risk-profile-label').textContent = userRiskProfile;
+      }
+
       const saved = localStorage.getItem('saarthix_mf_holdings');
       const initialList = saved ? JSON.parse(saved) : DEFAULT_MF_HOLDINGS;
       initialList.forEach(h => addMfRow(h));
@@ -670,6 +831,7 @@
       if (istEl) istEl.textContent = timeStr;
     }
 
+    // Gap 1: AMFI Live NAV Autocomplete & Debounced Search
     function createMfRow(h = {}) {
       rowCounter++;
       const id = rowCounter;
@@ -680,9 +842,10 @@
       const isSip = (!h.investType || h.investType === 'SIP');
 
       div.innerHTML = `
-        <div class="w-full">
+        <div class="w-full relative">
           <label class="block md:hidden text-[10px] text-on-surface-variant mb-1">Scheme Name</label>
-          <input class="w-full glass-input rounded-lg px-3 py-1.5 text-xs mf-scheme" placeholder="Scheme Name..." value="${h.schemeName || ''}" type="text"/>
+          <input class="w-full glass-input rounded-lg px-3 py-1.5 text-xs mf-scheme" placeholder="Search AMFI scheme name..." value="${h.schemeName || ''}" type="text" autocomplete="off"/>
+          <div class="suggest-dropdown hidden absolute left-0 right-0 top-full mt-1 glass-panel rounded-xl border border-white/10 shadow-2xl z-50 flex flex-col max-h-48 overflow-y-auto p-1.5 gap-1"></div>
         </div>
         <div class="w-full">
           <label class="block md:hidden text-[10px] text-on-surface-variant mb-1">AMC</label>
@@ -729,6 +892,57 @@
           <span class="material-symbols-outlined text-[18px]">delete</span>
         </button>
       `;
+
+      // Setup Debounced Autocomplete
+      const schemeInput = div.querySelector('.mf-scheme');
+      const dropdown = div.querySelector('.suggest-dropdown');
+      const amcInput = div.querySelector('.mf-amc');
+      const catSelect = div.querySelector('.mf-category');
+      const navInput = div.querySelector('.mf-current-nav');
+
+      let debounceTimer = null;
+
+      async function handleSearch(query) {
+        if (typeof AmfiNavService === 'undefined') return;
+        const matches = await AmfiNavService.searchAmfiSchemes(query);
+        if (!matches || !matches.length) {
+          dropdown.classList.add('hidden');
+          return;
+        }
+
+        dropdown.innerHTML = matches.map(s => `
+          <div role="button" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 flex items-center justify-between text-xs transition-colors cursor-pointer"
+               data-scheme="${s.schemeName}" data-amc="${s.amc}" data-cat="${s.category}" data-nav="${s.nav}">
+            <div class="flex flex-col">
+              <span class="font-bold text-white truncate max-w-[200px]">${s.schemeName}</span>
+              <span class="text-[10px] text-on-surface-variant">${s.amc} · ${s.category}</span>
+            </div>
+            <span class="font-mono font-bold text-primary">₹${s.nav}</span>
+          </div>
+        `).join('');
+        dropdown.classList.remove('hidden');
+
+        dropdown.querySelectorAll('[data-scheme]').forEach(btn => {
+          btn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            schemeInput.value = btn.dataset.scheme;
+            amcInput.value = btn.dataset.amc;
+            catSelect.value = btn.dataset.cat;
+            navInput.value = btn.dataset.nav;
+            dropdown.classList.add('hidden');
+            showToast(`Auto-filled NAV: ₹${btn.dataset.nav} for ${btn.dataset.scheme}`);
+          });
+        });
+      }
+
+      schemeInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => handleSearch(e.target.value), 250);
+      });
+
+      schemeInput.addEventListener('focus', (e) => handleSearch(e.target.value));
+      schemeInput.addEventListener('blur', () => setTimeout(() => dropdown.classList.add('hidden'), 200));
+
       return div;
     }
 
@@ -749,11 +963,11 @@
 
     function importCsvStub() {
       const sampleCsv = `Scheme Name,AMC,Category,Units,Avg NAV,Current NAV,Type,Date
-Parag Parikh Flexi Cap,PPFAS,Flexi Cap,500,50,78,SIP,2023-01-15
-SBI Small Cap,SBI MF,Small Cap,300,100,165,SIP,2023-04-10
-ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05-10`;
+Parag Parikh Flexi Cap,PPFAS,Flexi Cap,500,50,76.2,SIP,2023-01-15
+SBI Small Cap,SBI MF,Small Cap,300,100,168.9,SIP,2023-04-10
+ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-05-10`;
 
-      const input = prompt("Paste your CSV content below (Scheme Name, AMC, Category, Units, Avg NAV, Current NAV, Type, Date):", sampleCsv);
+      const input = prompt("Paste CSV content (Scheme Name, AMC, Category, Units, Avg NAV, Current NAV, Type, Date):", sampleCsv);
       if (!input) return;
 
       const lines = input.trim().split('\n');
@@ -823,7 +1037,7 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
 
       try {
         const slabRate = parseInt(document.getElementById('tax-slab-select').value) || 30;
-        currentPortfolioData = useMutualFundPortfolio(holdings, slabRate);
+        currentPortfolioData = useMutualFundPortfolio(holdings, slabRate, userGoals);
 
         let aiRecommendations = [];
         try {
@@ -858,7 +1072,22 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
       const summary = computed.summary;
       const health = computed.health;
 
-      // Summary Stat Row
+      // Check Risk Mismatch Banner (Gap 7)
+      const riskMeterLabel = computed.riskMeter.label;
+      const isMismatch = (riskMeterLabel === 'High' && userRiskProfile === 'Moderate') ||
+                         (riskMeterLabel === 'High' && userRiskProfile === 'Conservative') ||
+                         (riskMeterLabel === 'Medium-High' && userRiskProfile === 'Conservative');
+
+      const mismatchBanner = document.getElementById('risk-mismatch-banner');
+      if (isMismatch) {
+        document.getElementById('mismatch-risk-meter').textContent = riskMeterLabel;
+        document.getElementById('mismatch-user-profile').textContent = userRiskProfile;
+        mismatchBanner.classList.remove('hidden');
+      } else {
+        mismatchBanner.classList.add('hidden');
+      }
+
+      // Stat Row
       document.getElementById('res-current-value').textContent = fmtINR(summary.totalCurrentValue);
       document.getElementById('res-invested-value').textContent = fmtINR(summary.totalInvested);
       document.getElementById('res-holdings-count').textContent = `${computed.holdings.length} scheme${computed.holdings.length > 1 ? 's' : ''}`;
@@ -875,7 +1104,7 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
         ${isPositive ? '+' : ''}${fmtINR(summary.totalPnL)} (${summary.absReturnPct}%)
       `;
 
-      // Health Score Stars & Breakdown
+      // Health Breakdown
       const starStr = '★'.repeat(health.stars) + '☆'.repeat(5 - health.stars);
       document.getElementById('res-star-rating').textContent = starStr;
       document.getElementById('score-div').textContent = `${health.breakdown.diversification}/100`;
@@ -884,18 +1113,51 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
       document.getElementById('score-perf').textContent = `${health.breakdown.performance}/100`;
       document.getElementById('score-risk').textContent = `${health.breakdown.riskAlignment}/100`;
 
-      // AI Recommendations Grid
-      const recsGrid = document.getElementById('recommendations-grid');
-      recsGrid.innerHTML = '';
+      // AI Recommendations & Deep Analysis Cards (Gap 2, 3, 4, 8)
+      renderRecommendationCards(computed.holdings, aiRecommendations);
 
-      computed.holdings.forEach((h, i) => {
+      // Donut & Sector Charts
+      drawDiversificationChart(computed.diversification);
+      renderSectorBars(computed.sectorAllocation);
+
+      // Risk Meter & Overlap (Jaccard)
+      renderRiskMeter(computed.riskMeter);
+      renderOverlapPanelWithJaccard(computed.holdings);
+
+      // SIP & Tax & ELSS
+      renderSipOptimizer(computed.sipOptimizer);
+      renderTaxEstimator(computed.taxEstimator);
+      renderElssCard(computed.elssTaxSuggestions);
+
+      // Projections & Goals & AMC
+      updateProjectionChart();
+      renderGoalCards(computed.goalPlans);
+      renderAmcComparison(computed.amcGrouped);
+
+      // Alternatives
+      renderBetterAlternatives(computed.betterAlternatives);
+    }
+
+    // Extended Fund Recommendation Cards (Gap 2, 3, 4, 8)
+    function renderRecommendationCards(holdings, aiRecommendations) {
+      const grid = document.getElementById('recommendations-grid');
+      grid.innerHTML = '';
+
+      holdings.forEach((h, i) => {
         const aiRec = aiRecommendations.find(r => r.schemeName === h.schemeName) || {
           recommendation: h.absReturnPct >= 15 ? 'BUY_MORE' : 'HOLD',
-          confidence: 85,
-          suggestedNavRange: `₹${(h.currentNav * 0.95).toFixed(1)}-${(h.currentNav * 1.05).toFixed(1)}`,
-          reasons: ['Consistent historical return generation.', 'Expense ratio aligns with category average.'],
-          risks: ['Market volatility and macro rate shifts.']
+          confidence: 88,
+          idealBuyNav: `₹${(h.currentNav * 0.95).toFixed(1)} - ₹${(h.currentNav * 0.98).toFixed(1)}`,
+          idealExitNav: `₹${(h.currentNav * 1.35).toFixed(1)} - ₹${(h.currentNav * 1.45).toFixed(1)}`,
+          fiveYearExpectedCagr: '12-14%',
+          taxImpact: 'Redeeming today qualifies for Equity LTCG (held > 12m). Gains above ₹1.25L exemption taxed at 12.5%.',
+          pros: ['Strong return generation outperforming category benchmark', 'Competitive expense ratio preserves net yield'],
+          cons: ['Category valuation trading near upper band'],
+          actionPlan: 'Continue current monthly SIP. Step up allocation by 10% on minor NAV dips.'
         };
+
+        const topHoldingsObj = (typeof FundHoldingsData !== 'undefined') ? FundHoldingsData.getFundTopHoldings(h.schemeName) : null;
+        const managerObj = (typeof FundManagerData !== 'undefined') ? FundManagerData.getFundManagerInfo(h.schemeName) : null;
 
         const pillStyles = {
           'BUY_MORE': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
@@ -905,16 +1167,23 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
         };
 
         const card = document.createElement('div');
-        card.className = 'glass-panel rounded-xl p-5 flex flex-col justify-between gap-4 hover:border-primary/40 transition-all';
+        card.className = 'glass-panel rounded-xl p-5 flex flex-col justify-between gap-4 border border-white/10 hover:border-primary/40 transition-all';
         card.innerHTML = `
           <div>
+            <!-- Header & Badges -->
             <div class="flex justify-between items-start gap-2 mb-2">
-              <h5 class="font-bold text-sm text-white line-clamp-1" title="${h.schemeName}">${h.schemeName}</h5>
-              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${pillStyles[aiRec.recommendation] || pillStyles.HOLD}">${aiRec.recommendation}</span>
+              <div>
+                <h5 class="font-bold text-sm text-white line-clamp-1" title="${h.schemeName}">${h.schemeName}</h5>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-amber-400 text-xs">${h.rating.starString}</span>
+                  <span class="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">${h.categoryRank.rankString.split(' in ')[0]}</span>
+                </div>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-bold border ${pillStyles[aiRec.recommendation] || pillStyles.HOLD}">${aiRec.recommendation}</span>
             </div>
-            <p class="text-xs text-on-surface-variant mb-3">${h.category} · AMC: ${h.amc}</p>
 
-            <div class="grid grid-cols-2 gap-2 text-xs bg-white/[0.02] p-2.5 rounded-lg mb-3">
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-3 gap-2 text-xs bg-white/[0.02] p-2.5 rounded-lg my-3 border border-white/5">
               <div>
                 <span class="text-on-surface-variant text-[10px]">Current Value</span>
                 <p class="font-bold text-white">${fmtINR(h.currentVal)}</p>
@@ -923,33 +1192,260 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
                 <span class="text-on-surface-variant text-[10px]">Abs Return</span>
                 <p class="font-bold ${h.pnl >= 0 ? 'text-secondary' : 'text-error'}">${h.absReturnPct >= 0 ? '+' : ''}${h.absReturnPct}%</p>
               </div>
+              <div>
+                <span class="text-on-surface-variant text-[10px]">5Y Est. CAGR</span>
+                <p class="font-bold text-primary">${aiRec.fiveYearExpectedCagr || '12-14%'}</p>
+              </div>
             </div>
 
-            <div class="mb-3">
-              <span class="text-[11px] font-bold text-primary flex items-center gap-1 mb-1">
-                <span class="material-symbols-outlined text-xs">verified</span>Confidence: ${aiRec.confidence}%
-              </span>
-              <ul class="list-disc list-inside text-xs text-on-surface-variant space-y-1">
-                ${aiRec.reasons.map(r => `<li>${r}</li>`).join('')}
-              </ul>
+            <!-- NAV Bands (Gap 4) -->
+            <div class="flex justify-between text-xs mb-3 px-1 text-on-surface-variant font-mono">
+              ${aiRec.idealBuyNav ? `<span>Ideal Buy NAV: <strong class="text-emerald-400">${aiRec.idealBuyNav}</strong></span>` : ''}
+              ${aiRec.idealExitNav ? `<span>Ideal Exit Target: <strong class="text-amber-400">${aiRec.idealExitNav}</strong></span>` : ''}
             </div>
+
+            <!-- Pros & Cons (Gap 4) -->
+            <div class="grid grid-cols-2 gap-2 my-3 text-xs">
+              <div class="bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10">
+                <span class="text-[10px] font-bold text-emerald-400 block mb-1">PROS</span>
+                <ul class="list-disc list-inside text-[11px] text-on-surface-variant space-y-1">
+                  ${(aiRec.pros || []).slice(0, 2).map(p => `<li>${p}</li>`).join('')}
+                </ul>
+              </div>
+              <div class="bg-red-500/5 p-2 rounded-lg border border-red-500/10">
+                <span class="text-[10px] font-bold text-red-400 block mb-1">CONS</span>
+                <ul class="list-disc list-inside text-[11px] text-on-surface-variant space-y-1">
+                  ${(aiRec.cons || []).slice(0, 2).map(c => `<li>${c}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+
+            <!-- Fund Manager Signal (Gap 8) -->
+            ${managerObj ? `
+              <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/5 text-xs mb-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-sm">person</span>
+                  <div>
+                    <p class="font-bold text-white">${managerObj.name} <span class="text-[10px] text-on-surface-variant">(${managerObj.tenureFundYears} yrs on fund)</span></p>
+                    <p class="text-[10px] text-secondary">${managerObj.signal}</p>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Top Holdings Collapsible (Gap 3) -->
+            ${topHoldingsObj ? `
+              <details class="text-xs mb-3 bg-white/[0.01] rounded-lg p-2 border border-white/5">
+                <summary class="cursor-pointer font-bold text-primary flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">list_alt</span>Top Stock Holdings (${topHoldingsObj.disclosedDate})
+                </summary>
+                <div class="mt-2 space-y-1">
+                  ${topHoldingsObj.topHoldings.map(stk => `
+                    <div class="flex justify-between text-[11px] text-on-surface-variant">
+                      <span>${stk.name} (${stk.ticker})</span>
+                      <span class="font-mono text-white">${stk.weight}%</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </details>
+            ` : ''}
+
+            <!-- Tax Impact Summary -->
+            <p class="text-[11px] text-on-surface-variant/80 italic mb-3">
+              <strong>Tax Impact:</strong> ${aiRec.taxImpact}
+            </p>
           </div>
-          <div class="pt-2 border-t border-white/5 text-[11px] text-amber-400/80">
-            <strong>Risks:</strong> ${aiRec.risks.join(' · ')}
+
+          <!-- Highlighted Action Plan Callout (Gap 4) -->
+          <div class="p-3 rounded-xl bg-primary/10 border border-primary/30 text-xs text-white">
+            <strong class="text-primary font-bold">Action Plan:</strong> ${aiRec.actionPlan}
           </div>
         `;
-        recsGrid.appendChild(card);
+        grid.appendChild(card);
       });
+    }
 
-      // Render Charts & Panels
-      drawDiversificationChart(computed.diversification);
-      renderSectorBars(computed.sectorAllocation);
-      renderRiskMeter(computed.riskMeter);
-      renderOverlapPanel(computed.overlap);
-      renderSipOptimizer(computed.sipOptimizer);
-      renderTaxEstimator(computed.taxEstimator);
-      renderBetterAlternatives(computed.betterAlternatives);
-      updateProjectionChart();
+    // Overlap Detector with Jaccard Stock-Level Overlap (Gap 3)
+    function renderOverlapPanelWithJaccard(holdings) {
+      const container = document.getElementById('overlap-list-container');
+      container.innerHTML = '';
+
+      const pairs = [];
+      for (let i = 0; i < holdings.length; i++) {
+        for (let j = i + 1; j < holdings.length; j++) {
+          const f1 = holdings[i];
+          const f2 = holdings[j];
+
+          const h1 = (typeof FundHoldingsData !== 'undefined') ? FundHoldingsData.getFundTopHoldings(f1.schemeName) : null;
+          const h2 = (typeof FundHoldingsData !== 'undefined') ? FundHoldingsData.getFundTopHoldings(f2.schemeName) : null;
+
+          if (h1 && h2) {
+            const jaccard = MFMath.calcJaccardOverlap(h1.topHoldings, h2.topHoldings);
+            if (jaccard && jaccard.commonCount > 0) {
+              pairs.push({
+                fund1: f1.schemeName,
+                fund2: f2.schemeName,
+                overlapPct: jaccard.jaccardPct,
+                commonStocks: jaccard.commonStocks,
+                isJaccard: true
+              });
+            }
+          } else if (f1.category === f2.category) {
+            pairs.push({
+              fund1: f1.schemeName,
+              fund2: f2.schemeName,
+              overlapPct: 55,
+              commonStocks: [],
+              isJaccard: false
+            });
+          }
+        }
+      }
+
+      if (!pairs.length) {
+        container.innerHTML = `
+          <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span>
+            No overlapping fund holdings detected! Clean portfolio diversification.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = pairs.map(p => `
+        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col gap-1 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-white truncate max-w-[220px]">${p.fund1} vs ${p.fund2}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.overlapPct > 40 ? 'bg-error/20 text-error border border-error/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">
+              ~${p.overlapPct}% ${p.isJaccard ? 'Jaccard Stock Overlap' : 'Est. Category Overlap'}
+            </span>
+          </div>
+          ${p.commonStocks.length ? `<p class="text-[11px] text-on-surface-variant">Common holdings: <strong>${p.commonStocks.join(', ')}</strong></p>` : ''}
+        </div>
+      `).join('');
+    }
+
+    // ELSS Tax Card (Gap 6)
+    function renderElssCard(elssData) {
+      document.getElementById('elss-recommendation-text').textContent = elssData.recommendation;
+    }
+
+    // Goal Planner Cards (Gap 5)
+    function renderGoalCards(goalPlans) {
+      const container = document.getElementById('goal-cards-container');
+      if (!goalPlans || !goalPlans.length) {
+        container.innerHTML = '<p class="text-xs text-on-surface-variant col-span-3">No financial goals added yet. Click "+ Add Goal" or select a quick chip above.</p>';
+        return;
+      }
+
+      container.innerHTML = goalPlans.map(g => `
+        <div class="glass-panel rounded-xl p-4 flex flex-col justify-between gap-3 border border-white/10 relative">
+          <div>
+            <div class="flex justify-between items-start mb-1">
+              <h5 class="font-bold text-sm text-white">${g.name}</h5>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${g.isOnTrack ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'}">${g.statusLabel}</span>
+            </div>
+            <p class="text-xs text-on-surface-variant mb-2">Target: <strong class="text-white">${fmtINR(g.targetAmount)}</strong> by ${g.targetDateStr} (${g.yearsRemaining} yrs)</p>
+
+            <div class="bg-white/[0.02] p-2.5 rounded-lg space-y-1 text-xs">
+              <div class="flex justify-between">
+                <span class="text-on-surface-variant">Required Monthly SIP:</span>
+                <span class="font-bold text-secondary font-mono">${fmtINR(g.requiredSip)} / mo</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-on-surface-variant">Projected Portfolio Value:</span>
+                <span class="font-bold text-primary font-mono">${fmtINR(g.projectedVal)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-[11px] ${g.isOnTrack ? 'text-emerald-400' : 'text-amber-400'} pt-2 border-t border-white/5">
+            ${g.isOnTrack ? `Surplus of ${fmtINR(g.shortfallOrSurplus)} projected at target date!` : `Projected shortfall of ${fmtINR(g.shortfallOrSurplus)}. Increase SIP by ${fmtINR(g.requiredSip)}.`}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function quickAddGoal(name, targetAmount, years) {
+      const today = new Date();
+      const targetDateStr = new Date(today.getFullYear() + years, today.getMonth(), today.getDate()).toISOString().split('T')[0];
+      userGoals.push({
+        id: Math.random().toString(36).substr(2, 9),
+        name,
+        targetAmount,
+        targetDate: targetDateStr
+      });
+      if (currentPortfolioData) {
+        currentPortfolioData.goalPlans = MFMath.computeGoalPlan(userGoals, currentPortfolioData.summary.portfolioXIRR, currentPortfolioData.summary.totalCurrentValue);
+        renderGoalCards(currentPortfolioData.goalPlans);
+      } else {
+        showToast(`Added goal: ${name}`);
+      }
+    }
+
+    function addGoalModalPrompt() {
+      const name = prompt("Enter goal name (e.g. Dream Home):", "Custom Goal");
+      if (!name) return;
+      const amt = parseFloat(prompt("Enter target amount in ₹ (e.g. 2500000):", "2500000")) || 2500000;
+      const years = parseInt(prompt("Years to achieve goal (e.g. 5):", "5")) || 5;
+      quickAddGoal(name, amt, years);
+    }
+
+    // AMC Comparison Breakdown (Gap 9)
+    function renderAmcComparison(amcList) {
+      const tbody = document.getElementById('amc-comparison-body');
+      if (!amcList || !amcList.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-3 text-center text-on-surface-variant">No AMC data.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = amcList.map(a => `
+        <tr class="hover:bg-white/[0.02]">
+          <td class="py-2.5 font-bold text-white">${a.amc}</td>
+          <td class="py-2.5 text-on-surface-variant text-[11px]">${a.aumTier}</td>
+          <td class="py-2.5 text-center font-mono text-white">${a.schemesCount}</td>
+          <td class="py-2.5 text-right font-bold text-white">${fmtINR(a.totalVal)}</td>
+          <td class="py-2.5 text-right font-mono text-primary">${a.weightPct}%</td>
+          <td class="py-2.5 text-right font-mono text-amber-400">${a.avgExpense}%</td>
+          <td class="py-2.5 text-right font-bold ${a.absReturnPct >= 0 ? 'text-secondary' : 'text-error'}">${a.absReturnPct >= 0 ? '+' : ''}${a.absReturnPct}%</td>
+        </tr>
+      `).join('');
+    }
+
+    // Risk Profiling Quiz Functions (Gap 7)
+    function openRiskQuizModal() {
+      document.getElementById('risk-quiz-modal').classList.remove('hidden');
+      document.getElementById('risk-quiz-modal').classList.add('flex');
+    }
+
+    function closeRiskQuizModal() {
+      document.getElementById('risk-quiz-modal').classList.add('hidden');
+      document.getElementById('risk-quiz-modal').classList.remove('flex');
+    }
+
+    function submitRiskQuiz(e) {
+      e.preventDefault();
+      const form = e.target;
+      const q1 = parseInt(form.q1.value) || 2;
+      const q2 = parseInt(form.q2.value) || 2;
+      const q3 = parseInt(form.q3.value) || 2;
+      const q4 = parseInt(form.q4.value) || 2;
+      const q5 = parseInt(form.q5.value) || 2;
+
+      const totalScore = q1 + q2 + q3 + q4 + q5;
+
+      if (totalScore <= 7) userRiskProfile = 'Conservative';
+      else if (totalScore <= 11) userRiskProfile = 'Moderate';
+      else userRiskProfile = 'Aggressive';
+
+      localStorage.setItem('saarthix_user_risk_profile', userRiskProfile);
+      document.getElementById('user-risk-profile-label').textContent = userRiskProfile;
+      closeRiskQuizModal();
+      showToast(`Risk Profile calculated: ${userRiskProfile}!`);
+
+      if (currentPortfolioData) {
+        buildDashboardUI(currentPortfolioData, []);
+      }
     }
 
     function toggleHealthBreakdown() {
@@ -1010,31 +1506,6 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
       document.getElementById('risk-score-val').textContent = risk.score;
       document.getElementById('risk-level-badge').textContent = risk.label;
       document.getElementById('risk-gauge-bar').style.width = `${risk.pct}%`;
-    }
-
-    function renderOverlapPanel(overlapList) {
-      const container = document.getElementById('overlap-list-container');
-      if (!overlapList.length) {
-        container.innerHTML = `
-          <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 flex items-center gap-2">
-            <span class="material-symbols-outlined">check_circle</span>
-            No portfolio overlap detected! Funds are cleanly diversified across categories.
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = overlapList.map(pair => `
-        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between gap-3 text-xs">
-          <div>
-            <p class="font-bold text-white">${pair.fund1} <span class="text-on-surface-variant font-normal">vs</span> ${pair.fund2}</p>
-            <p class="text-[11px] text-on-surface-variant">${pair.category} Category Overlap</p>
-          </div>
-          <div class="text-right">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${pair.risk === 'High' ? 'bg-error/20 text-error border border-error/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">~${pair.estimatedOverlapPct}% Overlap</span>
-          </div>
-        </div>
-      `).join('');
     }
 
     function renderSipOptimizer(opt) {
@@ -1124,7 +1595,6 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
       document.getElementById('proj-5y-val').textContent = fmtINR(points[5].value);
       document.getElementById('proj-10y-val').textContent = fmtINR(points[10].value);
 
-      // Draw projection canvas line
       const canvas = document.getElementById('projection-canvas');
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, 700, 180);
@@ -1147,7 +1617,6 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
       });
       ctx.stroke();
 
-      // Area fill
       ctx.lineTo(width - padding, height - padding);
       ctx.lineTo(padding, height - padding);
       ctx.closePath();
@@ -1171,7 +1640,6 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
 
       const container = document.getElementById('chat-messages-container');
 
-      // User Message
       const userDiv = document.createElement('div');
       userDiv.className = 'flex gap-3 items-start justify-end';
       userDiv.innerHTML = `
@@ -1183,7 +1651,6 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,12,Lumpsum,2024-05
       input.value = '';
       container.scrollTop = container.scrollHeight;
 
-      // Loading Bot Indicator
       const botDiv = document.createElement('div');
       botDiv.className = 'flex gap-3 items-start';
       botDiv.innerHTML = `

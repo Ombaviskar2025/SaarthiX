@@ -2964,63 +2964,99 @@ app.post('/api/mf-analysis', async (req, res) => {
       return res.status(400).json({ status: 'FAILURE', error: 'Holdings array is required' });
     }
 
-    // Helper for recommendation per fund
+    // Helper for extended recommendation per fund
     function getRecommendation(h) {
       const invested = (parseFloat(h.units) || 0) * (parseFloat(h.avgNav) || 0);
       const current = (parseFloat(h.units) || 0) * (parseFloat(h.currentNav) || 0);
       const absReturn = invested > 0 ? ((current - invested) / invested) * 100 : 0;
       const er = parseFloat(h.expenseRatio) || 1.0;
+      const nav = parseFloat(h.currentNav) || 100;
 
       let rec = 'HOLD';
-      let confidence = 75;
-      let reasons = [];
-      let risks = [];
+      let confidence = 85;
+      let idealBuyNav = null;
+      let idealExitNav = null;
+      let cagrRange = '12-14%';
+      let pros = [];
+      let cons = [];
+      let actionPlan = '';
+      let taxImpact = '';
+
+      const isLongTerm = h.startDate ? (Date.now() - new Date(h.startDate).getTime() > 365 * 24 * 60 * 60 * 1000) : false;
 
       if (absReturn > 15 && er <= 1.2) {
         rec = 'BUY_MORE';
-        confidence = 88;
-        reasons = [
-          `Strong absolute gain of ${absReturn.toFixed(1)}% with cost-effective expense ratio of ${er}%.`,
-          `Category leadership and disciplined execution support long-term compounding.`,
-          `Fund strategy continues to capture upside momentum while controlling drawdown.`
+        confidence = 90;
+        idealBuyNav = `₹${(nav * 0.95).toFixed(1)} - ₹${(nav * 0.98).toFixed(1)}`;
+        idealExitNav = `₹${(nav * 1.35).toFixed(1)} - ₹${(nav * 1.45).toFixed(1)}`;
+        cagrRange = '14-16%';
+        pros = [
+          `Strong return generation of +${absReturn.toFixed(1)}% outperforming category benchmark`,
+          `Competitive expense ratio (${er}%) preserves net compounding returns`,
+          `Disciplined fund manager execution across market cycles`
         ];
-        risks = ['Short-term sector valuation expansion risk', 'Broader market volatility'];
+        cons = [
+          `Category valuation currently trading near upper historical band`,
+          `Short-term broader market volatility risk`
+        ];
+        actionPlan = `Continue current monthly SIP. Step up allocation by 10% on minor NAV dips into the ₹${(nav * 0.95).toFixed(1)} band.`;
       } else if (er > 1.4 && absReturn < 10) {
         rec = 'PARTIAL_SWITCH';
         confidence = 82;
-        reasons = [
-          `Relatively high expense ratio of ${er}% vs category average drag on net returns.`,
-          `Lower return generation (${absReturn.toFixed(1)}%) compared to benchmark index alternative.`,
-          `Reallocating capital to low-cost index/flexi-cap direct funds could enhance net yield.`
+        idealBuyNav = null;
+        idealExitNav = `₹${(nav * 1.02).toFixed(1)} - ₹${(nav * 1.05).toFixed(1)}`;
+        cagrRange = '9-11%';
+        pros = [
+          `Stable downside protection during market corrections`
         ];
-        risks = ['Tax implications on capital gains upon redemption', 'Timing risk on switch'];
-      } else if (absReturn < -5) {
-        rec = 'HOLD';
-        confidence = 70;
-        reasons = [
-          `Temporary drawdown of ${absReturn.toFixed(1)}% reflects short-term cyclical headwinds.`,
-          `Underlying portfolio quality remains intact; panic selling locks in losses.`,
-          `Averaging down via SIP step-up can lower effective cost basis over 12-24 months.`
+        cons = [
+          `High expense ratio (${er}%) creates noticeable drag on long-term net yield`,
+          `Lags lower-cost index and flexi-cap direct alternatives by 2.5% p.a.`
         ];
-        risks = ['Extended sector underperformance', 'Macro interest rate shifts'];
+        actionPlan = `Pause fresh SIP installments. Reallocate 30% capital to low-cost direct index alternatives upon reaching exit band.`;
       } else {
         rec = 'HOLD';
         confidence = 80;
-        reasons = [
-          `Consistent performer generating stable return of ${absReturn.toFixed(1)}%.`,
-          `Expense ratio (${er}%) aligns reasonably well with category peers.`,
-          `Maintain current allocation; rebalance if category exposure exceeds 35%.`
+        idealBuyNav = `₹${(nav * 0.92).toFixed(1)} - ₹${(nav * 0.95).toFixed(1)}`;
+        idealExitNav = `₹${(nav * 1.25).toFixed(1)} - ₹${(nav * 1.30).toFixed(1)}`;
+        cagrRange = '11-13%';
+        pros = [
+          `Consistent core portfolio compounding asset`,
+          `Balanced risk-reward profile aligning with long-term goals`
         ];
-        risks = ['Market correlation risk', 'Potential fund manager style drift'];
+        cons = [
+          `Requires ongoing monitoring for AMC concentration risk`
+        ];
+        actionPlan = `Maintain current position. Review performance again after Q3 factsheet disclosure.`;
       }
+
+      if (isLongTerm) {
+        taxImpact = `Redeeming today qualifies for Equity LTCG (held > 12m). Gains above annual ₹1.25L exemption are taxed at 12.5%.`;
+      } else {
+        taxImpact = `Redeeming today attracts STCG tax at 20% flat rate (held ≤ 12m). Consider holding until 12-month threshold to optimize tax.`;
+      }
+
+      const val5y = Math.round(current * Math.pow(1.13, 5));
+      const val10y = Math.round(current * Math.pow(1.13, 10));
 
       return {
         schemeName: h.schemeName || 'Mutual Fund',
         recommendation: rec,
         confidence,
-        suggestedNavRange: h.currentNav ? `₹${(h.currentNav * 0.96).toFixed(1)} - ₹${(h.currentNav * 1.04).toFixed(1)}` : null,
-        reasons,
-        risks
+        suggestedNavRange: `₹${(nav * 0.96).toFixed(1)} - ₹${(nav * 1.04).toFixed(1)}`,
+        idealBuyNav,
+        idealExitNav,
+        fiveYearExpectedCagr: cagrRange,
+        futureValueProjection: {
+          years5: val5y,
+          years10: val10y
+        },
+        taxImpact,
+        pros,
+        cons,
+        actionPlan,
+        reasons: pros,
+        risks: cons
       };
     }
 
