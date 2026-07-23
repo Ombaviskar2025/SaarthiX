@@ -97,7 +97,6 @@
       <p class="text-xs text-on-surface-variant">Answer 5 quick questions to determine your investor risk tolerance profile.</p>
 
       <form id="risk-quiz-form" onsubmit="submitRiskQuiz(event)" class="flex flex-col gap-4">
-        <!-- Q1 -->
         <div>
           <p class="text-xs font-bold text-white mb-1.5">1. What is your primary investment time horizon?</p>
           <div class="space-y-1 text-xs text-on-surface-variant">
@@ -107,7 +106,6 @@
           </div>
         </div>
 
-        <!-- Q2 -->
         <div>
           <p class="text-xs font-bold text-white mb-1.5">2. How would you react if your portfolio dropped 20% in 3 months?</p>
           <div class="space-y-1 text-xs text-on-surface-variant">
@@ -117,7 +115,6 @@
           </div>
         </div>
 
-        <!-- Q3 -->
         <div>
           <p class="text-xs font-bold text-white mb-1.5">3. How stable is your primary income stream?</p>
           <div class="space-y-1 text-xs text-on-surface-variant">
@@ -127,7 +124,6 @@
           </div>
         </div>
 
-        <!-- Q4 -->
         <div>
           <p class="text-xs font-bold text-white mb-1.5">4. Do you have an active emergency liquid fund (6 months expenses)?</p>
           <div class="space-y-1 text-xs text-on-surface-variant">
@@ -137,7 +133,6 @@
           </div>
         </div>
 
-        <!-- Q5 -->
         <div>
           <p class="text-xs font-bold text-white mb-1.5">5. What is your prior market investment experience?</p>
           <div class="space-y-1 text-xs text-on-surface-variant">
@@ -259,7 +254,6 @@
           </div>
         </div>
 
-        <!-- Risk Profile Status Tag (Gap 7) -->
         <div class="flex items-center gap-2">
           <div id="risk-profile-tag" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-on-surface flex items-center gap-1.5 cursor-pointer hover:bg-white/10" onclick="openRiskQuizModal()">
             <span class="material-symbols-outlined text-primary text-sm">psychology</span>
@@ -299,7 +293,6 @@
           </div>
         </div>
 
-        <!-- Table headers (desktop) -->
         <div class="hidden md:grid md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1.5fr_2.5rem] gap-2 mb-2 px-3 text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider">
           <span>Mutual Fund Scheme</span>
           <span>AMC</span>
@@ -387,7 +380,6 @@
             </button>
           </div>
 
-          <!-- Weighting Breakdown Grid (Expandable) -->
           <div id="health-breakdown-panel" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="bg-white/[0.02] p-4 rounded-xl border border-white/5">
               <div class="flex justify-between text-xs text-on-surface-variant mb-1">
@@ -432,7 +424,7 @@
           </div>
         </div>
 
-        <!-- 3. AI Recommendation per Fund (Cards Grid - Extended Gap 2,3,4,8) -->
+        <!-- 3. AI Recommendation per Fund Cards -->
         <div class="glass-panel rounded-xl p-container-padding">
           <h3 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">auto_awesome</span>
@@ -466,8 +458,6 @@
 
         <!-- 5. Risk Meter & Overlap Detector Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-          <!-- Risk Meter Gauge -->
           <div class="glass-panel rounded-xl p-container-padding flex flex-col justify-between">
             <div>
               <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-2">
@@ -493,7 +483,6 @@
             <p class="text-xs text-on-surface-variant/60" id="risk-description">Portfolio maintains a balanced risk profile between capital preservation and growth.</p>
           </div>
 
-          <!-- Overlap Detector Panel (Jaccard Enabled - Gap 3) -->
           <div class="glass-panel rounded-xl p-container-padding flex flex-col justify-between">
             <div>
               <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-2">
@@ -509,8 +498,6 @@
 
         <!-- 6. SIP Optimizer & Tax Estimator Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-          <!-- SIP Optimizer -->
           <div class="glass-panel rounded-xl p-container-padding flex flex-col justify-between">
             <div>
               <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-2">
@@ -522,7 +509,6 @@
             <div class="my-4 p-4 rounded-xl bg-white/[0.02] border border-white/5" id="sip-optimizer-box"></div>
           </div>
 
-          <!-- Tax Estimator Card & ELSS 80C Card (Gap 6) -->
           <div class="glass-panel rounded-xl p-container-padding flex flex-col justify-between">
             <div>
               <div class="flex justify-between items-center mb-2">
@@ -544,7 +530,6 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="tax-cards-grid"></div>
 
-            <!-- ELSS 80C Card (Gap 6) -->
             <div id="elss-tax-card" class="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
               <div class="flex justify-between items-center mb-1">
                 <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
@@ -611,7 +596,6 @@
             </button>
           </div>
 
-          <!-- Quick Select Chips -->
           <div class="flex flex-wrap gap-2 mb-4">
             <span class="text-xs text-on-surface-variant flex items-center">Quick Add:</span>
             <button onclick="quickAddGoal('House', 5000000, 7)" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20">🏡 Dream House (₹50L · 7Y)</button>
@@ -620,7 +604,6 @@
             <button onclick="quickAddGoal('Education', 3500000, 10)" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-xs text-primary border border-primary/20">🎓 Child Education (₹35L · 10Y)</button>
           </div>
 
-          <!-- Goal Cards Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="goal-cards-container"></div>
         </div>
 
@@ -794,6 +777,7 @@
 
     function showToast(msg) {
       const container = document.getElementById('toast-container');
+      if (!container) return;
       const div = document.createElement('div');
       div.className = 'toast-msg';
       div.textContent = msg;
@@ -801,12 +785,22 @@
       setTimeout(() => div.remove(), 4000);
     }
 
+    function setSafeText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function setSafeHtml(id, html) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof buildNav === 'function') {
         const { navLinks, mobileLinks, statusDot } = buildNav('mutual-funds');
-        document.getElementById('nav-links').innerHTML = navLinks;
-        document.getElementById('mobile-nav').innerHTML = mobileLinks;
-        document.getElementById('market-status').innerHTML = statusDot;
+        setSafeHtml('nav-links', navLinks);
+        setSafeHtml('mobile-nav', mobileLinks);
+        setSafeHtml('market-status', statusDot);
       }
 
       updateClock();
@@ -815,23 +809,25 @@
       const savedProfile = localStorage.getItem('saarthix_user_risk_profile');
       if (savedProfile) {
         userRiskProfile = savedProfile;
-        document.getElementById('user-risk-profile-label').textContent = userRiskProfile;
+        setSafeText('user-risk-profile-label', userRiskProfile);
       }
 
       const saved = localStorage.getItem('saarthix_mf_holdings');
       const initialList = saved ? JSON.parse(saved) : DEFAULT_MF_HOLDINGS;
-      initialList.forEach(h => addMfRow(h));
+      const container = document.getElementById('mf-inputs-container');
+      if (container) {
+        container.innerHTML = '';
+        initialList.forEach(h => addMfRow(h));
+      }
     });
 
     function updateClock() {
       const now = new Date();
       const timeStr = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: true });
       document.querySelectorAll('.live-timestamp').forEach(el => el.textContent = `Last updated: ${timeStr} IST`);
-      const istEl = document.getElementById('ist-time');
-      if (istEl) istEl.textContent = timeStr;
+      setSafeText('ist-time', timeStr);
     }
 
-    // Gap 1: AMFI Live NAV Autocomplete & Debounced Search
     function createMfRow(h = {}) {
       rowCounter++;
       const id = rowCounter;
@@ -893,7 +889,6 @@
         </button>
       `;
 
-      // Setup Debounced Autocomplete
       const schemeInput = div.querySelector('.mf-scheme');
       const dropdown = div.querySelector('.suggest-dropdown');
       const amcInput = div.querySelector('.mf-amc');
@@ -947,7 +942,8 @@
     }
 
     function addMfRow(h) {
-      document.getElementById('mf-inputs-container').appendChild(createMfRow(h));
+      const container = document.getElementById('mf-inputs-container');
+      if (container) container.appendChild(createMfRow(h));
     }
 
     function removeRow(id) {
@@ -956,7 +952,8 @@
     }
 
     function clearAllRows() {
-      document.getElementById('mf-inputs-container').innerHTML = '';
+      const container = document.getElementById('mf-inputs-container');
+      if (container) container.innerHTML = '';
       addMfRow();
       localStorage.removeItem('saarthix_mf_holdings');
     }
@@ -973,7 +970,9 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
       const lines = input.trim().split('\n');
       if (lines.length < 2) return;
 
-      document.getElementById('mf-inputs-container').innerHTML = '';
+      const container = document.getElementById('mf-inputs-container');
+      if (container) container.innerHTML = '';
+
       for (let i = 1; i < lines.length; i++) {
         const parts = lines[i].split(',');
         if (parts.length >= 6) {
@@ -1027,16 +1026,21 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
     async function runAnalysis() {
       const holdings = collectHoldingsFromDom();
       if (!holdings.length) {
-        alert('Please fill in at least one mutual fund with units and average NAV.');
+        alert('Please fill in at least one mutual fund scheme with Units (>0) and Avg NAV (>0).');
         return;
       }
 
-      localStorage.setItem('saarthix_mf_holdings', JSON.stringify(holdings));
+      try {
+        localStorage.setItem('saarthix_mf_holdings', JSON.stringify(holdings));
+      } catch (e) {}
 
-      document.getElementById('loading-overlay').style.display = 'flex';
+      const overlay = document.getElementById('loading-overlay');
+      if (overlay) overlay.style.display = 'flex';
 
       try {
-        const slabRate = parseInt(document.getElementById('tax-slab-select').value) || 30;
+        const slabElem = document.getElementById('tax-slab-select');
+        const slabRate = slabElem ? (parseInt(slabElem.value) || 30) : 30;
+
         currentPortfolioData = useMutualFundPortfolio(holdings, slabRate, userGoals);
 
         let aiRecommendations = [];
@@ -1046,105 +1050,106 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ holdings })
           });
-          const json = await res.json();
-          if (json.status === 'SUCCESS') {
-            aiRecommendations = json.recommendations;
+          if (res.ok) {
+            const json = await res.json();
+            if (json.status === 'SUCCESS' && Array.isArray(json.recommendations)) {
+              aiRecommendations = json.recommendations;
+            }
           }
         } catch (e) {
-          console.warn('Backend AI analysis call failed, using fallback:', e.message);
+          console.warn('Backend AI analysis call fallback:', e.message);
         }
 
-        setTimeout(() => {
-          buildDashboardUI(currentPortfolioData, aiRecommendations);
-          document.getElementById('loading-overlay').style.display = 'none';
-          const resultsSec = document.getElementById('results-section');
+        // Small delay to let loading spinner render smoothly
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        buildDashboardUI(currentPortfolioData, aiRecommendations);
+
+        const resultsSec = document.getElementById('results-section');
+        if (resultsSec) {
           resultsSec.classList.add('show-results');
           resultsSec.scrollIntoView({ behavior: 'smooth' });
-        }, 700);
-
+        }
       } catch (err) {
-        console.error('Analysis error:', err);
-        document.getElementById('loading-overlay').style.display = 'none';
+        console.error('Analysis Execution Error:', err);
+        alert('An error occurred during portfolio analysis: ' + err.message);
+      } finally {
+        if (overlay) overlay.style.display = 'none';
       }
     }
 
     function buildDashboardUI(computed, aiRecommendations) {
+      if (!computed || !computed.summary) return;
       const summary = computed.summary;
       const health = computed.health;
 
-      // Check Risk Mismatch Banner (Gap 7)
-      const riskMeterLabel = computed.riskMeter.label;
+      // Risk Mismatch Banner
+      const riskMeterLabel = computed.riskMeter ? computed.riskMeter.label : 'Medium';
       const isMismatch = (riskMeterLabel === 'High' && userRiskProfile === 'Moderate') ||
                          (riskMeterLabel === 'High' && userRiskProfile === 'Conservative') ||
                          (riskMeterLabel === 'Medium-High' && userRiskProfile === 'Conservative');
 
       const mismatchBanner = document.getElementById('risk-mismatch-banner');
-      if (isMismatch) {
-        document.getElementById('mismatch-risk-meter').textContent = riskMeterLabel;
-        document.getElementById('mismatch-user-profile').textContent = userRiskProfile;
-        mismatchBanner.classList.remove('hidden');
-      } else {
-        mismatchBanner.classList.add('hidden');
+      if (mismatchBanner) {
+        if (isMismatch) {
+          setSafeText('mismatch-risk-meter', riskMeterLabel);
+          setSafeText('mismatch-user-profile', userRiskProfile);
+          mismatchBanner.classList.remove('hidden');
+        } else {
+          mismatchBanner.classList.add('hidden');
+        }
       }
 
       // Stat Row
-      document.getElementById('res-current-value').textContent = fmtINR(summary.totalCurrentValue);
-      document.getElementById('res-invested-value').textContent = fmtINR(summary.totalInvested);
-      document.getElementById('res-holdings-count').textContent = `${computed.holdings.length} scheme${computed.holdings.length > 1 ? 's' : ''}`;
-      document.getElementById('res-xirr').textContent = `${summary.portfolioXIRR}%`;
-      document.getElementById('res-abs-return').textContent = `Abs Return: ${summary.absReturnPct}%`;
-      document.getElementById('res-health-score').textContent = `${summary.healthScore} / 100`;
-      document.getElementById('res-health-band').textContent = health.band;
+      setSafeText('res-current-value', fmtINR(summary.totalCurrentValue));
+      setSafeText('res-invested-value', fmtINR(summary.totalInvested));
+      setSafeText('res-holdings-count', `${computed.holdings.length} scheme${computed.holdings.length > 1 ? 's' : ''}`);
+      setSafeText('res-xirr', `${summary.portfolioXIRR}%`);
+      setSafeText('res-abs-return', `Abs Return: ${summary.absReturnPct}%`);
+      setSafeText('res-health-score', `${summary.healthScore} / 100`);
+      setSafeText('res-health-band', health ? health.band : 'Good');
 
-      const pnlEl = document.getElementById('res-pnl-strip');
       const isPositive = summary.totalPnL >= 0;
-      pnlEl.className = `font-body-sm text-body-sm mt-1 flex items-center gap-1 ${isPositive ? 'text-secondary' : 'text-error'}`;
-      pnlEl.innerHTML = `
+      setSafeHtml('res-pnl-strip', `
         <span class="material-symbols-outlined text-[14px]">${isPositive ? 'arrow_upward' : 'arrow_downward'}</span>
         ${isPositive ? '+' : ''}${fmtINR(summary.totalPnL)} (${summary.absReturnPct}%)
-      `;
+      `);
 
       // Health Breakdown
-      const starStr = '★'.repeat(health.stars) + '☆'.repeat(5 - health.stars);
-      document.getElementById('res-star-rating').textContent = starStr;
-      document.getElementById('score-div').textContent = `${health.breakdown.diversification}/100`;
-      document.getElementById('score-overlap').textContent = `${health.breakdown.overlap}/100`;
-      document.getElementById('score-cost').textContent = `${health.breakdown.costEfficiency}/100`;
-      document.getElementById('score-perf').textContent = `${health.breakdown.performance}/100`;
-      document.getElementById('score-risk').textContent = `${health.breakdown.riskAlignment}/100`;
+      if (health) {
+        const starStr = '★'.repeat(health.stars || 4) + '☆'.repeat(5 - (health.stars || 4));
+        setSafeText('res-star-rating', starStr);
+        if (health.breakdown) {
+          setSafeText('score-div', `${health.breakdown.diversification}/100`);
+          setSafeText('score-overlap', `${health.breakdown.overlap}/100`);
+          setSafeText('score-cost', `${health.breakdown.costEfficiency}/100`);
+          setSafeText('score-perf', `${health.breakdown.performance}/100`);
+          setSafeText('score-risk', `${health.breakdown.riskAlignment}/100`);
+        }
+      }
 
-      // AI Recommendations & Deep Analysis Cards (Gap 2, 3, 4, 8)
+      // Render Dashboard Sub-panels
       renderRecommendationCards(computed.holdings, aiRecommendations);
-
-      // Donut & Sector Charts
-      drawDiversificationChart(computed.diversification);
-      renderSectorBars(computed.sectorAllocation);
-
-      // Risk Meter & Overlap (Jaccard)
-      renderRiskMeter(computed.riskMeter);
-      renderOverlapPanelWithJaccard(computed.holdings);
-
-      // SIP & Tax & ELSS
-      renderSipOptimizer(computed.sipOptimizer);
-      renderTaxEstimator(computed.taxEstimator);
-      renderElssCard(computed.elssTaxSuggestions);
-
-      // Projections & Goals & AMC
+      drawDiversificationChart(computed.diversification || []);
+      renderSectorBars(computed.sectorAllocation || []);
+      renderRiskMeter(computed.riskMeter || { label: 'Medium', score: '3.0', pct: 50 });
+      renderOverlapPanelWithJaccard(computed.holdings || []);
+      renderSipOptimizer(computed.sipOptimizer || { currentSipEst: 0, suggestedIncrease: 1000, recommendations: [] });
+      renderTaxEstimator(computed.taxEstimator || {});
+      renderElssCard(computed.elssTaxSuggestions || { recommendation: '' });
       updateProjectionChart();
-      renderGoalCards(computed.goalPlans);
-      renderAmcComparison(computed.amcGrouped);
-
-      // Alternatives
-      renderBetterAlternatives(computed.betterAlternatives);
+      renderGoalCards(computed.goalPlans || []);
+      renderAmcComparison(computed.amcGrouped || []);
+      renderBetterAlternatives(computed.betterAlternatives || []);
     }
 
-    // Extended Fund Recommendation Cards (Gap 2, 3, 4, 8)
     function renderRecommendationCards(holdings, aiRecommendations) {
       const grid = document.getElementById('recommendations-grid');
+      if (!grid) return;
       grid.innerHTML = '';
 
-      holdings.forEach((h, i) => {
-        const aiRec = aiRecommendations.find(r => r.schemeName === h.schemeName) || {
+      holdings.forEach((h) => {
+        const aiRec = (aiRecommendations || []).find(r => r.schemeName === h.schemeName) || {
           recommendation: h.absReturnPct >= 15 ? 'BUY_MORE' : 'HOLD',
           confidence: 88,
           idealBuyNav: `₹${(h.currentNav * 0.95).toFixed(1)} - ₹${(h.currentNav * 0.98).toFixed(1)}`,
@@ -1166,23 +1171,24 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
           'SELL': 'bg-red-500/20 text-red-400 border-red-500/40'
         };
 
+        const starStr = (h.rating && h.rating.starString) ? h.rating.starString : '★★★★☆';
+        const rankStr = (h.categoryRank && h.categoryRank.rankString) ? h.categoryRank.rankString.split(' in ')[0] : 'Rank 1';
+
         const card = document.createElement('div');
         card.className = 'glass-panel rounded-xl p-5 flex flex-col justify-between gap-4 border border-white/10 hover:border-primary/40 transition-all';
         card.innerHTML = `
           <div>
-            <!-- Header & Badges -->
             <div class="flex justify-between items-start gap-2 mb-2">
               <div>
                 <h5 class="font-bold text-sm text-white line-clamp-1" title="${h.schemeName}">${h.schemeName}</h5>
                 <div class="flex items-center gap-2 mt-1">
-                  <span class="text-amber-400 text-xs">${h.rating.starString}</span>
-                  <span class="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">${h.categoryRank.rankString.split(' in ')[0]}</span>
+                  <span class="text-amber-400 text-xs">${starStr}</span>
+                  <span class="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">${rankStr}</span>
                 </div>
               </div>
               <span class="px-3 py-1 rounded-full text-xs font-bold border ${pillStyles[aiRec.recommendation] || pillStyles.HOLD}">${aiRec.recommendation}</span>
             </div>
 
-            <!-- Stats Bar -->
             <div class="grid grid-cols-3 gap-2 text-xs bg-white/[0.02] p-2.5 rounded-lg my-3 border border-white/5">
               <div>
                 <span class="text-on-surface-variant text-[10px]">Current Value</span>
@@ -1198,13 +1204,11 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
               </div>
             </div>
 
-            <!-- NAV Bands (Gap 4) -->
             <div class="flex justify-between text-xs mb-3 px-1 text-on-surface-variant font-mono">
               ${aiRec.idealBuyNav ? `<span>Ideal Buy NAV: <strong class="text-emerald-400">${aiRec.idealBuyNav}</strong></span>` : ''}
               ${aiRec.idealExitNav ? `<span>Ideal Exit Target: <strong class="text-amber-400">${aiRec.idealExitNav}</strong></span>` : ''}
             </div>
 
-            <!-- Pros & Cons (Gap 4) -->
             <div class="grid grid-cols-2 gap-2 my-3 text-xs">
               <div class="bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10">
                 <span class="text-[10px] font-bold text-emerald-400 block mb-1">PROS</span>
@@ -1220,7 +1224,6 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
               </div>
             </div>
 
-            <!-- Fund Manager Signal (Gap 8) -->
             ${managerObj ? `
               <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/5 text-xs mb-3 flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -1233,7 +1236,6 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
               </div>
             ` : ''}
 
-            <!-- Top Holdings Collapsible (Gap 3) -->
             ${topHoldingsObj ? `
               <details class="text-xs mb-3 bg-white/[0.01] rounded-lg p-2 border border-white/5">
                 <summary class="cursor-pointer font-bold text-primary flex items-center gap-1">
@@ -1250,13 +1252,11 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
               </details>
             ` : ''}
 
-            <!-- Tax Impact Summary -->
             <p class="text-[11px] text-on-surface-variant/80 italic mb-3">
               <strong>Tax Impact:</strong> ${aiRec.taxImpact}
             </p>
           </div>
 
-          <!-- Highlighted Action Plan Callout (Gap 4) -->
           <div class="p-3 rounded-xl bg-primary/10 border border-primary/30 text-xs text-white">
             <strong class="text-primary font-bold">Action Plan:</strong> ${aiRec.actionPlan}
           </div>
@@ -1265,10 +1265,19 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
       });
     }
 
-    // Overlap Detector with Jaccard Stock-Level Overlap (Gap 3)
     function renderOverlapPanelWithJaccard(holdings) {
       const container = document.getElementById('overlap-list-container');
+      if (!container) return;
       container.innerHTML = '';
+
+      if (!holdings || holdings.length < 2) {
+        container.innerHTML = `
+          <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-on-surface-variant">
+            Add 2 or more funds to evaluate portfolio holding overlap.
+          </div>
+        `;
+        return;
+      }
 
       const pairs = [];
       for (let i = 0; i < holdings.length; i++) {
@@ -1279,7 +1288,7 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
           const h1 = (typeof FundHoldingsData !== 'undefined') ? FundHoldingsData.getFundTopHoldings(f1.schemeName) : null;
           const h2 = (typeof FundHoldingsData !== 'undefined') ? FundHoldingsData.getFundTopHoldings(f2.schemeName) : null;
 
-          if (h1 && h2) {
+          if (h1 && h2 && typeof MFMath !== 'undefined') {
             const jaccard = MFMath.calcJaccardOverlap(h1.topHoldings, h2.topHoldings);
             if (jaccard && jaccard.commonCount > 0) {
               pairs.push({
@@ -1325,14 +1334,16 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
       `).join('');
     }
 
-    // ELSS Tax Card (Gap 6)
     function renderElssCard(elssData) {
-      document.getElementById('elss-recommendation-text').textContent = elssData.recommendation;
+      if (elssData && elssData.recommendation) {
+        setSafeText('elss-recommendation-text', elssData.recommendation);
+      }
     }
 
-    // Goal Planner Cards (Gap 5)
     function renderGoalCards(goalPlans) {
       const container = document.getElementById('goal-cards-container');
+      if (!container) return;
+
       if (!goalPlans || !goalPlans.length) {
         container.innerHTML = '<p class="text-xs text-on-surface-variant col-span-3">No financial goals added yet. Click "+ Add Goal" or select a quick chip above.</p>';
         return;
@@ -1375,7 +1386,8 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
         targetAmount,
         targetDate: targetDateStr
       });
-      if (currentPortfolioData) {
+
+      if (currentPortfolioData && typeof MFMath !== 'undefined') {
         currentPortfolioData.goalPlans = MFMath.computeGoalPlan(userGoals, currentPortfolioData.summary.portfolioXIRR, currentPortfolioData.summary.totalCurrentValue);
         renderGoalCards(currentPortfolioData.goalPlans);
       } else {
@@ -1391,11 +1403,12 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
       quickAddGoal(name, amt, years);
     }
 
-    // AMC Comparison Breakdown (Gap 9)
     function renderAmcComparison(amcList) {
       const tbody = document.getElementById('amc-comparison-body');
+      if (!tbody) return;
+
       if (!amcList || !amcList.length) {
-        tbody.innerHTML = '<tr><td colspan="7" class="py-3 text-center text-on-surface-variant">No AMC data.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="py-3 text-center text-on-surface-variant">No AMC data available.</td></tr>';
         return;
       }
 
@@ -1412,15 +1425,20 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
       `).join('');
     }
 
-    // Risk Profiling Quiz Functions (Gap 7)
     function openRiskQuizModal() {
-      document.getElementById('risk-quiz-modal').classList.remove('hidden');
-      document.getElementById('risk-quiz-modal').classList.add('flex');
+      const modal = document.getElementById('risk-quiz-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
     }
 
     function closeRiskQuizModal() {
-      document.getElementById('risk-quiz-modal').classList.add('hidden');
-      document.getElementById('risk-quiz-modal').classList.remove('flex');
+      const modal = document.getElementById('risk-quiz-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
     }
 
     function submitRiskQuiz(e) {
@@ -1438,8 +1456,11 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
       else if (totalScore <= 11) userRiskProfile = 'Moderate';
       else userRiskProfile = 'Aggressive';
 
-      localStorage.setItem('saarthix_user_risk_profile', userRiskProfile);
-      document.getElementById('user-risk-profile-label').textContent = userRiskProfile;
+      try {
+        localStorage.setItem('saarthix_user_risk_profile', userRiskProfile);
+      } catch (err) {}
+
+      setSafeText('user-risk-profile-label', userRiskProfile);
       closeRiskQuizModal();
       showToast(`Risk Profile calculated: ${userRiskProfile}!`);
 
@@ -1450,11 +1471,12 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
 
     function toggleHealthBreakdown() {
       const panel = document.getElementById('health-breakdown-panel');
-      panel.classList.toggle('hidden');
+      if (panel) panel.classList.toggle('hidden');
     }
 
     function drawDiversificationChart(list) {
       const canvas = document.getElementById('diversification-canvas');
+      if (!canvas) return;
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, 200, 200);
 
@@ -1474,16 +1496,19 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
       });
 
       const legend = document.getElementById('diversification-legend');
-      legend.innerHTML = list.map(item => `
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:${item.color}"></span>
-          <span class="truncate text-on-surface-variant">${item.category} (${item.percentage}%)</span>
-        </div>
-      `).join('');
+      if (legend) {
+        legend.innerHTML = list.map(item => `
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:${item.color}"></span>
+            <span class="truncate text-on-surface-variant">${item.category} (${item.percentage}%)</span>
+          </div>
+        `).join('');
+      }
     }
 
     function renderSectorBars(sectors) {
       const container = document.getElementById('sector-bars-container');
+      if (!container) return;
       if (!sectors.length) {
         container.innerHTML = '<p class="text-xs text-on-surface-variant">No sector data available.</p>';
         return;
@@ -1503,13 +1528,15 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
     }
 
     function renderRiskMeter(risk) {
-      document.getElementById('risk-score-val').textContent = risk.score;
-      document.getElementById('risk-level-badge').textContent = risk.label;
-      document.getElementById('risk-gauge-bar').style.width = `${risk.pct}%`;
+      setSafeText('risk-score-val', risk.score);
+      setSafeText('risk-level-badge', risk.label);
+      const bar = document.getElementById('risk-gauge-bar');
+      if (bar) bar.style.width = `${risk.pct}%`;
     }
 
     function renderSipOptimizer(opt) {
       const box = document.getElementById('sip-optimizer-box');
+      if (!box) return;
       box.innerHTML = `
         <div class="flex justify-between items-center mb-3">
           <span class="text-xs text-on-surface-variant">Estimated Monthly SIP:</span>
@@ -1521,7 +1548,7 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
         </div>
         <p class="text-xs text-on-surface-variant font-bold mb-2">Target Step-Up Allocation:</p>
         <div class="space-y-2">
-          ${opt.recommendations.map(r => `
+          ${(opt.recommendations || []).map(r => `
             <div class="flex justify-between items-center text-xs bg-white/[0.03] p-2 rounded-lg">
               <span class="text-white truncate max-w-[200px]">${r.fund}</span>
               <span class="text-primary font-bold">+${fmtINR(r.increase)}/mo</span>
@@ -1533,25 +1560,26 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
 
     function renderTaxEstimator(tax) {
       const grid = document.getElementById('tax-cards-grid');
+      if (!grid) return;
       grid.innerHTML = `
         <div class="tax-card stcg-card glass-panel rounded-lg p-4">
           <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Equity STCG (≤ 12 Months)</p>
-          <p class="font-headline-md text-headline-md text-primary font-bold">${fmtINR(tax.equityStcgTax)}</p>
-          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">20% Flat Rate · Gain: ${fmtINR(tax.totalEquityStcgGain)}</p>
+          <p class="font-headline-md text-headline-md text-primary font-bold">${fmtINR(tax.equityStcgTax || 0)}</p>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">20% Flat Rate · Gain: ${fmtINR(tax.totalEquityStcgGain || 0)}</p>
         </div>
         <div class="tax-card ltcg-card glass-panel rounded-lg p-4">
           <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Equity LTCG (> 12 Months)</p>
-          <p class="font-headline-md text-headline-md text-secondary font-bold">${fmtINR(tax.equityLtcgTax)}</p>
-          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">12.5% above ₹1.25L Exemption · Gain: ${fmtINR(tax.totalEquityLtcgGain)}</p>
+          <p class="font-headline-md text-headline-md text-secondary font-bold">${fmtINR(tax.equityLtcgTax || 0)}</p>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">12.5% above ₹1.25L Exemption · Gain: ${fmtINR(tax.totalEquityLtcgGain || 0)}</p>
         </div>
         <div class="tax-card glass-panel rounded-lg p-4 border-l-4 border-amber-500">
           <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Debt Fund Tax (Income Slab)</p>
-          <p class="font-headline-md text-headline-md text-amber-400 font-bold">${fmtINR(tax.debtSlabTax)}</p>
-          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Taxed @ ${tax.slabRatePct}% Slab Rate · Gain: ${fmtINR(tax.totalDebtSlabGain)}</p>
+          <p class="font-headline-md text-headline-md text-amber-400 font-bold">${fmtINR(tax.debtSlabTax || 0)}</p>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Taxed @ ${tax.slabRatePct || 30}% Slab Rate · Gain: ${fmtINR(tax.totalDebtSlabGain || 0)}</p>
         </div>
         <div class="tax-card glass-panel rounded-lg p-4 border-l-4 border-purple-500">
           <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Total Estimated Tax Liability</p>
-          <p class="font-headline-md text-headline-md text-white font-bold">${fmtINR(tax.totalEstTax)}</p>
+          <p class="font-headline-md text-headline-md text-white font-bold">${fmtINR(tax.totalEstTax || 0)}</p>
           <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Combined capital gains tax estimate</p>
         </div>
       `;
@@ -1559,14 +1587,18 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
 
     function updateTaxSlab() {
       if (!currentPortfolioData) return;
-      const slab = parseInt(document.getElementById('tax-slab-select').value) || 30;
-      const updatedTax = MFMath.calcTaxEstimator(currentPortfolioData.holdings, slab);
-      renderTaxEstimator(updatedTax);
+      const slabElem = document.getElementById('tax-slab-select');
+      const slab = slabElem ? (parseInt(slabElem.value) || 30) : 30;
+      if (typeof MFMath !== 'undefined') {
+        const updatedTax = MFMath.calcTaxEstimator(currentPortfolioData.holdings, slab);
+        renderTaxEstimator(updatedTax);
+      }
     }
 
     function renderBetterAlternatives(list) {
       const tbody = document.getElementById('better-alternatives-body');
-      if (!list.length) {
+      if (!tbody) return;
+      if (!list || !list.length) {
         tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-on-surface-variant">Your portfolio is well optimized with low expense ratios!</td></tr>';
         return;
       }
@@ -1585,17 +1617,20 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
 
     function updateProjectionChart() {
       if (!currentPortfolioData) return;
-      const cagr = parseFloat(document.getElementById('cagr-range').value) || 12;
-      document.getElementById('cagr-val-label').textContent = `${cagr.toFixed(1)}%`;
+      const slider = document.getElementById('cagr-range');
+      const cagr = slider ? (parseFloat(slider.value) || 12) : 12;
+      setSafeText('cagr-val-label', `${cagr.toFixed(1)}%`);
 
       const baseVal = currentPortfolioData.summary.totalCurrentValue;
+      if (typeof MFMath === 'undefined') return;
       const points = MFMath.calcFutureProjection(baseVal, cagr, 10);
 
-      document.getElementById('proj-base-val').textContent = fmtINR(baseVal);
-      document.getElementById('proj-5y-val').textContent = fmtINR(points[5].value);
-      document.getElementById('proj-10y-val').textContent = fmtINR(points[10].value);
+      setSafeText('proj-base-val', fmtINR(baseVal));
+      setSafeText('proj-5y-val', fmtINR(points[5].value));
+      setSafeText('proj-10y-val', fmtINR(points[10].value));
 
       const canvas = document.getElementById('projection-canvas');
+      if (!canvas) return;
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, 700, 180);
 
@@ -1628,17 +1663,20 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
     }
 
     async function askAiChat(qText) {
-      document.getElementById('chat-input').value = qText;
+      const input = document.getElementById('chat-input');
+      if (input) input.value = qText;
       submitChatForm(new Event('submit'));
     }
 
     async function submitChatForm(e) {
       e.preventDefault();
       const input = document.getElementById('chat-input');
+      if (!input) return;
       const q = input.value.trim();
       if (!q) return;
 
       const container = document.getElementById('chat-messages-container');
+      if (!container) return;
 
       const userDiv = document.createElement('div');
       userDiv.className = 'flex gap-3 items-start justify-end';
@@ -1675,16 +1713,21 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
 
         botDiv.querySelector('.material-symbols-outlined').className = 'material-symbols-outlined text-primary text-sm';
         botDiv.querySelector('.material-symbols-outlined').textContent = 'smart_toy';
-        botDiv.querySelector('.bg-white\/\\[0\\.04\\]').className = 'bg-white/[0.04] p-3 rounded-xl border border-white/5 text-xs text-on-surface max-w-[85%]';
-        botDiv.querySelector('.bg-white\/\\[0\\.04\\]').innerHTML = reply.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        const msgBox = botDiv.querySelector('.bg-white\/\\[0\\.04\\]');
+        if (msgBox) {
+          msgBox.className = 'bg-white/[0.04] p-3 rounded-xl border border-white/5 text-xs text-on-surface max-w-[85%]';
+          msgBox.innerHTML = reply.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
       } catch (err) {
-        botDiv.querySelector('.bg-white\/\\[0\\.04\\]').textContent = 'Analysis could not be generated. Please try again.';
+        const msgBox = botDiv.querySelector('.bg-white\/\\[0\\.04\\]');
+        if (msgBox) msgBox.textContent = 'Analysis could not be generated. Please try again.';
       }
       container.scrollTop = container.scrollHeight;
     }
 
     function resetAnalysis() {
-      document.getElementById('input-section').scrollIntoView({ behavior: 'smooth' });
+      const sec = document.getElementById('input-section');
+      if (sec) sec.scrollIntoView({ behavior: 'smooth' });
     }
   </script>
 </body>
