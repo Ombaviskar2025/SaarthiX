@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com" rel="preconnect"/>
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:wght@600;700&family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet"/>
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -88,6 +88,18 @@
             "body-lg": ["Inter"],
             "headline-lg-mobile": ["Geist"],
             "mono-data": ["Geist"]
+          },
+          fontSize: {
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-xl": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "label-sm": ["12px", { lineHeight: "14px", letterSpacing: "0.05em", fontWeight: "500" }],
+            "label-md": ["14px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "500" }],
+            "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+            "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+            "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+            "mono-data": ["14px", { lineHeight: "20px", letterSpacing: "-0.01em", fontWeight: "500" }]
           }
         }
       }
@@ -99,42 +111,12 @@
       background-size: cover;
     }
     .glass-card {
-      background: rgba(10, 15, 25, 0.78);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(230, 198, 135, 0.28);
-      box-shadow: 0 0 50px rgba(230, 198, 135, 0.14), inset 0 0 20px rgba(255, 255, 255, 0.03);
-      border-radius: 1.5rem;
-    }
-
-    /* Glass HUD Cards for Real-time Indices */
-    .glass-hud {
-      background: rgba(8, 12, 22, 0.76);
+      background: rgba(10, 15, 25, 0.75);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.65), inset 0 0 15px rgba(255, 255, 255, 0.02);
-      transition: all 0.3s ease;
-    }
-    .glass-hud:hover {
-      border-color: rgba(78, 222, 163, 0.4);
-      box-shadow: 0 12px 45px rgba(0, 0, 0, 0.8), 0 0 25px rgba(78, 222, 163, 0.15);
-    }
-
-    /* Price Flashing Animations */
-    .price-up {
-      animation: flashGreen 0.75s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-    .price-down {
-      animation: flashRed 0.75s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-    @keyframes flashGreen {
-      0% { color: #4edea3; text-shadow: 0 0 18px rgba(78, 222, 163, 0.95); transform: scale(1.03); }
-      100% { color: #ffffff; text-shadow: none; transform: scale(1); }
-    }
-    @keyframes flashRed {
-      0% { color: #ffb4ab; text-shadow: 0 0 18px rgba(255, 180, 171, 0.95); transform: scale(1.03); }
-      100% { color: #ffffff; text-shadow: none; transform: scale(1); }
+      border: 1px solid rgba(230, 198, 135, 0.25);
+      box-shadow: 0 0 50px rgba(230, 198, 135, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.03);
+      border-radius: 1.5rem;
     }
 
     /* Gold Typography & Styling */
@@ -188,564 +170,286 @@
       transform: translateY(0);
     }
 
+    /* Ambient floating particles */
+    @keyframes float-particle {
+      0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.4; }
+      33% { transform: translateY(-20px) translateX(10px); opacity: 0.7; }
+      66% { transform: translateY(-10px) translateX(-8px); opacity: 0.5; }
+    }
+
+    .particle {
+      animation: float-particle 8s ease-in-out infinite;
+    }
+    .particle:nth-child(2) { animation-delay: -2s; }
+    .particle:nth-child(3) { animation-delay: -4s; }
+    .particle:nth-child(4) { animation-delay: -6s; }
+
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(78, 222, 163, 0.3); }
+      70% { box-shadow: 0 0 0 12px rgba(78, 222, 163, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(78, 222, 163, 0); }
+    }
+
     .timer-badge {
       font-variant-numeric: tabular-nums;
     }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center font-body-md text-on-surface p-2 sm:p-gutter relative overflow-x-hidden">
+<body class="min-h-screen flex items-center justify-center font-body-md text-on-surface p-gutter relative overflow-hidden">
 
-  <!-- ── MOBILE TOP TICKER BAR (Visible on small screens) ── -->
-  <div class="lg:hidden fixed top-0 left-0 w-full bg-black/90 backdrop-blur-md border-b border-white/10 z-40 px-3 py-2 flex items-center justify-between text-[11px] font-mono overflow-x-auto gap-4">
-    <div class="flex items-center gap-1.5 flex-shrink-0">
-      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span class="text-slate-300 font-bold">NIFTY 50:</span>
-      <span id="mob-nifty50-price" class="text-white font-bold">24,834.85</span>
-      <span id="mob-nifty50-change" class="text-emerald-400 font-semibold">+1.35% ▲</span>
+  <!-- Mobile Top Live Market Ticker Bar (xl:hidden) -->
+  <div class="xl:hidden w-full bg-black/80 backdrop-blur-md border-b border-white/10 py-2.5 px-4 fixed top-0 left-0 z-30 flex items-center justify-between text-xs overflow-x-auto gap-6 shadow-lg">
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <span class="font-bold text-[#E5C158] uppercase">Nifty 50:</span>
+      <span id="mob-nifty-price" class="font-mono text-white font-semibold">--</span>
+      <span id="mob-nifty-pct" class="font-mono text-emerald-400 font-medium">--</span>
     </div>
-    <div class="flex items-center gap-1.5 flex-shrink-0">
-      <span class="text-slate-300 font-bold">SENSEX:</span>
-      <span id="mob-sensex-price" class="text-white font-bold">81,721.08</span>
-      <span id="mob-sensex-change" class="text-emerald-400 font-semibold">+1.28% ▲</span>
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <span class="font-bold text-[#E5C158] uppercase">Sensex:</span>
+      <span id="mob-sensex-price" class="font-mono text-white font-semibold">--</span>
+      <span id="mob-sensex-pct" class="font-mono text-emerald-400 font-medium">--</span>
     </div>
-    <div class="flex items-center gap-1.5 flex-shrink-0">
-      <span class="text-slate-300 font-bold">BANK NIFTY:</span>
-      <span id="mob-banknifty-price" class="text-white font-bold">51,246.20</span>
-      <span id="mob-banknifty-change" class="text-emerald-400 font-semibold">+1.72% ▲</span>
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <span class="font-bold text-primary uppercase">Bank Nifty:</span>
+      <span id="mob-bank-price" class="font-mono text-white font-semibold">--</span>
+      <span id="mob-bank-pct" class="font-mono text-emerald-400 font-medium">--</span>
     </div>
   </div>
 
-  <!-- ── MAIN WRAPPER WITH REAL-TIME MARKET HUD ── -->
-  <div class="w-full max-w-[1400px] mx-auto min-h-screen flex items-center justify-between relative z-10 py-8 px-4 gap-8">
-
-    <!-- ── LEFT FLANK HUD: NIFTY 50 & GLOBAL MARKETS ── -->
-    <aside class="hidden lg:flex flex-col gap-6 w-80 flex-shrink-0 z-20">
-
-      <!-- NIFTY 50 Real-time HUD Card -->
-      <div class="glass-hud p-5 rounded-2xl relative overflow-hidden group">
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#4edea3]"></span>
-            <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">NSE INDIA &middot; LIVE</span>
-          </div>
-          <span class="text-[10px] font-mono uppercase bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">REAL-TIME</span>
+  <!-- Left Side Real-Time Live Overlay Widgets (Desktop) -->
+  <div class="fixed left-8 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-5 z-20 pointer-events-none w-72">
+    
+    <!-- NIFTY 50 Live Card -->
+    <div class="pointer-events-auto p-4 rounded-2xl backdrop-blur-xl bg-black/65 border border-[#E5C158]/30 shadow-[0_0_30px_rgba(0,0,0,0.5)] text-left transition-all duration-300 hover:border-[#E5C158]/60">
+      <div class="flex items-center justify-between gap-2 mb-1.5">
+        <span class="text-xs font-bold tracking-widest text-[#E5C158] uppercase">NIFTY 50</span>
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="nifty-status">REAL-TIME</span>
+        </span>
+      </div>
+      <div class="text-2xl font-extrabold text-white font-mono tracking-tight" id="nifty-price">--</div>
+      <div class="flex items-center gap-2 text-xs font-semibold mt-1" id="nifty-change-wrap">
+        <span id="nifty-change-pts" class="text-emerald-400">--</span>
+        <span id="nifty-change-pct" class="text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10">--</span>
+      </div>
+      <!-- Live Candlestick Canvas Graphic -->
+      <div class="mt-3 pt-2.5 border-t border-white/10 relative">
+        <div class="text-[10px] text-on-surface-variant/60 font-mono mb-1 flex justify-between">
+          <span>LIVE CANDLESTICK</span>
+          <span>5m INTERVAL</span>
         </div>
+        <canvas id="nifty-chart-canvas" width="250" height="70" class="w-full h-[70px] rounded"></canvas>
+      </div>
+    </div>
 
-        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-widest">NIFTY 50</h3>
-
-        <div class="flex items-baseline gap-2 mt-1">
-          <span id="hud-nifty50-price" class="text-3xl font-black font-mono text-white tracking-tight">24,834.85</span>
+    <!-- Global Markets Live Card -->
+    <div class="pointer-events-auto p-4 rounded-2xl backdrop-blur-xl bg-black/65 border border-white/10 shadow-lg text-left">
+      <div class="text-xs font-bold tracking-widest text-on-surface-variant uppercase mb-2.5 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px] text-[#E5C158]">public</span>
+        GLOBAL MARKETS
+      </div>
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between items-center">
+          <span class="text-on-surface-variant font-medium">NASDAQ 100</span>
+          <span class="font-mono text-emerald-400 font-semibold" id="nasdaq-val">19,842.10 (+0.92%)</span>
         </div>
-        <div id="hud-nifty50-change" class="text-xs font-bold text-emerald-400 flex items-center gap-1 mt-0.5">
-          <span class="material-symbols-outlined text-sm">trending_up</span>
-          <span>+331.25 (+1.35%) ▲</span>
+        <div class="flex justify-between items-center">
+          <span class="text-on-surface-variant font-medium">DOW JONES</span>
+          <span class="font-mono text-emerald-400 font-semibold" id="dow-val">40,812.50 (+0.68%)</span>
         </div>
-
-        <!-- Real-Time Animated Candlestick Graphic Canvas -->
-        <div class="mt-4 relative h-28 w-full bg-black/30 rounded-xl p-2 border border-white/5">
-          <canvas id="nifty-candlestick-canvas" class="w-full h-full block"></canvas>
-          <div class="absolute left-2 top-2 text-[9px] font-mono text-slate-400">24.9k</div>
-          <div class="absolute left-2 bottom-2 text-[9px] font-mono text-slate-400">24.1k</div>
+        <div class="flex justify-between items-center">
+          <span class="text-on-surface-variant font-medium">S&amp;P 500</span>
+          <span class="font-mono text-emerald-400 font-semibold" id="sp-val">5,540.20 (+0.55%)</span>
         </div>
       </div>
+    </div>
 
-      <!-- GLOBAL MARKETS Card -->
-      <div class="glass-hud p-5 rounded-2xl">
-        <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
-          <span class="text-xs font-bold uppercase tracking-widest text-slate-300 flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-sm text-cyan-400">public</span>
-            GLOBAL MARKETS
-          </span>
-          <span class="text-[10px] font-mono text-slate-400">REAL-TIME</span>
+  </div>
+
+  <!-- Right Side Real-Time Live Overlay Widgets (Desktop) -->
+  <div class="fixed right-8 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-5 z-20 pointer-events-none w-72">
+
+    <!-- SENSEX Live Card -->
+    <div class="pointer-events-auto p-4 rounded-2xl backdrop-blur-xl bg-black/65 border border-[#E5C158]/30 shadow-[0_0_30px_rgba(0,0,0,0.5)] text-left transition-all duration-300 hover:border-[#E5C158]/60">
+      <div class="flex items-center justify-between gap-2 mb-1.5">
+        <span class="text-xs font-bold tracking-widest text-[#E5C158] uppercase">SENSEX</span>
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>BSE INDIA</span>
+        </span>
+      </div>
+      <div class="text-2xl font-extrabold text-white font-mono tracking-tight" id="sensex-price">--</div>
+      <div class="flex items-center gap-2 text-xs font-semibold mt-1" id="sensex-change-wrap">
+        <span id="sensex-change-pts" class="text-emerald-400">--</span>
+        <span id="sensex-change-pct" class="text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10">--</span>
+      </div>
+    </div>
+
+    <!-- BANK NIFTY Live Card -->
+    <div class="pointer-events-auto p-4 rounded-2xl backdrop-blur-xl bg-black/65 border border-white/10 shadow-lg text-left transition-all duration-300 hover:border-[#E5C158]/60">
+      <div class="flex items-center justify-between gap-2 mb-1.5">
+        <span class="text-xs font-bold tracking-widest text-primary uppercase">BANK NIFTY</span>
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+          <span>BANKING</span>
+        </span>
+      </div>
+      <div class="text-2xl font-extrabold text-white font-mono tracking-tight" id="bank-price">--</div>
+      <div class="flex items-center gap-2 text-xs font-semibold mt-1" id="bank-change-wrap">
+        <span id="bank-change-pts" class="text-emerald-400">--</span>
+        <span id="bank-change-pct" class="text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10">--</span>
+      </div>
+    </div>
+
+    <!-- Live Market Trend Card -->
+    <div class="pointer-events-auto p-4 rounded-2xl backdrop-blur-xl bg-black/65 border border-emerald-500/30 shadow-lg text-left flex items-center justify-between">
+      <div>
+        <span class="text-[11px] font-bold tracking-widest text-on-surface-variant/80 uppercase block">MARKET TREND</span>
+        <span class="text-base font-extrabold text-emerald-400 tracking-wide font-mono flex items-center gap-1.5 mt-0.5" id="trend-text">
+          <span class="material-symbols-outlined text-[18px]">trending_up</span>
+          BULLISH
+        </span>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(78,222,163,0.3)]">
+        <span class="material-symbols-outlined text-[22px]">show_chart</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Login Container -->
+  <main class="w-full max-w-md z-10">
+    <div class="glass-card rounded-xl p-8 shadow-2xl relative overflow-hidden">
+
+      <!-- Decorative Top Border Glow -->
+      <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E6C687] to-transparent opacity-80"></div>
+      <!-- Decorative Bottom Subtle Line -->
+      <div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+
+      <!-- Header -->
+      <div class="text-center mb-4">
+        <!-- Logo Mark -->
+        <div class="relative inline-block mb-2">
+          <img src="logo.png" class="w-48 h-48 mx-auto object-contain drop-shadow-2xl" alt="SaarthiX Logo"/>
         </div>
 
+        <h1 class="gold-heading text-3xl sm:text-4xl mb-2 font-bold tracking-tight">Welcome to SaarthiX</h1>
+        <p class="font-body-sm text-body-sm gold-subtext">Every Portfolio Needs a Saarthi.</p>
+      </div>
+
+      <!-- ─── Phone Step ─── -->
+      <div class="space-y-6 transition-all duration-300" id="phone-step">
+        <div class="space-y-2">
+          <label class="font-label-sm text-label-sm gold-accent-text block uppercase tracking-wider font-semibold">Phone Number</label>
+          <div class="flex gap-2">
+            <select id="country-code" class="bg-black/30 border border-white/10 text-on-surface rounded-lg px-3 py-3 font-mono-data text-mono-data focus:border-secondary focus:ring-1 focus:ring-secondary input-glow w-24 appearance-none text-center">
+              <option value="+1">+1</option>
+              <option value="+44">+44</option>
+              <option value="+91" selected>+91</option>
+              <option value="+61">+61</option>
+              <option value="+49">+49</option>
+              <option value="+81">+81</option>
+            </select>
+            <input id="phone-input" class="bg-black/30 border border-white/10 text-on-surface rounded-lg px-4 py-3 font-mono-data text-mono-data w-full input-glow placeholder:text-on-surface-variant/30" placeholder="(555) 123-4567" type="tel"/>
+          </div>
+          <p id="phone-error" class="text-error font-label-sm text-label-sm hidden">Please enter a valid phone number.</p>
+        </div>
+
+        <button
+          class="w-full btn-emerald rounded-lg py-3 font-label-md text-label-md font-bold uppercase tracking-wider flex items-center justify-center gap-2 group"
+          onclick="sendOtp()"
+          id="send-otp-btn"
+        >
+          Send OTP
+          <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </button>
+
+        <p class="text-center font-body-sm text-body-sm text-on-surface-variant/50">
+          By continuing, you agree to our
+          <a href="#" class="text-secondary hover:underline">Terms</a> &amp;
+          <a href="#" class="text-secondary hover:underline">Privacy Policy</a>.
+        </p>
+      </div>
+
+      <!-- ─── OTP Step ─── -->
+      <div class="otp-hidden space-y-6" id="otp-step">
         <div class="space-y-3">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-medium text-slate-300">NASDAQ 100</span>
-            <div class="text-right">
-              <span id="hud-nasdaq-price" class="font-mono font-bold text-white block">19,842.10</span>
-              <span id="hud-nasdaq-change" class="font-mono text-[11px] text-emerald-400 font-semibold">+0.92% ▲</span>
-            </div>
-          </div>
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-medium text-slate-300">DOW JONES</span>
-            <div class="text-right">
-              <span id="hud-dow-price" class="font-mono font-bold text-white block">40,812.40</span>
-              <span id="hud-dow-change" class="font-mono text-[11px] text-emerald-400 font-semibold">+0.68% ▲</span>
-            </div>
-          </div>
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-medium text-slate-300">S&P 500</span>
-            <div class="text-right">
-              <span id="hud-sp500-price" class="font-mono font-bold text-white block">5,548.20</span>
-              <span id="hud-sp500-change" class="font-mono text-[11px] text-emerald-400 font-semibold">+0.55% ▲</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </aside>
-
-    <!-- ── CENTER: LOGIN CONTAINER ── -->
-    <main class="w-full max-w-md z-10 mx-auto my-auto">
-      <div class="glass-card rounded-xl p-8 shadow-2xl relative overflow-hidden">
-
-        <!-- Decorative Top Border Glow -->
-        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E6C687] to-transparent opacity-80"></div>
-        <!-- Decorative Bottom Subtle Line -->
-        <div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
-
-        <!-- Header -->
-        <div class="text-center mb-4">
-          <!-- Logo Mark (Untouched) -->
-          <div class="relative inline-block mb-2">
-            <img src="logo.png" class="w-48 h-48 mx-auto object-contain drop-shadow-2xl" alt="SaarthiX Logo"/>
-          </div>
-
-          <h1 class="gold-heading text-3xl sm:text-4xl mb-2 font-bold tracking-tight">Welcome to SaarthiX</h1>
-          <p class="font-body-sm text-body-sm gold-subtext">Every Portfolio Needs a Saarthi.</p>
-        </div>
-
-        <!-- ─── Phone Step ─── -->
-        <div class="space-y-6 transition-all duration-300" id="phone-step">
-          <div class="space-y-2">
-            <label class="font-label-sm text-label-sm gold-accent-text block uppercase tracking-wider font-semibold">Phone Number</label>
-            <div class="flex gap-2">
-              <select id="country-code" class="bg-black/30 border border-white/10 text-on-surface rounded-lg px-3 py-3 font-mono-data text-mono-data focus:border-secondary focus:ring-1 focus:ring-secondary input-glow w-24 appearance-none text-center">
-                <option value="+1">+1</option>
-                <option value="+44">+44</option>
-                <option value="+91" selected>+91</option>
-                <option value="+61">+61</option>
-                <option value="+49">+49</option>
-                <option value="+81">+81</option>
-              </select>
-              <input id="phone-input" class="bg-black/30 border border-white/10 text-on-surface rounded-lg px-4 py-3 font-mono-data text-mono-data w-full input-glow placeholder:text-on-surface-variant/30" placeholder="(555) 123-4567" type="tel"/>
-            </div>
-            <p id="phone-error" class="text-error font-label-sm text-label-sm hidden">Please enter a valid phone number.</p>
-          </div>
-
-          <button
-            class="w-full btn-emerald rounded-lg py-3 font-label-md text-label-md font-bold uppercase tracking-wider flex items-center justify-center gap-2 group"
-            onclick="sendOtp()"
-            id="send-otp-btn"
-          >
-            Send OTP
-            <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
-          </button>
-
-          <p class="text-center font-body-sm text-body-sm text-on-surface-variant/50">
-            By continuing, you agree to our
-            <a href="#" class="text-secondary hover:underline">Terms</a> &amp;
-            <a href="#" class="text-secondary hover:underline">Privacy Policy</a>.
-          </p>
-        </div>
-
-        <!-- ─── OTP Step ─── -->
-        <div class="otp-hidden space-y-6" id="otp-step">
-          <div class="space-y-3">
-            <div class="flex justify-between items-center">
-              <label class="font-label-sm text-label-sm gold-accent-text block uppercase tracking-wider font-semibold">Verification Code</label>
-              <button class="text-secondary hover:text-secondary-fixed font-label-sm text-label-sm transition-colors flex items-center gap-1" onclick="showPhoneStep()">
-                <span class="material-symbols-outlined text-[14px]">edit</span>
-                Edit Number
-              </button>
-            </div>
-
-            <!-- Sent-to indicator -->
-            <div class="flex items-center gap-2 bg-secondary-container/10 border border-secondary-container/20 rounded-lg px-3 py-2">
-              <span class="material-symbols-outlined text-secondary text-sm">sms</span>
-              <span class="font-body-sm text-body-sm text-on-surface-variant">Code sent to <span id="display-number" class="text-on-surface font-medium"></span></span>
-            </div>
-
-            <!-- ⚠️ Demo Mode Notice -->
-            <div class="flex items-start gap-2 bg-primary-container/10 border border-primary-container/30 rounded-lg px-3 py-2.5 mt-1">
-              <span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5" style="font-variation-settings:'FILL' 1;">info</span>
-              <div>
-                <p class="font-label-sm text-label-sm text-primary font-semibold">Demo Mode — No real SMS is sent</p>
-                <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">This is a UI demo. Use the auto-filled code below or type any 6 digits.</p>
-              </div>
-            </div>
-
-            <!-- 6-digit OTP inputs -->
-            <div class="flex justify-between gap-2 mt-2">
-              <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-              <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-              <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-              <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-              <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-              <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-            </div>
-
-            <!-- Quick-fill helper -->
-            <button onclick="fillDemoOtp()" class="w-full mt-1 py-2 rounded-lg border border-dashed border-secondary/30 text-secondary font-label-sm text-label-sm hover:bg-secondary/5 transition-colors flex items-center justify-center gap-1">
-              <span class="material-symbols-outlined text-[15px]">bolt</span>
-              Auto-fill Demo Code (1 2 3 4 5 6)
+          <div class="flex justify-between items-center">
+            <label class="font-label-sm text-label-sm gold-accent-text block uppercase tracking-wider font-semibold">Verification Code</label>
+            <button class="text-secondary hover:text-secondary-fixed font-label-sm text-label-sm transition-colors flex items-center gap-1" onclick="showPhoneStep()">
+              <span class="material-symbols-outlined text-[14px]">edit</span>
+              Edit Number
             </button>
+          </div>
 
-            <div class="flex items-center justify-between mt-1">
-              <p class="font-body-sm text-body-sm text-on-surface-variant/60">
-                Expires in <span id="otp-timer" class="text-secondary timer-badge font-medium">03:00</span>
-              </p>
-              <button id="resend-btn" class="font-label-sm text-label-sm text-on-surface-variant/40 cursor-not-allowed" disabled onclick="resendOtp()">Resend OTP</button>
+          <!-- Sent-to indicator -->
+          <div class="flex items-center gap-2 bg-secondary-container/10 border border-secondary-container/20 rounded-lg px-3 py-2">
+            <span class="material-symbols-outlined text-secondary text-sm">sms</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Code sent to <span id="display-number" class="text-on-surface font-medium"></span></span>
+          </div>
+
+          <!-- ⚠️ Demo Mode Notice -->
+          <div class="flex items-start gap-2 bg-primary-container/10 border border-primary-container/30 rounded-lg px-3 py-2.5 mt-1">
+            <span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5" style="font-variation-settings:'FILL' 1;">info</span>
+            <div>
+              <p class="font-label-sm text-label-sm text-primary font-semibold">Demo Mode — No real SMS is sent</p>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">This is a UI demo. Use the auto-filled code below or type any 6 digits.</p>
             </div>
           </div>
 
-          <!-- Login CTA -->
-          <button
-            id="login-btn"
-            onclick="loginToDashboard()"
-            class="w-full btn-emerald rounded-lg py-3 font-label-md text-label-md font-bold uppercase tracking-wider flex items-center justify-center gap-2 group"
-          >
-            Login to Dashboard
-            <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">login</span>
+          <!-- 6-digit OTP inputs -->
+          <div class="flex justify-between gap-2 mt-2">
+            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
+          </div>
+
+          <!-- Quick-fill helper -->
+          <button onclick="fillDemoOtp()" class="w-full mt-1 py-2 rounded-lg border border-dashed border-secondary/30 text-secondary font-label-sm text-label-sm hover:bg-secondary/5 transition-colors flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-[15px]">bolt</span>
+            Auto-fill Demo Code (1 2 3 4 5 6)
           </button>
-        </div>
 
-        <!-- Footer Links -->
-        <div class="mt-8 pt-6 border-t border-white/5 flex justify-center space-x-4 font-label-sm text-label-sm text-on-surface-variant/60">
-          <a class="hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
-          <span>•</span>
-          <a class="hover:text-on-surface transition-colors" href="#">Terms of Service</a>
-          <span>•</span>
-          <a class="hover:text-on-surface transition-colors" href="#">Support</a>
-        </div>
-      </div>
-
-      <!-- Brand tagline below card -->
-      <p class="text-center mt-6 font-label-sm text-label-sm text-on-surface-variant/30 tracking-widest uppercase">
-        NSE &middot; BSE &middot; India &middot; SaarthiX
-      </p>
-    </main>
-
-    <!-- ── RIGHT FLANK HUD: SENSEX, BANK NIFTY & MARKET TREND ── -->
-    <aside class="hidden lg:flex flex-col gap-6 w-80 flex-shrink-0 z-20">
-
-      <!-- SENSEX Real-time HUD Card -->
-      <div class="glass-hud p-5 rounded-2xl relative overflow-hidden group">
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#4edea3]"></span>
-            <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">BSE INDIA &middot; LIVE</span>
-          </div>
-          <span class="text-[10px] font-mono uppercase bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">REAL-TIME</span>
-        </div>
-
-        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-widest">SENSEX</h3>
-
-        <div class="flex items-baseline gap-2 mt-1">
-          <span id="hud-sensex-price" class="text-3xl font-black font-mono text-white tracking-tight">81,721.08</span>
-        </div>
-        <div id="hud-sensex-change" class="text-xs font-bold text-emerald-400 flex items-center gap-1 mt-0.5">
-          <span class="material-symbols-outlined text-sm">trending_up</span>
-          <span>+1,034.50 (+1.28%) ▲</span>
-        </div>
-      </div>
-
-      <!-- BANK NIFTY Real-time HUD Card -->
-      <div class="glass-hud p-5 rounded-2xl relative overflow-hidden group">
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#4edea3]"></span>
-            <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">NSE BANK &middot; LIVE</span>
-          </div>
-          <span class="text-[10px] font-mono uppercase bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">REAL-TIME</span>
-        </div>
-
-        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-widest">BANK NIFTY</h3>
-
-        <div class="flex items-baseline gap-2 mt-1">
-          <span id="hud-banknifty-price" class="text-3xl font-black font-mono text-white tracking-tight">51,246.20</span>
-        </div>
-        <div id="hud-banknifty-change" class="text-xs font-bold text-emerald-400 flex items-center gap-1 mt-0.5">
-          <span class="material-symbols-outlined text-sm">trending_up</span>
-          <span>+868.40 (+1.72%) ▲</span>
-        </div>
-
-        <!-- Real-Time Animated Candlestick Canvas for BANK NIFTY -->
-        <div class="mt-4 relative h-24 w-full bg-black/30 rounded-xl p-2 border border-white/5">
-          <canvas id="banknifty-candlestick-canvas" class="w-full h-full block"></canvas>
-        </div>
-      </div>
-
-      <!-- MARKET TREND Card with Animated Cyber Bull Graphic -->
-      <div class="glass-hud p-5 rounded-2xl relative overflow-hidden">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold uppercase tracking-widest text-slate-300">MARKET TREND</span>
-          <div id="market-trend-badge" class="px-2.5 py-0.5 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 rounded-full font-bold text-[11px] tracking-wider uppercase animate-pulse flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-            BULLISH
+          <div class="flex items-center justify-between mt-1">
+            <p class="font-body-sm text-body-sm text-on-surface-variant/60">
+              Expires in <span id="otp-timer" class="text-secondary timer-badge font-medium">03:00</span>
+            </p>
+            <button id="resend-btn" class="font-label-sm text-label-sm text-on-surface-variant/40 cursor-not-allowed" disabled onclick="resendOtp()">Resend OTP</button>
           </div>
         </div>
 
-        <div class="mt-3 flex items-center justify-between opacity-90">
-          <div class="text-xs text-slate-300 space-y-1.5 font-mono">
-            <div>FII Inflow: <span class="text-emerald-400 font-bold">+2,450 Cr</span></div>
-            <div>Adv / Dec: <span class="text-emerald-400 font-bold">34 / 16</span></div>
-          </div>
-          <!-- Cyber Bull Wireframe SVG -->
-          <svg class="w-20 h-14 text-emerald-400 drop-shadow-[0_0_12px_rgba(78,222,163,0.6)]" viewBox="0 0 100 80" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M10 50 L30 20 L45 35 L70 15 L90 40 L75 70 L40 65 L20 70 Z" stroke-dasharray="3 3"/>
-            <polyline points="20,70 30,45 48,55 72,30 92,38" stroke="#4edea3" stroke-width="2.5"/>
-            <circle cx="72" cy="30" r="4" fill="#4edea3"/>
-          </svg>
-        </div>
+        <!-- Login CTA -->
+        <button
+          id="login-btn"
+          onclick="loginToDashboard()"
+          class="w-full btn-emerald rounded-lg py-3 font-label-md text-label-md font-bold uppercase tracking-wider flex items-center justify-center gap-2 group"
+        >
+          Login to Dashboard
+          <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">login</span>
+        </button>
       </div>
 
-    </aside>
+      <!-- Footer Links -->
+      <div class="mt-8 pt-6 border-t border-white/5 flex justify-center space-x-4 font-label-sm text-label-sm text-on-surface-variant/60">
+        <a class="hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
+        <span>•</span>
+        <a class="hover:text-on-surface transition-colors" href="#">Terms of Service</a>
+        <span>•</span>
+        <a class="hover:text-on-surface transition-colors" href="#">Support</a>
+      </div>
+    </div>
 
-  </div>
+    <!-- Brand tagline below card -->
+    <p class="text-center mt-6 font-label-sm text-label-sm text-on-surface-variant/30 tracking-widest uppercase">
+      NSE &middot; BSE &middot; India &middot; SaarthiX
+    </p>
+  </main>
 
-  <!-- ── REAL-TIME MARKET TICKER ENGINE & CANVAS GRAPHICS SCRIPT ── -->
   <script>
-    // State of live indices
-    const indicesState = {
-      nifty50: { value: 24834.85, change: 331.25, changePct: 1.35 },
-      sensex: { value: 81721.08, change: 1034.50, changePct: 1.28 },
-      banknifty: { value: 51246.20, change: 868.40, changePct: 1.72 },
-      nasdaq: { value: 19842.10, changePct: 0.92 },
-      dow: { value: 40812.40, changePct: 0.68 },
-      sp500: { value: 5548.20, changePct: 0.55 }
-    };
-
-    let niftyCanvasCtrl = null;
-    let bankCanvasCtrl = null;
-
-    // ── Candlestick Canvas Renderer ──
-    function createCandlestickCanvas(canvasId, isBullish = true) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) return null;
-      const ctx = canvas.getContext('2d');
-
-      function resize() {
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * (window.devicePixelRatio || 1);
-        canvas.height = rect.height * (window.devicePixelRatio || 1);
-        ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
-      }
-      resize();
-      window.addEventListener('resize', resize);
-
-      const count = 16;
-      let candles = [];
-      let basePrice = 100;
-      for (let i = 0; i < count; i++) {
-        let open = basePrice + (Math.random() - 0.45) * 5;
-        let close = open + (Math.random() - 0.42) * 7;
-        let high = Math.max(open, close) + Math.random() * 3;
-        let low = Math.min(open, close) - Math.random() * 3;
-        candles.push({ open, close, high, low });
-        basePrice = close;
-      }
-
-      function draw() {
-        const rect = canvas.getBoundingClientRect();
-        const w = rect.width;
-        const h = rect.height;
-
-        ctx.clearRect(0, 0, w, h);
-
-        // Subtle Grid
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-        ctx.lineWidth = 1;
-        for (let y = 10; y < h; y += 20) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(w, y);
-          ctx.stroke();
-        }
-
-        let minVal = Math.min(...candles.map(c => c.low));
-        let maxVal = Math.max(...candles.map(c => c.high));
-        let range = (maxVal - minVal) || 1;
-
-        const candleWidth = Math.max(4, (w - 20) / count - 3);
-        const linePoints = [];
-
-        candles.forEach((c, i) => {
-          let x = 10 + i * (candleWidth + 3);
-          let openY = h - 10 - ((c.open - minVal) / range) * (h - 20);
-          let closeY = h - 10 - ((c.close - minVal) / range) * (h - 20);
-          let highY = h - 10 - ((c.high - minVal) / range) * (h - 20);
-          let lowY = h - 10 - ((c.low - minVal) / range) * (h - 20);
-
-          let isBull = c.close >= c.open;
-          let color = isBull ? '#4edea3' : '#ffb4ab';
-          let glowColor = isBull ? 'rgba(78, 222, 163, 0.5)' : 'rgba(255, 180, 171, 0.5)';
-
-          // Wick
-          ctx.strokeStyle = color;
-          ctx.lineWidth = 1.5;
-          ctx.shadowColor = glowColor;
-          ctx.shadowBlur = 4;
-          ctx.beginPath();
-          ctx.moveTo(x + candleWidth / 2, highY);
-          ctx.lineTo(x + candleWidth / 2, lowY);
-          ctx.stroke();
-
-          // Body
-          ctx.fillStyle = color;
-          let bodyY = Math.min(openY, closeY);
-          let bodyH = Math.max(2, Math.abs(closeY - openY));
-          ctx.fillRect(x, bodyY, candleWidth, bodyH);
-
-          linePoints.push({ x: x + candleWidth / 2, y: closeY });
-        });
-
-        // Trendline overlay
-        if (linePoints.length > 1) {
-          ctx.beginPath();
-          ctx.moveTo(linePoints[0].x, linePoints[0].y);
-          for (let i = 1; i < linePoints.length; i++) {
-            ctx.lineTo(linePoints[i].x, linePoints[i].y);
-          }
-          ctx.strokeStyle = 'rgba(78, 222, 163, 0.5)';
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        }
-
-        ctx.shadowBlur = 0;
-      }
-
-      draw();
-
-      function addTick(delta = 0) {
-        let last = candles[candles.length - 1];
-        let newOpen = last.close;
-        let diff = (Math.random() - 0.44) * 4 + delta;
-        let newClose = newOpen + diff;
-        let newHigh = Math.max(newOpen, newClose) + Math.random() * 2.5;
-        let newLow = Math.min(newOpen, newClose) - Math.random() * 2.5;
-
-        candles.shift();
-        candles.push({ open: newOpen, close: newClose, high: newHigh, low: newLow });
-        draw();
-      }
-
-      return { addTick, draw };
-    }
-
-    // ── Update Index UI Displays ──
-    function updateIndexDisplay(key, data, triggerFlash = true) {
-      const state = indicesState[key];
-      if (!state) return;
-
-      const oldVal = state.value;
-      if (data.value || data.price) state.value = data.value || data.price;
-      if (data.change !== undefined) state.change = data.change;
-      if (data.changePct !== undefined) state.changePct = data.changePct;
-
-      const formattedVal = state.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const isPos = state.changePct >= 0;
-      const sign = isPos ? '+' : '';
-      const arrow = isPos ? '▲' : '▼';
-      const colorClass = isPos ? 'text-emerald-400' : 'text-rose-400';
-      const changeStr = `${sign}${state.change ? state.change.toFixed(2) : ''} (${sign}${state.changePct.toFixed(2)}%) ${arrow}`;
-
-      // Update Desktop HUD elements
-      const priceEl = document.getElementById(`hud-${key}-price`);
-      const changeEl = document.getElementById(`hud-${key}-change`);
-      if (priceEl) {
-        priceEl.textContent = formattedVal;
-        if (triggerFlash && oldVal !== state.value) {
-          const flash = state.value >= oldVal ? 'price-up' : 'price-down';
-          priceEl.classList.remove('price-up', 'price-down');
-          void priceEl.offsetWidth;
-          priceEl.classList.add(flash);
-        }
-      }
-      if (changeEl) {
-        changeEl.className = `text-xs font-bold ${colorClass} flex items-center gap-1 mt-0.5`;
-        changeEl.innerHTML = `<span class="material-symbols-outlined text-sm">${isPos ? 'trending_up' : 'trending_down'}</span> <span>${changeStr}</span>`;
-      }
-
-      // Update Mobile Ticker elements
-      const mobPriceEl = document.getElementById(`mob-${key}-price`);
-      const mobChangeEl = document.getElementById(`mob-${key}-change`);
-      if (mobPriceEl) mobPriceEl.textContent = formattedVal;
-      if (mobChangeEl) {
-        mobChangeEl.className = `${colorClass} font-semibold`;
-        mobChangeEl.textContent = `${sign}${state.changePct.toFixed(2)}% ${arrow}`;
-      }
-    }
-
-    // ── Update Global Markets UI ──
-    function updateGlobalIndex(key, data) {
-      const priceEl = document.getElementById(`hud-${key}-price`);
-      const changeEl = document.getElementById(`hud-${key}-change`);
-      if (!priceEl || !changeEl) return;
-
-      if (data.price || data.value) {
-        priceEl.textContent = (data.price || data.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      }
-      if (data.changePct !== undefined) {
-        const isPos = data.changePct >= 0;
-        const sign = isPos ? '+' : '';
-        const arrow = isPos ? '▲' : '▼';
-        changeEl.className = `font-mono text-[11px] ${isPos ? 'text-emerald-400' : 'text-rose-400'} font-semibold`;
-        changeEl.textContent = `${sign}${data.changePct.toFixed(2)}% ${arrow}`;
-      }
-    }
-
-    // ── Fetch Live Data from Backend API ──
-    async function fetchLiveMarketData() {
-      try {
-        const response = await fetch('/api/market-watch');
-        if (!response.ok) return;
-        const data = await response.json();
-
-        if (data.indices) {
-          if (data.indices.nifty50) updateIndexDisplay('nifty50', data.indices.nifty50, true);
-          if (data.indices.sensex) updateIndexDisplay('sensex', data.indices.sensex, true);
-          if (data.indices.niftyBank) updateIndexDisplay('banknifty', data.indices.niftyBank, true);
-
-          if (data.indices.nasdaq) updateGlobalIndex('nasdaq', data.indices.nasdaq);
-          if (data.indices.dow) updateGlobalIndex('dow', data.indices.dow);
-          if (data.indices.sp500) updateGlobalIndex('sp500', data.indices.sp500);
-        }
-      } catch (err) {
-        console.log('[Live Market Fetch]:', err.message);
-      }
-    }
-
-    // ── Micro Ticks Simulation Engine (smooth real-time tick animations) ──
-    function startMicroTickEngine() {
-      setInterval(() => {
-        // Micro fluctuation for Nifty 50
-        const niftyDelta = (Math.random() - 0.47) * 3.5;
-        indicesState.nifty50.value = parseFloat((indicesState.nifty50.value + niftyDelta).toFixed(2));
-        indicesState.nifty50.change = parseFloat((indicesState.nifty50.change + niftyDelta).toFixed(2));
-        updateIndexDisplay('nifty50', indicesState.nifty50, true);
-        if (niftyCanvasCtrl) niftyCanvasCtrl.addTick(niftyDelta);
-
-        // Micro fluctuation for Sensex
-        const sensexDelta = (Math.random() - 0.46) * 11.0;
-        indicesState.sensex.value = parseFloat((indicesState.sensex.value + sensexDelta).toFixed(2));
-        indicesState.sensex.change = parseFloat((indicesState.sensex.change + sensexDelta).toFixed(2));
-        updateIndexDisplay('sensex', indicesState.sensex, true);
-
-        // Micro fluctuation for Bank Nifty
-        const bankDelta = (Math.random() - 0.47) * 7.0;
-        indicesState.banknifty.value = parseFloat((indicesState.banknifty.value + bankDelta).toFixed(2));
-        indicesState.banknifty.change = parseFloat((indicesState.banknifty.change + bankDelta).toFixed(2));
-        updateIndexDisplay('banknifty', indicesState.banknifty, true);
-        if (bankCanvasCtrl) bankCanvasCtrl.addTick(bankDelta);
-
-      }, 2500);
-    }
-
-    // ── Page Initialization ──
-    document.addEventListener('DOMContentLoaded', () => {
-      // Initialize Candlestick Canvases
-      niftyCanvasCtrl = createCandlestickCanvas('nifty-candlestick-canvas', true);
-      bankCanvasCtrl = createCandlestickCanvas('banknifty-candlestick-canvas', true);
-
-      // Initial Fetch & Polling
-      fetchLiveMarketData();
-      setInterval(fetchLiveMarketData, 5000);
-      startMicroTickEngine();
-    });
-
-    // ── Login Form & OTP Handlers ──
     let timerInterval = null;
     let secondsLeft = 180;
 
@@ -783,6 +487,7 @@
         otpStep.classList.remove('otp-hidden');
         otpStep.classList.add('otp-visible');
 
+        // Auto-fill demo OTP after a short delay for effect
         setTimeout(() => fillDemoOtp(), 400);
       }, 300);
     }
@@ -794,6 +499,7 @@
         inp.value = demoCode[i] || '';
         inp.classList.remove('border-error');
       });
+      // Focus last input to signal completion
       inputs[inputs.length - 1].focus();
     }
 
@@ -845,6 +551,7 @@
       const resendBtn = document.getElementById('resend-btn');
       if (resendBtn.disabled) return;
 
+      // Reset OTP inputs
       document.querySelectorAll('#otp-step input').forEach(i => i.value = '');
       document.querySelectorAll('#otp-step input')[0].focus();
 
@@ -859,12 +566,14 @@
       const inputs = document.querySelectorAll('#otp-step input[type="text"]');
       const otp = [...inputs].map(i => i.value).join('');
 
+      // In demo mode: accept any 6 digits, or auto-fill if empty
       if (otp.replace(/\s/g, '').length < 6) {
         fillDemoOtp();
         setTimeout(loginToDashboard, 300);
         return;
       }
 
+      // Show loading state then navigate
       const btn = document.getElementById('login-btn');
       if (btn) {
         btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Verifying...`;
@@ -878,16 +587,18 @@
       }, 1000);
     }
 
-    // OTP Input auto-advance
+    // ── OTP input auto-advance & backspace handling ──
     document.addEventListener('DOMContentLoaded', () => {
       const otpInputs = document.querySelectorAll('#otp-step input');
 
       otpInputs.forEach((input, index) => {
         input.addEventListener('input', function () {
+          // Allow only digits
           this.value = this.value.replace(/\D/g, '');
           if (this.value.length === 1 && index < otpInputs.length - 1) {
             otpInputs[index + 1].focus();
           }
+          // If last filled, remove error border
           this.classList.remove('border-error');
         });
 
@@ -907,6 +618,191 @@
           if (otpInputs[nextEmpty]) otpInputs[nextEmpty].focus();
         });
       });
+    });
+  </script>
+
+  <!-- Load Market Engine & Live Client -->
+  <script src="shared.js"></script>
+  <script src="groww-client.js"></script>
+
+  <script>
+    // ── Live Indices Real-Time Sync Logic ──
+    function updateLoginIndicesUI() {
+      if (typeof window.LIVE_INDICES === 'undefined') return;
+
+      const nse = window.LIVE_INDICES.nifty50;
+      const bse = window.LIVE_INDICES.sensex;
+      const bank = window.LIVE_INDICES.niftyBank;
+
+      const fmt = (val) => typeof val === 'number' ? val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (val || '--');
+
+      // 1. NIFTY 50
+      if (nse) {
+        const elPrice = document.getElementById('nifty-price');
+        const elPts = document.getElementById('nifty-change-pts');
+        const elPct = document.getElementById('nifty-change-pct');
+        const mobPrice = document.getElementById('mob-nifty-price');
+        const mobPct = document.getElementById('mob-nifty-pct');
+
+        const isUp = (nse.change || 0) >= 0;
+        const sign = isUp ? '+' : '';
+        const colorClass = isUp ? 'text-emerald-400' : 'text-rose-400';
+        const bgClass = isUp ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/10 border border-rose-500/20';
+
+        if (elPrice) elPrice.innerText = fmt(nse.value);
+        if (mobPrice) mobPrice.innerText = fmt(nse.value);
+
+        const ptsStr = `${sign}${fmt(nse.change)}`;
+        const pctStr = `${sign}${(nse.changePct || 0).toFixed(2)}% ${isUp ? '▲' : '▼'}`;
+
+        if (elPts) { elPts.innerText = ptsStr; elPts.className = colorClass; }
+        if (elPct) { elPct.innerText = pctStr; elPct.className = `${colorClass} ${bgClass} px-1.5 py-0.5 rounded font-mono`; }
+        if (mobPct) { mobPct.innerText = pctStr; mobPct.className = `font-mono ${colorClass}`; }
+      }
+
+      // 2. SENSEX
+      if (bse) {
+        const elPrice = document.getElementById('sensex-price');
+        const elPts = document.getElementById('sensex-change-pts');
+        const elPct = document.getElementById('sensex-change-pct');
+        const mobPrice = document.getElementById('mob-sensex-price');
+        const mobPct = document.getElementById('mob-sensex-pct');
+
+        const isUp = (bse.change || 0) >= 0;
+        const sign = isUp ? '+' : '';
+        const colorClass = isUp ? 'text-emerald-400' : 'text-rose-400';
+        const bgClass = isUp ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/10 border border-rose-500/20';
+
+        if (elPrice) elPrice.innerText = fmt(bse.value);
+        if (mobPrice) mobPrice.innerText = fmt(bse.value);
+
+        const ptsStr = `${sign}${fmt(bse.change)}`;
+        const pctStr = `${sign}${(bse.changePct || 0).toFixed(2)}% ${isUp ? '▲' : '▼'}`;
+
+        if (elPts) { elPts.innerText = ptsStr; elPts.className = colorClass; }
+        if (elPct) { elPct.innerText = pctStr; elPct.className = `${colorClass} ${bgClass} px-1.5 py-0.5 rounded font-mono`; }
+        if (mobPct) { mobPct.innerText = pctStr; mobPct.className = `font-mono ${colorClass}`; }
+      }
+
+      // 3. BANK NIFTY
+      if (bank) {
+        const elPrice = document.getElementById('bank-price');
+        const elPts = document.getElementById('bank-change-pts');
+        const elPct = document.getElementById('bank-change-pct');
+        const mobPrice = document.getElementById('mob-bank-price');
+        const mobPct = document.getElementById('mob-bank-pct');
+
+        const isUp = (bank.change || 0) >= 0;
+        const sign = isUp ? '+' : '';
+        const colorClass = isUp ? 'text-emerald-400' : 'text-rose-400';
+        const bgClass = isUp ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/10 border border-rose-500/20';
+
+        if (elPrice) elPrice.innerText = fmt(bank.value);
+        if (mobPrice) mobPrice.innerText = fmt(bank.value);
+
+        const ptsStr = `${sign}${fmt(bank.change)}`;
+        const pctStr = `${sign}${(bank.changePct || 0).toFixed(2)}% ${isUp ? '▲' : '▼'}`;
+
+        if (elPts) { elPts.innerText = ptsStr; elPts.className = colorClass; }
+        if (elPct) { elPct.innerText = pctStr; elPct.className = `${colorClass} ${bgClass} px-1.5 py-0.5 rounded font-mono`; }
+        if (mobPct) { mobPct.innerText = pctStr; mobPct.className = `font-mono ${colorClass}`; }
+      }
+    }
+
+    // ── Live Candlestick Sparkline Canvas Drawing ──
+    function drawCandlestickChart() {
+      const canvas = document.getElementById('nifty-chart-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Draw faint grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      for (let y = 15; y < h; y += 20) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Generate 16 realistic candle sticks
+      const candles = [
+        { open: 20, close: 28, high: 32, low: 16 },
+        { open: 28, close: 24, high: 30, low: 22 },
+        { open: 24, close: 35, high: 38, low: 20 },
+        { open: 35, close: 32, high: 36, low: 28 },
+        { open: 32, close: 42, high: 45, low: 30 },
+        { open: 42, close: 39, high: 44, low: 36 },
+        { open: 39, close: 48, high: 52, low: 37 },
+        { open: 48, close: 45, high: 50, low: 42 },
+        { open: 45, close: 54, high: 58, low: 44 },
+        { open: 54, close: 50, high: 56, low: 48 },
+        { open: 50, close: 58, high: 62, low: 47 },
+        { open: 58, close: 55, high: 60, low: 52 },
+        { open: 55, close: 62, high: 65, low: 53 },
+        { open: 62, close: 60, high: 64, low: 57 },
+        { open: 60, close: 66, high: 68, low: 58 },
+        { open: 66, close: 64, high: 67, low: 61 },
+      ];
+
+      const candleW = 8;
+      const gap = (w - (candles.length * candleW)) / (candles.length + 1);
+
+      const closes = [];
+
+      candles.forEach((c, i) => {
+        const x = gap + i * (candleW + gap) + candleW / 2;
+        const yOpen = h - (c.open / 70) * (h - 10) - 5;
+        const yClose = h - (c.close / 70) * (h - 10) - 5;
+        const yHigh = h - (c.high / 70) * (h - 10) - 5;
+        const yLow = h - (c.low / 70) * (h - 10) - 5;
+
+        const isBullish = c.close >= c.open;
+        const color = isBullish ? '#4edea3' : '#ff516a';
+
+        // Draw Wick
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(x, yHigh);
+        ctx.lineTo(x, yLow);
+        ctx.stroke();
+
+        // Draw Body
+        ctx.fillStyle = color;
+        const topY = Math.min(yOpen, yClose);
+        const bodyH = Math.max(Math.abs(yClose - yOpen), 2);
+        ctx.fillRect(x - candleW / 2, topY, candleW, bodyH);
+
+        closes.push({ x, y: yClose });
+      });
+
+      // Draw glowing Moving Average line over closes
+      if (closes.length > 1) {
+        ctx.strokeStyle = '#E5C158';
+        ctx.lineWidth = 1.8;
+        ctx.shadowColor = 'rgba(229, 193, 88, 0.6)';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(closes[0].x, closes[0].y);
+        for (let i = 1; i < closes.length; i++) {
+          ctx.lineTo(closes[i].x, closes[i].y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0; // reset shadow
+      }
+    }
+
+    document.addEventListener('market:tick', updateLoginIndicesUI);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateLoginIndicesUI();
+      drawCandlestickChart();
+      window.addEventListener('resize', drawCandlestickChart);
     });
   </script>
 </body>
