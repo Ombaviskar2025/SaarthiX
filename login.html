@@ -193,13 +193,36 @@
     .timer-badge {
       font-variant-numeric: tabular-nums;
     }
+
+    /* Ambient Glow & Shimmer Graphics */
+    @keyframes border-shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .shimmer-border {
+      background: linear-gradient(90deg, transparent, rgba(229, 193, 88, 0.6), transparent);
+      background-size: 200% 100%;
+      animation: border-shimmer 4s infinite linear;
+    }
+
+    .card-aura {
+      box-shadow: 0 0 70px rgba(229, 193, 88, 0.2), 0 0 40px rgba(78, 222, 163, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.04);
+    }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center font-body-md text-on-surface p-gutter relative overflow-hidden">
 
+  <!-- Interactive Dynamic Background Canvas Graphics -->
+  <canvas id="bg-graphics-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-80"></canvas>
+
   <!-- Login Container -->
-  <main class="w-full max-w-md z-10">
-    <div class="glass-card rounded-xl p-8 shadow-2xl relative overflow-hidden">
+  <main class="w-full max-w-md z-10 relative">
+
+    <!-- Card Background Ambient Glow Graphic -->
+    <div class="absolute -inset-3 rounded-3xl bg-gradient-to-r from-[#E5C158]/20 via-emerald-500/15 to-[#E5C158]/20 blur-xl opacity-75 pointer-events-none animate-pulse"></div>
+
+    <div class="glass-card card-aura rounded-xl p-8 shadow-2xl relative overflow-hidden">
 
       <!-- Decorative Top Border Glow -->
       <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E6C687] to-transparent opacity-80"></div>
@@ -497,6 +520,121 @@
           if (otpInputs[nextEmpty]) otpInputs[nextEmpty].focus();
         });
       });
+    });
+
+    // ── Dynamic Background Canvas Graphics Engine ──
+    (function initBgGraphics() {
+      const canvas = document.getElementById('bg-graphics-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      // Floating gold & emerald particles
+      const particles = [];
+      const numParticles = 45;
+      const colors = ['#E5C158', '#4edea3', '#adc6ff', '#ffffff'];
+
+      for (let i = 0; i < numParticles; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 2.2 + 0.8,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: -Math.random() * 0.5 - 0.2,
+          alpha: Math.random() * 0.6 + 0.25,
+          pulse: Math.random() * 0.05 + 0.01
+        });
+      }
+
+      let waveOffset = 0;
+
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. Draw glowing wave stock graph line across background
+        waveOffset += 0.012;
+        ctx.save();
+        ctx.lineWidth = 2.2;
+
+        const grad = ctx.createLinearGradient(0, 0, width, 0);
+        grad.addColorStop(0, 'rgba(78, 222, 163, 0.05)');
+        grad.addColorStop(0.3, 'rgba(229, 193, 88, 0.45)');
+        grad.addColorStop(0.7, 'rgba(78, 222, 163, 0.45)');
+        grad.addColorStop(1, 'rgba(173, 198, 255, 0.05)');
+
+        ctx.strokeStyle = grad;
+        ctx.shadowColor = 'rgba(229, 193, 88, 0.6)';
+        ctx.shadowBlur = 14;
+
+        ctx.beginPath();
+        const startY = height * 0.65;
+        ctx.moveTo(0, startY);
+
+        for (let x = 0; x <= width; x += 15) {
+          const y = startY + Math.sin(x * 0.005 + waveOffset) * 45 + Math.cos(x * 0.008 + waveOffset * 0.75) * 28;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        // 2. Render floating cosmic market particles
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.y < 0) {
+            p.y = height + 10;
+            p.x = Math.random() * width;
+          }
+          if (p.x < 0 || p.x > width) p.vx *= -1;
+
+          p.alpha += Math.sin(Date.now() * 0.003 + p.radius) * 0.005;
+
+          ctx.save();
+          ctx.globalAlpha = Math.max(0.15, Math.min(0.85, p.alpha));
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // 3. Draw constellation connection lines
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 95) {
+              ctx.save();
+              ctx.globalAlpha = (1 - dist / 95) * 0.15;
+              ctx.strokeStyle = '#E5C158';
+              ctx.lineWidth = 0.6;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+              ctx.restore();
+            }
+          }
+        }
+
+        requestAnimationFrame(render);
+      }
+
+      render();
+    })();
   </script>
 </body>
 </html>
