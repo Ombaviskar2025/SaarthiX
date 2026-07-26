@@ -209,6 +209,15 @@
     .card-aura {
       box-shadow: 0 0 70px rgba(229, 193, 88, 0.2), 0 0 40px rgba(78, 222, 163, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.04);
     }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.04); }
+    }
+
+    .holo-glow {
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center font-body-md text-on-surface p-gutter relative overflow-hidden">
@@ -231,9 +240,16 @@
 
       <!-- Header -->
       <div class="text-center mb-4">
-        <!-- Logo Mark -->
-        <div class="relative inline-block mb-2">
-          <img src="logo.png" class="w-48 h-48 mx-auto object-contain drop-shadow-2xl" alt="SaarthiX Logo"/>
+        <!-- Logo Mark with Holographic Rotating Gold Ring Graphic -->
+        <div class="relative inline-block mb-2 group">
+          <!-- Outer Rotating Golden Halo Ring Graphic -->
+          <div class="absolute -inset-3 rounded-full border border-[#E5C158]/35 border-dashed animate-[spin_28s_linear_infinite] pointer-events-none"></div>
+          <!-- Inner Rotating Counter-Ring Graphic -->
+          <div class="absolute -inset-6 rounded-full border border-emerald-400/25 border-dotted animate-[spin_20s_linear_infinite_reverse] pointer-events-none"></div>
+          <!-- Radial Core Aura Glow -->
+          <div class="absolute inset-1 rounded-full bg-gradient-to-tr from-[#E5C158]/15 via-emerald-500/10 to-[#E5C158]/15 blur-xl group-hover:bg-[#E5C158]/25 transition-all duration-500 pointer-events-none holo-glow"></div>
+
+          <img src="logo.png" class="w-48 h-48 mx-auto object-contain drop-shadow-2xl relative z-10" alt="SaarthiX Logo"/>
         </div>
 
         <h1 class="gold-heading text-3xl sm:text-4xl mb-2 font-bold tracking-tight">Welcome to SaarthiX</h1>
@@ -536,9 +552,9 @@
         height = canvas.height = window.innerHeight;
       });
 
-      // Floating gold & emerald particles
+      // Floating ambient particles
       const particles = [];
-      const numParticles = 45;
+      const numParticles = 50;
       const colors = ['#E5C158', '#4edea3', '#adc6ff', '#ffffff'];
 
       for (let i = 0; i < numParticles; i++) {
@@ -549,17 +565,54 @@
           color: colors[Math.floor(Math.random() * colors.length)],
           vx: (Math.random() - 0.5) * 0.35,
           vy: -Math.random() * 0.5 - 0.2,
-          alpha: Math.random() * 0.6 + 0.25,
-          pulse: Math.random() * 0.05 + 0.01
+          alpha: Math.random() * 0.6 + 0.25
         });
       }
+
+      // Interactive Mouse Stardust Trail
+      const mouseParticles = [];
+      window.addEventListener('mousemove', (e) => {
+        for (let i = 0; i < 2; i++) {
+          mouseParticles.push({
+            x: e.clientX + (Math.random() - 0.5) * 10,
+            y: e.clientY + (Math.random() - 0.5) * 10,
+            vx: (Math.random() - 0.5) * 1.2,
+            vy: (Math.random() - 0.5) * 1.2 - 0.5,
+            radius: Math.random() * 2.5 + 1,
+            color: Math.random() > 0.4 ? '#E5C158' : '#4edea3',
+            life: 1,
+            decay: Math.random() * 0.03 + 0.02
+          });
+        }
+      });
 
       let waveOffset = 0;
 
       function render() {
         ctx.clearRect(0, 0, width, height);
 
-        // 1. Draw glowing wave stock graph line across background
+        // 1. Perspective Cyber Grid Floor Graphic at bottom
+        ctx.save();
+        ctx.strokeStyle = 'rgba(78, 222, 163, 0.07)';
+        ctx.lineWidth = 1;
+        const horizonY = height * 0.78;
+
+        for (let x = -width; x < width * 2; x += 60) {
+          ctx.beginPath();
+          ctx.moveTo(x, height);
+          ctx.lineTo(width / 2 + (x - width / 2) * 0.25, horizonY);
+          ctx.stroke();
+        }
+        for (let y = height; y > horizonY; y -= 18) {
+          const progress = (height - y) / (height - horizonY);
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // 2. Dual Glowing Wave Stock Trend Lines
         waveOffset += 0.012;
         ctx.save();
         ctx.lineWidth = 2.2;
@@ -585,7 +638,7 @@
         ctx.stroke();
         ctx.restore();
 
-        // 2. Render floating cosmic market particles
+        // 3. Render Ambient Floating Particles
         particles.forEach(p => {
           p.x += p.vx;
           p.y += p.vy;
@@ -595,8 +648,6 @@
             p.x = Math.random() * width;
           }
           if (p.x < 0 || p.x > width) p.vx *= -1;
-
-          p.alpha += Math.sin(Date.now() * 0.003 + p.radius) * 0.005;
 
           ctx.save();
           ctx.globalAlpha = Math.max(0.15, Math.min(0.85, p.alpha));
@@ -609,7 +660,30 @@
           ctx.restore();
         });
 
-        // 3. Draw constellation connection lines
+        // 4. Render Interactive Mouse Stardust Trail
+        for (let i = mouseParticles.length - 1; i >= 0; i--) {
+          const mp = mouseParticles[i];
+          mp.x += mp.vx;
+          mp.y += mp.vy;
+          mp.life -= mp.decay;
+
+          if (mp.life <= 0) {
+            mouseParticles.splice(i, 1);
+            continue;
+          }
+
+          ctx.save();
+          ctx.globalAlpha = mp.life;
+          ctx.fillStyle = mp.color;
+          ctx.shadowColor = mp.color;
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.arc(mp.x, mp.y, mp.radius * mp.life, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // 5. Constellation Connection Lines
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
             const dx = particles[i].x - particles[j].x;
