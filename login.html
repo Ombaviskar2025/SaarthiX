@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com" rel="preconnect"/>
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet"/>
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -111,17 +111,38 @@
       background-size: cover;
     }
     .glass-card {
-      background: rgba(10, 15, 25, 0.7);
+      background: rgba(10, 15, 25, 0.75);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 165, 255, 0.25);
-      box-shadow: 0 0 50px rgba(0, 165, 255, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(230, 198, 135, 0.25);
+      box-shadow: 0 0 50px rgba(230, 198, 135, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.03);
       border-radius: 1.5rem;
     }
 
+    /* Gold Typography & Styling */
+    .gold-heading {
+      font-family: 'Playfair Display', 'Cinzel', Georgia, serif;
+      color: #E5C158;
+      background: linear-gradient(135deg, #FFF6D6 0%, #F5C869 35%, #E5C158 70%, #BA923E 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text;
+      filter: drop-shadow(0px 2px 10px rgba(229, 193, 88, 0.3));
+    }
+
+    .gold-accent-text {
+      color: #E5C158 !important;
+      letter-spacing: 0.08em;
+    }
+
+    .gold-subtext {
+      color: #D4C3A3;
+      opacity: 0.95;
+    }
+
     .input-glow:focus {
-      box-shadow: 0 0 15px rgba(105, 251, 190, 0.2);
-      border-color: #6ffbbe;
+      box-shadow: 0 0 15px rgba(229, 193, 88, 0.35);
+      border-color: #E5C158;
       outline: none;
     }
 
@@ -181,7 +202,7 @@
     <div class="glass-card rounded-xl p-8 shadow-2xl relative overflow-hidden">
 
       <!-- Decorative Top Border Glow -->
-      <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-60"></div>
+      <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E6C687] to-transparent opacity-80"></div>
       <!-- Decorative Bottom Subtle Line -->
       <div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
 
@@ -192,14 +213,14 @@
           <img src="logo.png" class="w-48 h-48 mx-auto object-contain drop-shadow-2xl" alt="SaarthiX Logo"/>
         </div>
 
-        <h1 class="font-headline-md text-headline-md text-on-surface mb-2 font-bold tracking-tight">Welcome to SaarthiX</h1>
-        <p class="font-body-sm text-body-sm text-on-surface-variant">Every Portfolio Needs a Saarthi.</p>
+        <h1 class="gold-heading text-3xl sm:text-4xl mb-2 font-bold tracking-tight">Welcome to SaarthiX</h1>
+        <p class="font-body-sm text-body-sm gold-subtext">Every Portfolio Needs a Saarthi.</p>
       </div>
 
       <!-- ─── Phone Step ─── -->
       <div class="space-y-6 transition-all duration-300" id="phone-step">
         <div class="space-y-2">
-          <label class="font-label-sm text-label-sm text-on-surface-variant block uppercase tracking-wider">Phone Number</label>
+          <label class="font-label-sm text-label-sm gold-accent-text block uppercase tracking-wider font-semibold">Phone Number</label>
           <div class="flex gap-2">
             <select id="country-code" class="bg-black/30 border border-white/10 text-on-surface rounded-lg px-3 py-3 font-mono-data text-mono-data focus:border-secondary focus:ring-1 focus:ring-secondary input-glow w-24 appearance-none text-center">
               <option value="+1">+1</option>
@@ -234,7 +255,7 @@
       <div class="otp-hidden space-y-6" id="otp-step">
         <div class="space-y-3">
           <div class="flex justify-between items-center">
-            <label class="font-label-sm text-label-sm text-on-surface-variant block uppercase tracking-wider">Verification Code</label>
+            <label class="font-label-sm text-label-sm gold-accent-text block uppercase tracking-wider font-semibold">Verification Code</label>
             <button class="text-secondary hover:text-secondary-fixed font-label-sm text-label-sm transition-colors flex items-center gap-1" onclick="showPhoneStep()">
               <span class="material-symbols-outlined text-[14px]">edit</span>
               Edit Number
