@@ -2571,16 +2571,28 @@ async function refreshMarketWatchCache() {
     nifty50: '^NSEI',
     sensex: '^BSESN',
     niftyBank: '^NSEBANK',
-    niftyIT: '^CNXIT'
+    niftyIT: '^CNXIT',
+    nasdaq: '^IXIC',
+    dow: '^DJI',
+    sp500: '^GSPC'
   };
 
   // 1. Refresh Indices in parallel
   await Promise.all(Object.entries(indexSymbols).map(async ([key, ySym]) => {
     const quote = await fetchYahooQuote(ySym);
     if (quote) {
+      const nameMap = {
+        nifty50: 'NIFTY 50',
+        sensex: 'SENSEX',
+        niftyBank: 'BANK NIFTY',
+        niftyIT: 'NIFTY IT',
+        nasdaq: 'NASDAQ 100',
+        dow: 'DOW JONES',
+        sp500: 'S&P 500'
+      };
       marketWatchCache.indices[key] = {
         id: key,
-        name: key === 'nifty50' ? 'NIFTY 50' : (key === 'sensex' ? 'SENSEX' : (key === 'niftyBank' ? 'BANK NIFTY' : 'NIFTY IT')),
+        name: nameMap[key] || key.toUpperCase(),
         value: quote.price,
         price: quote.price,
         change: quote.change,
