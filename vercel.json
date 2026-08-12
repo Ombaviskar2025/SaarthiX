@@ -9,6 +9,8 @@
           "*.html",
           "*.js",
           "*.png",
+          "*.jpg",
+          "*.jpeg",
           "*.ico",
           "*.css"
         ]
