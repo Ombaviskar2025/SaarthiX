@@ -1,712 +1,439 @@
-<!DOCTYPE html>
-<html class="dark" lang="en">
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>SaarthiX - Login | NSE &amp; BSE India</title>
+  <title>SaarthiX - Login - NSE and BSE India</title>
+  <meta name="description" content="Login to your SaarthiX account. Smart portfolio decisions start here."/>
   <link rel="icon" type="image/x-icon" href="favicon.ico"/>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com" rel="preconnect"/>
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet"/>
-  <script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "surface-bright": "#353943",
-            "on-secondary-container": "#00311f",
-            "on-surface-variant": "#c2c6d6",
-            "on-secondary-fixed": "#002113",
-            "tertiary-container": "#ff516a",
-            "primary": "#adc6ff",
-            "on-primary": "#002e6a",
-            "on-error-container": "#ffdad6",
-            "secondary-fixed-dim": "#4edea3",
-            "inverse-primary": "#005ac2",
-            "on-tertiary-fixed-variant": "#92002a",
-            "secondary-fixed": "#6ffbbe",
-            "on-tertiary-container": "#5b0017",
-            "on-background": "#dfe2ef",
-            "surface-container-highest": "#31353f",
-            "error-container": "#93000a",
-            "tertiary": "#ffb2b7",
-            "surface-container-lowest": "#0a0e17",
-            "on-primary-fixed": "#001a42",
-            "surface-container-high": "#262a34",
-            "surface-container-low": "#181b25",
-            "on-primary-fixed-variant": "#004395",
-            "on-tertiary-fixed": "#40000d",
-            "on-secondary-fixed-variant": "#005236",
-            "tertiary-fixed": "#ffdadb",
-            "surface-tint": "#adc6ff",
-            "on-error": "#690005",
-            "primary-container": "#4d8eff",
-            "secondary-container": "#00a572",
-            "inverse-on-surface": "#2c303a",
-            "error": "#ffb4ab",
-            "primary-fixed": "#d8e2ff",
-            "outline-variant": "#424754",
-            "surface-container": "#1c1f29",
-            "background": "#0f131c",
-            "inverse-surface": "#dfe2ef",
-            "surface-variant": "#31353f",
-            "on-tertiary": "#67001b",
-            "on-surface": "#dfe2ef",
-            "surface-dim": "#0f131c",
-            "primary-fixed-dim": "#adc6ff",
-            "secondary": "#4edea3",
-            "surface": "#0f131c",
-            "on-secondary": "#003824",
-            "outline": "#8c909f",
-            "tertiary-fixed-dim": "#ffb2b7",
-            "on-primary-container": "#00285d"
-          },
-          borderRadius: {
-            DEFAULT: "0.25rem",
-            lg: "0.5rem",
-            xl: "0.75rem",
-            full: "9999px"
-          },
-          spacing: {
-            unit: "4px",
-            "element-gap": "12px",
-            "section-gap": "32px",
-            gutter: "16px",
-            "container-padding": "24px"
-          },
-          fontFamily: {
-            "headline-lg": ["Geist"],
-            "headline-xl": ["Geist"],
-            "body-sm": ["Inter"],
-            "label-sm": ["Geist"],
-            "label-md": ["Geist"],
-            "body-md": ["Inter"],
-            "headline-md": ["Geist"],
-            "body-lg": ["Inter"],
-            "headline-lg-mobile": ["Geist"],
-            "mono-data": ["Geist"]
-          },
-          fontSize: {
-            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
-            "headline-xl": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
-            "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
-            "label-sm": ["12px", { lineHeight: "14px", letterSpacing: "0.05em", fontWeight: "500" }],
-            "label-md": ["14px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "500" }],
-            "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
-            "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
-            "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
-            "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
-            "mono-data": ["14px", { lineHeight: "20px", letterSpacing: "-0.01em", fontWeight: "500" }]
-          }
-        }
-      }
-    }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    body {
-      background: url('space_bg.png') no-repeat center center fixed;
-      background-size: cover;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --gold:#E5C158;--gold-light:#FFF0A0;--gold-dark:#BA923E;
+      --emerald:#10c990;--emerald-dk:#0aa578;
+      --bg-card:rgba(8,14,26,0.82);
+      --panel-left:rgba(6,11,22,0.90);--panel-right:rgba(10,16,28,0.94);
+      --border-gold:rgba(229,193,88,0.22);
+      --text-muted:rgba(180,190,210,0.65);--text-dim:rgba(180,190,210,0.42);
+      --input-bg:rgba(255,255,255,0.04);--input-border:rgba(255,255,255,0.12);
     }
-    .glass-card {
-      background: rgba(10, 15, 25, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(230, 198, 135, 0.25);
-      box-shadow: 0 0 50px rgba(230, 198, 135, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.03);
-      border-radius: 1.5rem;
+    html,body{height:100%;min-height:100vh}
+    body{
+      font-family:'Inter',sans-serif;
+      background:url('space_bg.png') no-repeat center center fixed;
+      background-size:cover;
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;position:relative;overflow:hidden;color:#dde4f0;
     }
-
-    /* Gold Typography & Styling */
-    .gold-heading {
-      font-family: 'Playfair Display', 'Cinzel', Georgia, serif;
-      color: #E5C158;
-      background: linear-gradient(135deg, #FFF6D6 0%, #F5C869 35%, #E5C158 70%, #BA923E 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent !important;
-      background-clip: text;
-      filter: drop-shadow(0px 2px 10px rgba(229, 193, 88, 0.3));
+    body::before{content:'';position:fixed;inset:0;background:rgba(4,8,18,0.52);z-index:0}
+    canvas#bg-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0.72}
+    .card-glow{
+      position:fixed;z-index:9;pointer-events:none;
+      width:900px;max-width:calc(100vw - 40px);
+      height:calc(100% - 40px);max-height:620px;
+      border-radius:23px;
+      background:linear-gradient(135deg,rgba(229,193,88,0.18),rgba(16,201,144,0.12),rgba(229,193,88,0.18));
+      filter:blur(10px);opacity:0.5;
+      animation:glow-pulse 4s ease-in-out infinite;
     }
-
-    .gold-accent-text {
-      color: #E5C158 !important;
-      letter-spacing: 0.08em;
+    @keyframes glow-pulse{0%,100%{opacity:0.35}50%{opacity:0.65}}
+    .login-card{
+      position:relative;z-index:10;
+      display:flex;width:100%;max-width:900px;min-height:570px;
+      border-radius:20px;overflow:hidden;
+      background:var(--bg-card);
+      border:1px solid var(--border-gold);
+      box-shadow:0 0 80px rgba(229,193,88,0.13),0 0 40px rgba(16,201,144,0.07),0 30px 80px rgba(0,0,0,0.6),inset 0 0 30px rgba(255,255,255,0.02);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
     }
-
-    .gold-subtext {
-      color: #D4C3A3;
-      opacity: 0.95;
+    .panel-left{
+      flex:0 0 42%;background:var(--panel-left);
+      border-right:1px solid var(--border-gold);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:40px 30px;position:relative;overflow:hidden;
     }
-
-    .input-glow:focus {
-      box-shadow: 0 0 15px rgba(229, 193, 88, 0.35);
-      border-color: #E5C158;
-      outline: none;
+    .panel-left::before{content:'';position:absolute;top:-60px;left:-60px;width:280px;height:280px;background:radial-gradient(circle,rgba(229,193,88,0.11) 0%,transparent 70%);pointer-events:none}
+    .panel-left::after{content:'';position:absolute;bottom:-40px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(16,201,144,0.09) 0%,transparent 70%);pointer-events:none}
+    .logo-wrap{position:relative;margin-bottom:18px}
+    .logo-ring{position:absolute;border-radius:50%;border:1px dashed rgba(229,193,88,0.35);animation:spin-slow 28s linear infinite}
+    .logo-ring.outer{inset:-14px}
+    .logo-ring.inner{inset:-24px;border-color:rgba(16,201,144,0.22);border-style:dotted;animation-direction:reverse;animation-duration:20s}
+    @keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .logo-img{width:152px;height:152px;object-fit:contain;border-radius:50%;display:block;position:relative;z-index:2;filter:drop-shadow(0 0 20px rgba(229,193,88,0.35))}
+    .left-title{font-family:'Playfair Display',serif;font-size:1.65rem;font-weight:700;text-align:center;line-height:1.25;margin-bottom:6px;color:#d4c3a3}
+    .left-title .brand{background:linear-gradient(135deg,#FFF6D6 0%,#F5C869 40%,#E5C158 70%,#BA923E 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .gold-divider{display:flex;align-items:center;gap:8px;margin:10px 0;width:100%;justify-content:center}
+    .gold-divider::before,.gold-divider::after{content:'';flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(229,193,88,0.5))}
+    .gold-divider::after{background:linear-gradient(90deg,rgba(229,193,88,0.5),transparent)}
+    .gold-diamond{width:7px;height:7px;background:#E5C158;transform:rotate(45deg);flex-shrink:0;display:inline-block}
+    .left-tagline{font-size:0.82rem;color:var(--text-muted);text-align:center;line-height:1.65;margin-bottom:16px}
+    .mini-chart{width:100%;max-width:220px;height:68px;margin:0 auto 20px;position:relative}
+    .features{display:flex;justify-content:center;gap:12px;width:100%;margin-top:4px}
+    .feature-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1}
+    .feature-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:#E5C158}
+    .feature-icon svg{width:22px;height:22px}
+    .feature-label{font-size:0.67rem;color:var(--text-muted);text-align:center;line-height:1.3;font-weight:500}
+    .panel-right{flex:1;background:var(--panel-right);display:flex;flex-direction:column;justify-content:center;padding:44px 42px}
+    .right-title{font-size:1.55rem;font-weight:700;color:#edf0f8;text-align:center;margin-bottom:5px;letter-spacing:-0.02em}
+    .right-subtitle{font-size:0.82rem;color:var(--text-muted);text-align:center;margin-bottom:4px}
+    .right-divider{margin:10px auto 20px;display:flex;align-items:center;justify-content:center;gap:8px}
+    .right-divider::before,.right-divider::after{content:'';width:50px;height:1px;background:rgba(229,193,88,0.35)}
+    .form-group{margin-bottom:14px}
+    .form-label{display:block;font-size:0.77rem;font-weight:600;color:#b8c4d8;margin-bottom:6px;letter-spacing:0.02em}
+    .input-row{display:flex;gap:8px}
+    .country-select{
+      width:76px;flex-shrink:0;background:var(--input-bg);border:1px solid var(--input-border);
+      border-radius:10px;color:#dde4f0;font-family:inherit;font-size:0.87rem;
+      padding:0 8px;cursor:pointer;appearance:none;text-align:center;
+      transition:border-color .25s,box-shadow .25s;
     }
-
-    .btn-emerald {
-      background-color: #00a572;
-      color: #ffffff;
-      transition: all 0.3s ease;
+    .country-select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(229,193,88,0.12)}
+    .field-wrap{position:relative;flex:1}
+    .field-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:rgba(180,190,210,0.42);display:flex;align-items:center}
+    .field-icon svg{width:15px;height:15px}
+    .form-input{
+      width:100%;background:var(--input-bg);border:1px solid var(--input-border);
+      border-radius:10px;color:#dde4f0;font-family:inherit;font-size:0.9rem;
+      padding:12px 40px 12px 40px;transition:border-color .25s,box-shadow .25s;
     }
-
-    .btn-emerald:hover {
-      box-shadow: 0 0 24px rgba(0, 165, 114, 0.4);
-      background-color: #00875c;
+    .form-input.no-li{padding-left:14px}
+    .form-input::placeholder{color:rgba(180,190,210,0.3)}
+    .form-input:focus{outline:none;border-color:rgba(229,193,88,0.55);box-shadow:0 0 0 3px rgba(229,193,88,0.10),0 0 14px rgba(229,193,88,0.11)}
+    .eye-btn{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(180,190,210,0.42);cursor:pointer;padding:4px;display:flex;align-items:center;transition:color .2s}
+    .eye-btn:hover{color:#dde4f0}
+    .eye-btn svg{width:17px;height:17px}
+    .forgot-link{display:block;text-align:right;font-size:0.77rem;color:#E5C158;text-decoration:none;margin-top:7px;font-weight:500;transition:opacity .2s}
+    .forgot-link:hover{opacity:0.72}
+    .btn-login{
+      width:100%;margin-top:16px;padding:13px 20px;border-radius:10px;border:none;
+      background:linear-gradient(135deg,#10c990 0%,#0aa578 100%);
+      color:#fff;font-family:inherit;font-size:1rem;font-weight:700;
+      letter-spacing:0.02em;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      transition:all .3s ease;box-shadow:0 4px 20px rgba(16,201,144,0.25);
     }
-
-    .otp-hidden {
-      display: none;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
+    .btn-login:hover{background:linear-gradient(135deg,#12dca0 0%,#0bb882 100%);box-shadow:0 6px 30px rgba(16,201,144,0.40);transform:translateY(-1px)}
+    .btn-login:active{transform:translateY(0)}
+    .arrow-icon{transition:transform .25s}
+    .btn-login:hover .arrow-icon{transform:translateX(4px)}
+    .or-divider{display:flex;align-items:center;gap:12px;margin:15px 0;color:var(--text-dim);font-size:0.78rem;font-weight:500}
+    .or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08)}
+    .btn-otp{
+      width:100%;padding:12px 20px;border-radius:10px;
+      border:1px solid rgba(255,255,255,0.11);background:rgba(255,255,255,0.03);
+      color:#dde4f0;font-family:inherit;font-size:0.9rem;font-weight:600;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:9px;transition:all .25s;
     }
-
-    .otp-visible {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
+    .btn-otp:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.2)}
+    .btn-otp svg{width:16px;height:16px;color:#10c990}
+    .signup-row{text-align:center;margin-top:15px;font-size:0.81rem;color:var(--text-muted)}
+    .signup-row a{color:#10c990;font-weight:600;text-decoration:none;transition:opacity .2s}
+    .signup-row a:hover{opacity:0.72}
+    .security-note{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:13px;font-size:0.73rem;color:var(--text-dim)}
+    .security-note svg{width:13px;height:13px;flex-shrink:0}
+    #otp-panel{display:none}
+    .otp-inputs{display:flex;gap:9px;justify-content:center;margin:13px 0}
+    .otp-digit{width:46px;height:50px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;color:#edf0f8;font-size:1.3rem;font-weight:700;text-align:center;font-family:inherit;transition:border-color .25s,box-shadow .25s}
+    .otp-digit:focus{outline:none;border-color:#10c990;box-shadow:0 0 0 3px rgba(16,201,144,0.15)}
+    .timer-row{display:flex;justify-content:space-between;align-items:center;font-size:0.77rem;color:var(--text-muted);margin-bottom:13px}
+    .timer-val{color:#10c990;font-weight:600}
+    .resend-btn{background:none;border:none;color:var(--text-dim);font-family:inherit;font-size:0.77rem;cursor:not-allowed;transition:color .2s}
+    .resend-btn.active{color:#10c990;cursor:pointer}
+    @media(max-width:700px){
+      .login-card{flex-direction:column;max-width:430px;min-height:auto}
+      .panel-left{flex:none;width:100%;padding:28px 22px 22px;border-right:none;border-bottom:1px solid var(--border-gold)}
+      .panel-right{padding:28px 22px 26px}
+      .logo-img{width:110px;height:110px}
+      .left-title{font-size:1.3rem}
+      .features{gap:8px}
     }
-
-    /* Ambient floating particles */
-    @keyframes float-particle {
-      0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.4; }
-      33% { transform: translateY(-20px) translateX(10px); opacity: 0.7; }
-      66% { transform: translateY(-10px) translateX(-8px); opacity: 0.5; }
-    }
-
-    .particle {
-      animation: float-particle 8s ease-in-out infinite;
-    }
-    .particle:nth-child(2) { animation-delay: -2s; }
-    .particle:nth-child(3) { animation-delay: -4s; }
-    .particle:nth-child(4) { animation-delay: -6s; }
-
-    @keyframes pulse-ring {
-      0% { box-shadow: 0 0 0 0 rgba(78, 222, 163, 0.3); }
-      70% { box-shadow: 0 0 0 12px rgba(78, 222, 163, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(78, 222, 163, 0); }
-    }
-
-    .timer-badge {
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* Ambient Glow & Shimmer Graphics */
-    @keyframes border-shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-
-    .shimmer-border {
-      background: linear-gradient(90deg, transparent, rgba(229, 193, 88, 0.6), transparent);
-      background-size: 200% 100%;
-      animation: border-shimmer 4s infinite linear;
-    }
-
-    .card-aura {
-      box-shadow: 0 0 70px rgba(229, 193, 88, 0.2), 0 0 40px rgba(78, 222, 163, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.04);
-    }
-
-    @keyframes pulse-glow {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 0.85; transform: scale(1.04); }
-    }
-
-    .holo-glow {
-      animation: pulse-glow 4s ease-in-out infinite;
-    }
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center font-body-md text-on-surface p-gutter relative overflow-hidden">
+<body>
+  <canvas id="bg-canvas"></canvas>
 
-  <!-- Interactive Dynamic Background Canvas Graphics -->
-  <canvas id="bg-graphics-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-80"></canvas>
-
-  <!-- Login Container -->
-  <main class="w-full max-w-md z-10 relative">
-
-    <!-- Card Background Ambient Glow Graphic -->
-    <div class="absolute -inset-3 rounded-3xl bg-gradient-to-r from-[#E5C158]/20 via-emerald-500/15 to-[#E5C158]/20 blur-xl opacity-75 pointer-events-none animate-pulse"></div>
-
-    <div class="glass-card card-aura rounded-xl p-8 shadow-2xl relative overflow-hidden">
-
-      <!-- Decorative Top Border Glow -->
-      <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E6C687] to-transparent opacity-80"></div>
-      <!-- Decorative Bottom Subtle Line -->
-      <div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
-
-      <!-- Header -->
-      <div class="text-center mb-4">
-        <!-- Logo Mark with Holographic Rotating Gold Ring Graphic -->
-        <div class="relative inline-block mb-2 group">
-          <!-- Outer Rotating Golden Halo Ring Graphic -->
-          <div class="absolute -inset-3 rounded-full border border-[#E5C158]/35 border-dashed animate-[spin_28s_linear_infinite] pointer-events-none"></div>
-          <!-- Inner Rotating Counter-Ring Graphic -->
-          <div class="absolute -inset-6 rounded-full border border-emerald-400/25 border-dotted animate-[spin_20s_linear_infinite_reverse] pointer-events-none"></div>
-          <!-- Radial Core Aura Glow -->
-          <div class="absolute inset-1 rounded-full bg-gradient-to-tr from-[#E5C158]/15 via-emerald-500/10 to-[#E5C158]/15 blur-xl group-hover:bg-[#E5C158]/25 transition-all duration-500 pointer-events-none holo-glow"></div>
-
-          <img src="logo.png" class="w-48 h-48 mx-auto object-contain drop-shadow-2xl relative z-10" alt="SaarthiX Logo"/>
-        </div>
-
-        <h1 class="gold-heading text-3xl sm:text-4xl mb-2 font-bold tracking-tight">Welcome to SaarthiX</h1>
-        <p class="font-body-sm text-body-sm gold-subtext">Every Portfolio Needs a Saarthi.</p>
+  <div class="login-card">
+    <!-- LEFT PANEL -->
+    <div class="panel-left">
+      <div class="logo-wrap">
+        <div class="logo-ring outer"></div>
+        <div class="logo-ring inner"></div>
+        <img src="logo.png" class="logo-img" alt="SaarthiX Logo"/>
       </div>
-
-      <!-- ─── Phone Step ─── -->
-      <div class="space-y-6 transition-all duration-300" id="phone-step">
-        <div class="space-y-2">
-          <label class="font-label-sm text-label-sm gold-accent-text block uppercase tracking-wider font-semibold">Phone Number</label>
-          <div class="flex gap-2">
-            <select id="country-code" class="bg-black/30 border border-white/10 text-on-surface rounded-lg px-3 py-3 font-mono-data text-mono-data focus:border-secondary focus:ring-1 focus:ring-secondary input-glow w-24 appearance-none text-center">
-              <option value="+1">+1</option>
-              <option value="+44">+44</option>
-              <option value="+91" selected>+91</option>
-              <option value="+61">+61</option>
-              <option value="+49">+49</option>
-              <option value="+81">+81</option>
-            </select>
-            <input id="phone-input" class="bg-black/30 border border-white/10 text-on-surface rounded-lg px-4 py-3 font-mono-data text-mono-data w-full input-glow placeholder:text-on-surface-variant/30" placeholder="(555) 123-4567" type="tel"/>
+      <h1 class="left-title">Welcome to <span class="brand">SaarthiX</span></h1>
+      <div class="gold-divider"><div class="gold-diamond"></div></div>
+      <p class="left-tagline">Smart portfolio decisions start here.<br/>Track. Analyze. Grow.</p>
+      <div class="mini-chart"><canvas id="chart-canvas" style="width:100%;height:100%;"></canvas></div>
+      <div class="features">
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="4" height="14" rx="1"/><rect x="9" y="7" width="4" height="10" rx="1"/><rect x="16" y="5" width="4" height="12" rx="1"/><path d="M2 21h20"/></svg>
           </div>
-          <p id="phone-error" class="text-error font-label-sm text-label-sm hidden">Please enter a valid phone number.</p>
+          <span class="feature-label">Real-time<br/>Market Data</span>
         </div>
-
-        <button
-          class="w-full btn-emerald rounded-lg py-3 font-label-md text-label-md font-bold uppercase tracking-wider flex items-center justify-center gap-2 group"
-          onclick="sendOtp()"
-          id="send-otp-btn"
-        >
-          Send OTP
-          <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
-        </button>
-
-        <p class="text-center font-body-sm text-body-sm text-on-surface-variant/50">
-          By continuing, you agree to our
-          <a href="#" class="text-secondary hover:underline">Terms</a> &amp;
-          <a href="#" class="text-secondary hover:underline">Privacy Policy</a>.
-        </p>
-      </div>
-
-      <!-- ─── OTP Step ─── -->
-      <div class="otp-hidden space-y-6" id="otp-step">
-        <div class="space-y-3">
-          <div class="flex justify-between items-center">
-            <label class="font-label-sm text-label-sm gold-accent-text block uppercase tracking-wider font-semibold">Verification Code</label>
-            <button class="text-secondary hover:text-secondary-fixed font-label-sm text-label-sm transition-colors flex items-center gap-1" onclick="showPhoneStep()">
-              <span class="material-symbols-outlined text-[14px]">edit</span>
-              Edit Number
-            </button>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
           </div>
-
-          <!-- Sent-to indicator -->
-          <div class="flex items-center gap-2 bg-secondary-container/10 border border-secondary-container/20 rounded-lg px-3 py-2">
-            <span class="material-symbols-outlined text-secondary text-sm">sms</span>
-            <span class="font-body-sm text-body-sm text-on-surface-variant">Code sent to <span id="display-number" class="text-on-surface font-medium"></span></span>
-          </div>
-
-          <!-- ⚠️ Demo Mode Notice -->
-          <div class="flex items-start gap-2 bg-primary-container/10 border border-primary-container/30 rounded-lg px-3 py-2.5 mt-1">
-            <span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5" style="font-variation-settings:'FILL' 1;">info</span>
-            <div>
-              <p class="font-label-sm text-label-sm text-primary font-semibold">Demo Mode — No real SMS is sent</p>
-              <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">This is a UI demo. Use the auto-filled code below or type any 6 digits.</p>
-            </div>
-          </div>
-
-          <!-- 6-digit OTP inputs -->
-          <div class="flex justify-between gap-2 mt-2">
-            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-            <input class="w-12 h-12 bg-black/30 border border-white/10 text-on-surface rounded-lg text-center font-headline-md text-headline-md input-glow focus:border-secondary" maxlength="1" placeholder="·" type="text" inputmode="numeric"/>
-          </div>
-
-          <!-- Quick-fill helper -->
-          <button onclick="fillDemoOtp()" class="w-full mt-1 py-2 rounded-lg border border-dashed border-secondary/30 text-secondary font-label-sm text-label-sm hover:bg-secondary/5 transition-colors flex items-center justify-center gap-1">
-            <span class="material-symbols-outlined text-[15px]">bolt</span>
-            Auto-fill Demo Code (1 2 3 4 5 6)
-          </button>
-
-          <div class="flex items-center justify-between mt-1">
-            <p class="font-body-sm text-body-sm text-on-surface-variant/60">
-              Expires in <span id="otp-timer" class="text-secondary timer-badge font-medium">03:00</span>
-            </p>
-            <button id="resend-btn" class="font-label-sm text-label-sm text-on-surface-variant/40 cursor-not-allowed" disabled onclick="resendOtp()">Resend OTP</button>
-          </div>
+          <span class="feature-label">Portfolio<br/>Analytics</span>
         </div>
-
-        <!-- Login CTA -->
-        <button
-          id="login-btn"
-          onclick="loginToDashboard()"
-          class="w-full btn-emerald rounded-lg py-3 font-label-md text-label-md font-bold uppercase tracking-wider flex items-center justify-center gap-2 group"
-        >
-          Login to Dashboard
-          <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">login</span>
-        </button>
-      </div>
-
-      <!-- Footer Links -->
-      <div class="mt-8 pt-6 border-t border-white/5 flex justify-center space-x-4 font-label-sm text-label-sm text-on-surface-variant/60">
-        <a class="hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
-        <span>•</span>
-        <a class="hover:text-on-surface transition-colors" href="#">Terms of Service</a>
-        <span>•</span>
-        <a class="hover:text-on-surface transition-colors" href="#">Support</a>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+          <span class="feature-label">Secure &amp;<br/>Reliable</span>
+        </div>
       </div>
     </div>
 
-    <!-- Brand tagline below card -->
-    <p class="text-center mt-6 font-label-sm text-label-sm text-on-surface-variant/30 tracking-widest uppercase">
-      NSE &middot; BSE &middot; India &middot; SaarthiX
-    </p>
-  </main>
+    <!-- RIGHT PANEL -->
+    <div class="panel-right">
+      <h2 class="right-title">Login to Your Account</h2>
+      <p class="right-subtitle">Access your SaarthiX dashboard</p>
+      <div class="right-divider"><div class="gold-diamond" style="width:6px;height:6px;"></div></div>
+
+      <!-- Password Login -->
+      <div id="password-panel">
+        <div class="form-group">
+          <label class="form-label" for="phone-input">Phone Number</label>
+          <div class="input-row">
+            <select class="country-select" id="country-code" aria-label="Country code">
+              <option value="+91" selected>+91</option>
+              <option value="+1">+1</option>
+              <option value="+44">+44</option>
+              <option value="+61">+61</option>
+              <option value="+81">+81</option>
+            </select>
+            <div class="field-wrap" style="flex:1;">
+              <input class="form-input no-li" id="phone-input" type="tel" placeholder="Enter your phone number" autocomplete="tel" aria-label="Phone number"/>
+            </div>
+          </div>
+          <p id="phone-error" style="display:none;color:#ff7e7e;font-size:0.73rem;margin-top:5px;">Please enter a valid phone number.</p>
+        </div>
+
+        <div class="form-group" style="margin-bottom:4px;">
+          <label class="form-label" for="password-input">Password</label>
+          <div class="field-wrap">
+            <span class="field-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input class="form-input" id="password-input" type="password" placeholder="Enter your password" autocomplete="current-password" aria-label="Password"/>
+            <button class="eye-btn" id="toggle-pwd" type="button" aria-label="Toggle password visibility" onclick="togglePassword()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <a href="#" class="forgot-link">Forgot Password?</a>
+        </div>
+
+        <button class="btn-login" id="login-btn" onclick="handleLogin()">
+          Login
+          <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <div class="or-divider">OR</div>
+
+        <button class="btn-otp" id="otp-switch-btn" onclick="switchToOtp()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          Login with OTP
+        </button>
+
+        <p class="signup-row">Don't have an account? <a href="#">Sign Up</a></p>
+        <div class="security-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Your data is encrypted and secure with us.
+        </div>
+      </div>
+
+      <!-- OTP Panel -->
+      <div id="otp-panel">
+        <div class="form-group" id="otp-phone-group">
+          <label class="form-label">Phone Number</label>
+          <div class="input-row">
+            <select class="country-select" id="otp-country-code" aria-label="OTP Country code">
+              <option value="+91" selected>+91</option>
+              <option value="+1">+1</option>
+              <option value="+44">+44</option>
+            </select>
+            <div class="field-wrap" style="flex:1;">
+              <input class="form-input no-li" id="otp-phone-input" type="tel" placeholder="Enter your phone number" autocomplete="tel"/>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-login" id="send-otp-btn" onclick="sendOtp()">
+          Send OTP
+          <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <div id="otp-verify-block" style="display:none;margin-top:16px;">
+          <p style="font-size:0.8rem;color:var(--text-muted);text-align:center;margin-bottom:10px;">Code sent to <span id="otp-phone-display" style="color:#dde4f0;font-weight:600;"></span></p>
+          <div class="otp-inputs">
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" aria-label="OTP digit 1"/>
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" aria-label="OTP digit 2"/>
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" aria-label="OTP digit 3"/>
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" aria-label="OTP digit 4"/>
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" aria-label="OTP digit 5"/>
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" aria-label="OTP digit 6"/>
+          </div>
+          <div class="timer-row">
+            <span>Expires in <span id="otp-timer" class="timer-val">03:00</span></span>
+            <button class="resend-btn" id="resend-btn" onclick="resendOtp()" disabled>Resend OTP</button>
+          </div>
+          <button class="btn-login" onclick="loginToDashboard()">
+            Verify &amp; Login
+            <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+
+        <div class="or-divider" style="margin-top:14px;">OR</div>
+        <button class="btn-otp" onclick="switchToPassword()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Login with Password
+        </button>
+
+        <p class="signup-row">Don't have an account? <a href="#">Sign Up</a></p>
+        <div class="security-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Your data is encrypted and secure with us.
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
-    let timerInterval = null;
-    let secondsLeft = 180;
+    function togglePassword(){var i=document.getElementById('password-input');i.type=i.type==='password'?'text':'password'}
+    function switchToOtp(){document.getElementById('password-panel').style.display='none';document.getElementById('otp-panel').style.display='block'}
+    function switchToPassword(){document.getElementById('otp-panel').style.display='none';document.getElementById('password-panel').style.display='block'}
 
-    function validatePhone() {
-      const phone = document.getElementById('phone-input').value.trim();
-      const error = document.getElementById('phone-error');
-      if (!phone || phone.replace(/\D/g, '').length < 7) {
-        error.classList.remove('hidden');
-        return false;
-      }
-      error.classList.add('hidden');
-      return true;
+    function handleLogin(){
+      var phone=document.getElementById('phone-input').value.trim();
+      var err=document.getElementById('phone-error');
+      if(!phone||phone.replace(/\D/g,'').length<7){err.style.display='block';return}
+      err.style.display='none';
+      var btn=document.getElementById('login-btn');
+      btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Verifying...';
+      btn.disabled=true;
+      setTimeout(function(){var cp=window.location.pathname;window.location.replace(window.location.origin+cp.substring(0,cp.lastIndexOf('/'))+'/dashboard.html')},1200);
     }
 
-    function sendOtp() {
-      if (!validatePhone()) return;
-
-      const code = document.getElementById('country-code').value;
-      const phone = document.getElementById('phone-input').value.trim();
-      document.getElementById('display-number').textContent = code + ' ' + phone;
-
-      showOtpStep();
+    var timerInterval=null,secondsLeft=180;
+    function sendOtp(){
+      var phone=document.getElementById('otp-phone-input').value.trim();
+      if(!phone||phone.replace(/\D/g,'').length<7){alert('Please enter a valid phone number.');return}
+      var code=document.getElementById('otp-country-code').value;
+      document.getElementById('otp-phone-display').textContent=code+' '+phone;
+      document.getElementById('otp-phone-group').style.display='none';
+      document.getElementById('send-otp-btn').style.display='none';
+      document.getElementById('otp-verify-block').style.display='block';
       startTimer();
+      setTimeout(function(){var d=document.querySelectorAll('.otp-digit');'123456'.split('').forEach(function(c,i){if(d[i])d[i].value=c})},500);
+    }
+    function startTimer(){
+      secondsLeft=180;clearInterval(timerInterval);
+      var rb=document.getElementById('resend-btn');rb.disabled=true;rb.classList.remove('active');
+      updateTimer();
+      timerInterval=setInterval(function(){secondsLeft--;updateTimer();if(secondsLeft<=0){clearInterval(timerInterval);rb.disabled=false;rb.classList.add('active')}},1000);
+    }
+    function updateTimer(){var m=String(Math.floor(secondsLeft/60)).padStart(2,'0'),s=String(secondsLeft%60).padStart(2,'0');document.getElementById('otp-timer').textContent=m+':'+s}
+    function resendOtp(){document.querySelectorAll('.otp-digit').forEach(function(d){d.value=''});document.querySelectorAll('.otp-digit')[0].focus();startTimer()}
+    function loginToDashboard(){
+      var otp=[].slice.call(document.querySelectorAll('.otp-digit')).map(function(d){return d.value}).join('');
+      if(otp.replace(/\s/g,'').length<6){document.querySelectorAll('.otp-digit').forEach(function(d){d.style.borderColor='#ff7e7e'});return}
+      var cp=window.location.pathname;window.location.replace(window.location.origin+cp.substring(0,cp.lastIndexOf('/'))+'/dashboard.html');
     }
 
-    function showOtpStep() {
-      const phoneStep = document.getElementById('phone-step');
-      const otpStep = document.getElementById('otp-step');
-
-      phoneStep.style.opacity = '0';
-      phoneStep.style.transform = 'translateY(-10px)';
-
-      setTimeout(() => {
-        phoneStep.style.display = 'none';
-        otpStep.classList.remove('otp-hidden');
-        otpStep.classList.add('otp-visible');
-
-        // Auto-fill demo OTP after a short delay for effect
-        setTimeout(() => fillDemoOtp(), 400);
-      }, 300);
-    }
-
-    function fillDemoOtp() {
-      const demoCode = '123456';
-      const inputs = document.querySelectorAll('#otp-step input[type="text"]');
-      inputs.forEach((inp, i) => {
-        inp.value = demoCode[i] || '';
-        inp.classList.remove('border-error');
+    document.addEventListener('DOMContentLoaded',function(){
+      var digits=document.querySelectorAll('.otp-digit');
+      digits.forEach(function(inp,idx){
+        inp.addEventListener('input',function(){this.value=this.value.replace(/\D/g,'');this.style.borderColor='';if(this.value&&idx<digits.length-1)digits[idx+1].focus()});
+        inp.addEventListener('keydown',function(e){if(e.key==='Backspace'&&!this.value&&idx>0)digits[idx-1].focus()});
       });
-      // Focus last input to signal completion
-      inputs[inputs.length - 1].focus();
-    }
 
-    function showPhoneStep() {
-      const phoneStep = document.getElementById('phone-step');
-      const otpStep = document.getElementById('otp-step');
-
-      otpStep.classList.remove('otp-visible');
-      otpStep.classList.add('otp-hidden');
-
-      clearInterval(timerInterval);
-
-      setTimeout(() => {
-        phoneStep.style.display = 'block';
-        requestAnimationFrame(() => {
-          phoneStep.style.opacity = '1';
-          phoneStep.style.transform = 'translateY(0)';
+      // Mini candlestick chart
+      var cc=document.getElementById('chart-canvas');
+      if(cc){
+        var dpr=window.devicePixelRatio||1;
+        var W=cc.offsetWidth||220,H=cc.offsetHeight||68;
+        cc.width=W*dpr;cc.height=H*dpr;
+        var ctx2=cc.getContext('2d');ctx2.scale(dpr,dpr);
+        var candles=[
+          {o:40,c:52,h:55,l:36,b:true},{o:52,c:44,h:56,l:40,b:false},
+          {o:44,c:58,h:62,l:42,b:true},{o:58,c:54,h:61,l:50,b:false},
+          {o:54,c:63,h:67,l:51,b:true},{o:63,c:55,h:65,l:52,b:false},
+          {o:55,c:60,h:63,l:53,b:true},{o:60,c:50,h:62,l:46,b:false},
+          {o:50,c:65,h:68,l:48,b:true},{o:65,c:59,h:67,l:55,b:false},
+          {o:59,c:66,h:69,l:57,b:true}
+        ];
+        var minV=34,maxV=70,rng=maxV-minV;
+        function toY(v){return H-((v-minV)/rng)*(H-4)-2}
+        var cw=10,gap=9,tw=candles.length*(cw+gap)-gap,sx=(W-tw)/2;
+        var wg=ctx2.createLinearGradient(0,0,W,0);
+        wg.addColorStop(0,'rgba(229,193,88,0)');wg.addColorStop(0.4,'rgba(229,193,88,0.55)');
+        wg.addColorStop(0.7,'rgba(16,201,144,0.55)');wg.addColorStop(1,'rgba(16,201,144,0)');
+        ctx2.strokeStyle=wg;ctx2.lineWidth=1.5;ctx2.shadowColor='rgba(229,193,88,0.5)';ctx2.shadowBlur=6;
+        ctx2.beginPath();
+        candles.forEach(function(c,i){var cx=sx+i*(cw+gap)+cw/2,cy=toY((c.o+c.c)/2);if(i===0)ctx2.moveTo(cx,cy);else ctx2.lineTo(cx,cy)});
+        ctx2.stroke();ctx2.shadowBlur=0;
+        candles.forEach(function(c,i){
+          var x=sx+i*(cw+gap),cx=x+cw/2,yO=toY(c.o),yC=toY(c.c),yH=toY(c.h),yL=toY(c.l);
+          var col=c.b?'#10c990':'#ff5266';
+          ctx2.strokeStyle=col;ctx2.lineWidth=1.2;ctx2.beginPath();ctx2.moveTo(cx,yH);ctx2.lineTo(cx,yL);ctx2.stroke();
+          ctx2.fillStyle=col+'cc';ctx2.strokeStyle=col;ctx2.lineWidth=1;
+          var top=Math.min(yO,yC),ht=Math.max(Math.abs(yO-yC),2);
+          ctx2.fillRect(x,top,cw,ht);ctx2.strokeRect(x,top,cw,ht);
         });
-      }, 400);
-    }
-
-    function startTimer() {
-      secondsLeft = 180;
-      updateTimerDisplay();
-      clearInterval(timerInterval);
-
-      timerInterval = setInterval(() => {
-        secondsLeft--;
-        updateTimerDisplay();
-
-        if (secondsLeft <= 0) {
-          clearInterval(timerInterval);
-          document.getElementById('otp-timer').textContent = '00:00';
-          const resendBtn = document.getElementById('resend-btn');
-          resendBtn.disabled = false;
-          resendBtn.classList.remove('text-on-surface-variant/40', 'cursor-not-allowed');
-          resendBtn.classList.add('text-secondary', 'hover:text-secondary-fixed', 'cursor-pointer');
-        }
-      }, 1000);
-    }
-
-    function updateTimerDisplay() {
-      const m = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
-      const s = String(secondsLeft % 60).padStart(2, '0');
-      document.getElementById('otp-timer').textContent = m + ':' + s;
-    }
-
-    function resendOtp() {
-      const resendBtn = document.getElementById('resend-btn');
-      if (resendBtn.disabled) return;
-
-      // Reset OTP inputs
-      document.querySelectorAll('#otp-step input').forEach(i => i.value = '');
-      document.querySelectorAll('#otp-step input')[0].focus();
-
-      resendBtn.disabled = true;
-      resendBtn.classList.add('text-on-surface-variant/40', 'cursor-not-allowed');
-      resendBtn.classList.remove('text-secondary', 'hover:text-secondary-fixed', 'cursor-pointer');
-
-      startTimer();
-    }
-
-    function loginToDashboard() {
-      const inputs = document.querySelectorAll('#otp-step input[type="text"]');
-      const otp = [...inputs].map(i => i.value).join('');
-
-      // In demo mode: accept any 6 digits, or auto-fill if empty
-      if (otp.replace(/\s/g, '').length < 6) {
-        fillDemoOtp();
-        setTimeout(loginToDashboard, 300);
-        return;
       }
-
-      // Show loading state then navigate
-      const btn = document.getElementById('login-btn');
-      if (btn) {
-        btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Verifying...`;
-        btn.disabled = true;
-      }
-
-      setTimeout(() => {
-        const currentPath = window.location.pathname;
-        const targetPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/dashboard.html';
-        window.location.replace(window.location.origin + targetPath);
-      }, 1000);
-    }
-
-    // ── OTP input auto-advance & backspace handling ──
-    document.addEventListener('DOMContentLoaded', () => {
-      const otpInputs = document.querySelectorAll('#otp-step input');
-
-      otpInputs.forEach((input, index) => {
-        input.addEventListener('input', function () {
-          // Allow only digits
-          this.value = this.value.replace(/\D/g, '');
-          if (this.value.length === 1 && index < otpInputs.length - 1) {
-            otpInputs[index + 1].focus();
-          }
-          // If last filled, remove error border
-          this.classList.remove('border-error');
-        });
-
-        input.addEventListener('keydown', function (e) {
-          if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
-            otpInputs[index - 1].focus();
-          }
-        });
-
-        input.addEventListener('paste', function (e) {
-          e.preventDefault();
-          const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
-          [...pasted].forEach((char, i) => {
-            if (otpInputs[index + i]) otpInputs[index + i].value = char;
-          });
-          const nextEmpty = index + pasted.length;
-          if (otpInputs[nextEmpty]) otpInputs[nextEmpty].focus();
-        });
-      });
     });
 
-    // ── Dynamic Background Canvas Graphics Engine ──
-    (function initBgGraphics() {
-      const canvas = document.getElementById('bg-graphics-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-
-      let width = canvas.width = window.innerWidth;
-      let height = canvas.height = window.innerHeight;
-
-      window.addEventListener('resize', () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-      });
-
-      // Floating ambient particles
-      const particles = [];
-      const numParticles = 50;
-      const colors = ['#E5C158', '#4edea3', '#adc6ff', '#ffffff'];
-
-      for (let i = 0; i < numParticles; i++) {
-        particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          radius: Math.random() * 2.2 + 0.8,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          vx: (Math.random() - 0.5) * 0.35,
-          vy: -Math.random() * 0.5 - 0.2,
-          alpha: Math.random() * 0.6 + 0.25
+    // BG Canvas
+    (function(){
+      var canvas=document.getElementById('bg-canvas');if(!canvas)return;
+      var ctx=canvas.getContext('2d');
+      var W=canvas.width=window.innerWidth,H=canvas.height=window.innerHeight;
+      window.addEventListener('resize',function(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight});
+      var particles=[];
+      var cols=['#E5C158','#10c990','#adc6ff','#ffffff'];
+      for(var i=0;i<55;i++)particles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+0.5,color:cols[Math.floor(Math.random()*4)],vx:(Math.random()-.5)*.3,vy:-Math.random()*.45-.15,a:Math.random()*.5+.2});
+      var mouse=[];
+      window.addEventListener('mousemove',function(e){for(var i=0;i<2;i++)mouse.push({x:e.clientX+(Math.random()-.5)*10,y:e.clientY+(Math.random()-.5)*10,vx:(Math.random()-.5)*1.1,vy:(Math.random()-.5)*1.1-.4,r:Math.random()*2+1,color:Math.random()>.4?'#E5C158':'#10c990',life:1,decay:Math.random()*.03+.02})});
+      var wt=0;
+      function render(){
+        ctx.clearRect(0,0,W,H);
+        ctx.strokeStyle='rgba(78,222,163,0.06)';ctx.lineWidth=1;
+        var hy=H*.78;
+        for(var x=-W;x<W*2;x+=60){ctx.beginPath();ctx.moveTo(x,H);ctx.lineTo(W/2+(x-W/2)*.25,hy);ctx.stroke()}
+        for(var y=H;y>hy;y-=18){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+        wt+=.012;
+        var g=ctx.createLinearGradient(0,0,W,0);
+        g.addColorStop(0,'rgba(78,222,163,0.05)');g.addColorStop(.35,'rgba(229,193,88,0.5)');
+        g.addColorStop(.7,'rgba(78,222,163,0.5)');g.addColorStop(1,'rgba(173,198,255,0.05)');
+        ctx.strokeStyle=g;ctx.lineWidth=2.2;ctx.shadowColor='rgba(229,193,88,0.55)';ctx.shadowBlur=14;
+        ctx.beginPath();var sy=H*.65;ctx.moveTo(0,sy);
+        for(var x2=0;x2<=W;x2+=15)ctx.lineTo(x2,sy+Math.sin(x2*.005+wt)*45+Math.cos(x2*.008+wt*.75)*28);
+        ctx.stroke();ctx.shadowBlur=0;
+        particles.forEach(function(p){
+          p.x+=p.vx;p.y+=p.vy;
+          if(p.y<0){p.y=H+10;p.x=Math.random()*W}
+          if(p.x<0||p.x>W)p.vx*=-1;
+          ctx.save();ctx.globalAlpha=p.a;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;
+          ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.restore();
         });
-      }
-
-      // Interactive Mouse Stardust Trail
-      const mouseParticles = [];
-      window.addEventListener('mousemove', (e) => {
-        for (let i = 0; i < 2; i++) {
-          mouseParticles.push({
-            x: e.clientX + (Math.random() - 0.5) * 10,
-            y: e.clientY + (Math.random() - 0.5) * 10,
-            vx: (Math.random() - 0.5) * 1.2,
-            vy: (Math.random() - 0.5) * 1.2 - 0.5,
-            radius: Math.random() * 2.5 + 1,
-            color: Math.random() > 0.4 ? '#E5C158' : '#4edea3',
-            life: 1,
-            decay: Math.random() * 0.03 + 0.02
-          });
+        for(var i=mouse.length-1;i>=0;i--){
+          var m=mouse[i];m.x+=m.vx;m.y+=m.vy;m.life-=m.decay;
+          if(m.life<=0){mouse.splice(i,1);continue}
+          ctx.save();ctx.globalAlpha=m.life;ctx.fillStyle=m.color;ctx.shadowColor=m.color;ctx.shadowBlur=10;
+          ctx.beginPath();ctx.arc(m.x,m.y,m.r*m.life,0,Math.PI*2);ctx.fill();ctx.restore();
         }
-      });
-
-      let waveOffset = 0;
-
-      function render() {
-        ctx.clearRect(0, 0, width, height);
-
-        // 1. Perspective Cyber Grid Floor Graphic at bottom
-        ctx.save();
-        ctx.strokeStyle = 'rgba(78, 222, 163, 0.07)';
-        ctx.lineWidth = 1;
-        const horizonY = height * 0.78;
-
-        for (let x = -width; x < width * 2; x += 60) {
-          ctx.beginPath();
-          ctx.moveTo(x, height);
-          ctx.lineTo(width / 2 + (x - width / 2) * 0.25, horizonY);
-          ctx.stroke();
-        }
-        for (let y = height; y > horizonY; y -= 18) {
-          const progress = (height - y) / (height - horizonY);
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(width, y);
-          ctx.stroke();
-        }
-        ctx.restore();
-
-        // 2. Dual Glowing Wave Stock Trend Lines
-        waveOffset += 0.012;
-        ctx.save();
-        ctx.lineWidth = 2.2;
-
-        const grad = ctx.createLinearGradient(0, 0, width, 0);
-        grad.addColorStop(0, 'rgba(78, 222, 163, 0.05)');
-        grad.addColorStop(0.3, 'rgba(229, 193, 88, 0.45)');
-        grad.addColorStop(0.7, 'rgba(78, 222, 163, 0.45)');
-        grad.addColorStop(1, 'rgba(173, 198, 255, 0.05)');
-
-        ctx.strokeStyle = grad;
-        ctx.shadowColor = 'rgba(229, 193, 88, 0.6)';
-        ctx.shadowBlur = 14;
-
-        ctx.beginPath();
-        const startY = height * 0.65;
-        ctx.moveTo(0, startY);
-
-        for (let x = 0; x <= width; x += 15) {
-          const y = startY + Math.sin(x * 0.005 + waveOffset) * 45 + Math.cos(x * 0.008 + waveOffset * 0.75) * 28;
-          ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-        ctx.restore();
-
-        // 3. Render Ambient Floating Particles
-        particles.forEach(p => {
-          p.x += p.vx;
-          p.y += p.vy;
-
-          if (p.y < 0) {
-            p.y = height + 10;
-            p.x = Math.random() * width;
-          }
-          if (p.x < 0 || p.x > width) p.vx *= -1;
-
-          ctx.save();
-          ctx.globalAlpha = Math.max(0.15, Math.min(0.85, p.alpha));
-          ctx.fillStyle = p.color;
-          ctx.shadowColor = p.color;
-          ctx.shadowBlur = 10;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        });
-
-        // 4. Render Interactive Mouse Stardust Trail
-        for (let i = mouseParticles.length - 1; i >= 0; i--) {
-          const mp = mouseParticles[i];
-          mp.x += mp.vx;
-          mp.y += mp.vy;
-          mp.life -= mp.decay;
-
-          if (mp.life <= 0) {
-            mouseParticles.splice(i, 1);
-            continue;
-          }
-
-          ctx.save();
-          ctx.globalAlpha = mp.life;
-          ctx.fillStyle = mp.color;
-          ctx.shadowColor = mp.color;
-          ctx.shadowBlur = 12;
-          ctx.beginPath();
-          ctx.arc(mp.x, mp.y, mp.radius * mp.life, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-
-        // 5. Constellation Connection Lines
-        for (let i = 0; i < particles.length; i++) {
-          for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < 95) {
-              ctx.save();
-              ctx.globalAlpha = (1 - dist / 95) * 0.15;
-              ctx.strokeStyle = '#E5C158';
-              ctx.lineWidth = 0.6;
-              ctx.beginPath();
-              ctx.moveTo(particles[i].x, particles[i].y);
-              ctx.lineTo(particles[j].x, particles[j].y);
-              ctx.stroke();
-              ctx.restore();
-            }
-          }
-        }
-
+        for(var i=0;i<particles.length;i++){for(var j=i+1;j<particles.length;j++){
+          var dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);
+          if(d<100){ctx.save();ctx.globalAlpha=(1-d/100)*.11;ctx.strokeStyle='#E5C158';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.stroke();ctx.restore()}
+        }}
         requestAnimationFrame(render);
       }
-
       render();
     })();
   </script>
