@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
@@ -29,7 +29,7 @@
       padding:20px;position:relative;overflow:hidden;color:#dde4f0;
     }
     body::before{content:'';position:fixed;inset:0;background:rgba(4,8,18,0.52);z-index:0}
-    canvas#bg-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0.72}
+
     .card-glow{
       position:fixed;z-index:9;pointer-events:none;
       width:900px;max-width:calc(100vw - 40px);
@@ -154,7 +154,6 @@
   </style>
 </head>
 <body>
-  <canvas id="bg-canvas"></canvas>
 
   <div class="login-card">
     <!-- LEFT PANEL -->
@@ -389,53 +388,6 @@
       }
     });
 
-    // BG Canvas
-    (function(){
-      var canvas=document.getElementById('bg-canvas');if(!canvas)return;
-      var ctx=canvas.getContext('2d');
-      var W=canvas.width=window.innerWidth,H=canvas.height=window.innerHeight;
-      window.addEventListener('resize',function(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight});
-      var particles=[];
-      var cols=['#E5C158','#10c990','#adc6ff','#ffffff'];
-      for(var i=0;i<55;i++)particles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+0.5,color:cols[Math.floor(Math.random()*4)],vx:(Math.random()-.5)*.3,vy:-Math.random()*.45-.15,a:Math.random()*.5+.2});
-      var mouse=[];
-      window.addEventListener('mousemove',function(e){for(var i=0;i<2;i++)mouse.push({x:e.clientX+(Math.random()-.5)*10,y:e.clientY+(Math.random()-.5)*10,vx:(Math.random()-.5)*1.1,vy:(Math.random()-.5)*1.1-.4,r:Math.random()*2+1,color:Math.random()>.4?'#E5C158':'#10c990',life:1,decay:Math.random()*.03+.02})});
-      var wt=0;
-      function render(){
-        ctx.clearRect(0,0,W,H);
-        ctx.strokeStyle='rgba(78,222,163,0.06)';ctx.lineWidth=1;
-        var hy=H*.78;
-        for(var x=-W;x<W*2;x+=60){ctx.beginPath();ctx.moveTo(x,H);ctx.lineTo(W/2+(x-W/2)*.25,hy);ctx.stroke()}
-        for(var y=H;y>hy;y-=18){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-        wt+=.012;
-        var g=ctx.createLinearGradient(0,0,W,0);
-        g.addColorStop(0,'rgba(78,222,163,0.05)');g.addColorStop(.35,'rgba(229,193,88,0.5)');
-        g.addColorStop(.7,'rgba(78,222,163,0.5)');g.addColorStop(1,'rgba(173,198,255,0.05)');
-        ctx.strokeStyle=g;ctx.lineWidth=2.2;ctx.shadowColor='rgba(229,193,88,0.55)';ctx.shadowBlur=14;
-        ctx.beginPath();var sy=H*.65;ctx.moveTo(0,sy);
-        for(var x2=0;x2<=W;x2+=15)ctx.lineTo(x2,sy+Math.sin(x2*.005+wt)*45+Math.cos(x2*.008+wt*.75)*28);
-        ctx.stroke();ctx.shadowBlur=0;
-        particles.forEach(function(p){
-          p.x+=p.vx;p.y+=p.vy;
-          if(p.y<0){p.y=H+10;p.x=Math.random()*W}
-          if(p.x<0||p.x>W)p.vx*=-1;
-          ctx.save();ctx.globalAlpha=p.a;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;
-          ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.restore();
-        });
-        for(var i=mouse.length-1;i>=0;i--){
-          var m=mouse[i];m.x+=m.vx;m.y+=m.vy;m.life-=m.decay;
-          if(m.life<=0){mouse.splice(i,1);continue}
-          ctx.save();ctx.globalAlpha=m.life;ctx.fillStyle=m.color;ctx.shadowColor=m.color;ctx.shadowBlur=10;
-          ctx.beginPath();ctx.arc(m.x,m.y,m.r*m.life,0,Math.PI*2);ctx.fill();ctx.restore();
-        }
-        for(var i=0;i<particles.length;i++){for(var j=i+1;j<particles.length;j++){
-          var dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);
-          if(d<100){ctx.save();ctx.globalAlpha=(1-d/100)*.11;ctx.strokeStyle='#E5C158';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.stroke();ctx.restore()}
-        }}
-        requestAnimationFrame(render);
-      }
-      render();
-    })();
   </script>
 </body>
 </html>
