@@ -1041,7 +1041,11 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
         const slabElem = document.getElementById('tax-slab-select');
         const slabRate = slabElem ? (parseInt(slabElem.value) || 30) : 30;
 
-        currentPortfolioData = useMutualFundPortfolio(holdings, slabRate, userGoals);
+        const calcFn = window.useMutualFundPortfolio || (typeof useMutualFundPortfolio !== 'undefined' ? useMutualFundPortfolio : null);
+        if (!calcFn) {
+          throw new Error('useMutualFundPortfolio library is not loaded. Please refresh the page and try again.');
+        }
+        currentPortfolioData = calcFn(holdings, slabRate, userGoals);
 
         let aiRecommendations = [];
         try {
