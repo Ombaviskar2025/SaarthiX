@@ -520,6 +520,9 @@
       btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Creating...';
       btn.disabled=true;
       setTimeout(function(){
+        // Save user info so all pages can show the real name
+        localStorage.setItem('sx_user_name', fname + ' ' + lname);
+        localStorage.setItem('sx_user_email', email);
         document.getElementById('su-form-state').style.display='none';
         document.getElementById('su-success-state').style.display='flex';
         btn.innerHTML='Create Account <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';

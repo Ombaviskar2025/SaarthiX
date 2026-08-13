@@ -186,7 +186,8 @@
         </div>
         
         <div class="flex items-center gap-2 cursor-pointer">
-          <img src="https://ui-avatars.com/api/?name=User&background=4d8eff&color=fff" alt="User" class="w-8 h-8 rounded-full" />
+          <img id="user-avatar-img" src="https://ui-avatars.com/api/?name=User&background=4d8eff&color=fff" alt="User" class="w-8 h-8 rounded-full" />
+          <span id="user-avatar-name" class="text-sm font-medium text-on-surface hidden md:block"></span>
           <span class="material-symbols-outlined text-on-surface-variant">arrow_drop_down</span>
         </div>
       </div>
@@ -333,6 +334,21 @@
   <script src="groww-client.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Update avatar from stored user name
+      (function(){
+        var name = localStorage.getItem('sx_user_name') || 'User';
+        var avatarImg = document.getElementById('user-avatar-img');
+        var avatarNameEl = document.getElementById('user-avatar-name');
+        if(avatarImg){
+          avatarImg.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=4d8eff&color=fff&bold=true';
+          avatarImg.alt = name;
+        }
+        if(avatarNameEl){
+          var firstName = name.split(' ')[0];
+          avatarNameEl.textContent = firstName;
+        }
+      })();
+
       if(typeof buildNav === 'undefined') return;
       const { navLinks, mobileLinks, statusDot } = buildNav('dashboard');
       
