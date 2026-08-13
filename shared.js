@@ -245,7 +245,43 @@ function buildNav(activePageId) {
 }
 
 function getMarketBreadth() {
-  const adv = LIVE_STOCKS.filter(s => (s.change || 0) > 0).length;
-  const dec = LIVE_STOCKS.filter(s => (s.change || 0) < 0).length;
-  return { advances: adv, declines: dec, unchanged: LIVE_STOCKS.length - adv - dec, total: LIVE_STOCKS.length };
+  const stocks = window.LIVE_STOCKS || STOCKS_DB;
+  const adv = stocks.filter(s => (s.changePct || s.change || 0) > 0).length;
+  const dec = stocks.filter(s => (s.changePct || s.change || 0) < 0).length;
+  return { advances: adv, declines: dec, unchanged: stocks.length - adv - dec, total: stocks.length };
 }
+
+function getTopGainers(limit = 5) {
+  const stocks = [...(window.LIVE_STOCKS || STOCKS_DB)];
+  stocks.sort((a, b) => (b.changePct || 0) - (a.changePct || 0));
+  return stocks.slice(0, limit);
+}
+
+function getTopLosers(limit = 5) {
+  const stocks = [...(window.LIVE_STOCKS || STOCKS_DB)];
+  stocks.sort((a, b) => (a.changePct || 0) - (b.changePct || 0));
+  return stocks.slice(0, limit);
+}
+
+function getSectorSummary() {
+  const stocks = window.LIVE_STOCKS || STOCKS_DB;
+  const map = {};
+  stocks.forEach(s => {
+    const sec = s.sector || 'Other';
+    if (!map[sec]) map[sec] = { sector: sec, totalChg: 0, count: 0 };
+    map[sec].totalChg += (s.changePct || 0);
+    map[sec].count++;
+  });
+  return Object.values(map).map(m => ({
+    sector: m.sector,
+    avgChangePct: parseFloat((m.totalChg / m.count).toFixed(2)),
+    count: m.count
+  })).sort((a, b) => b.avgChangePct - a.avgChangePct);
+}
+
+// Expose globally
+window.getMarketBreadth = getMarketBreadth;
+window.getTopGainers = getTopGainers;
+window.getTopLosers = getTopLosers;
+window.getSectorSummary = getSectorSummary;
+

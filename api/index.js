@@ -3450,6 +3450,13 @@ const stockAnalysisHandler = require('./stock-analysis.js');
 const fiiDiiHandler = require('./fii-dii.js');
 const healthHandler = require('./health.js');
 
+// Dashboard routes
+const breadthHandler = require('./dashboard/breadth.js');
+const gainersHandler = require('./dashboard/gainers.js');
+const losersHandler = require('./dashboard/losers.js');
+const sectorHeatmapHandler = require('./dashboard/sector-heatmap.js');
+const dashboardNewsHandler = require('./dashboard/news.js');
+
 app.get('/api/sentiment', sentimentHandler);
 app.get('/api/sector-momentum', sectorMomentumHandler);
 app.get('/api/technical-signals', technicalSignalsHandler);
@@ -3457,10 +3464,18 @@ app.all('/api/stock-analysis', stockAnalysisHandler);
 app.get('/api/fii-dii', fiiDiiHandler);
 app.get('/api/health', healthHandler);
 
+// Mount Dashboard Endpoints
+app.get('/api/dashboard/breadth', (req, res) => breadthHandler(req, res, marketWatchCache, refreshMarketWatchCache));
+app.get('/api/dashboard/gainers', (req, res) => gainersHandler(req, res, marketWatchCache, refreshMarketWatchCache));
+app.get('/api/dashboard/losers', (req, res) => losersHandler(req, res, marketWatchCache, refreshMarketWatchCache));
+app.get('/api/dashboard/sector-heatmap', (req, res) => sectorHeatmapHandler(req, res, marketWatchCache, refreshMarketWatchCache));
+app.get('/api/dashboard/news', dashboardNewsHandler);
+
 // Fallback to serve login page
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'login.html'));
 });
 
 module.exports = app;
+
 
