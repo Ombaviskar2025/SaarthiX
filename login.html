@@ -151,6 +151,71 @@
       .features{gap:8px}
     }
     @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+    /* ── Sign Up Modal ── */
+    .su-overlay{
+      position:fixed;inset:0;z-index:100;
+      background:rgba(4,8,18,0.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+      display:flex;align-items:center;justify-content:center;padding:20px;
+      opacity:0;pointer-events:none;transition:opacity .3s ease;
+    }
+    .su-overlay.open{opacity:1;pointer-events:auto}
+    .su-modal{
+      background:rgba(6,11,24,0.96);border:1px solid rgba(229,193,88,0.30);
+      border-radius:20px;width:100%;max-width:420px;
+      box-shadow:0 0 60px rgba(229,193,88,0.12),0 20px 60px rgba(0,0,0,0.5),inset 0 0 20px rgba(255,255,255,0.02);
+      padding:36px 36px 30px;position:relative;
+      transform:translateY(24px) scale(0.97);transition:transform .3s ease;
+    }
+    .su-overlay.open .su-modal{transform:translateY(0) scale(1)}
+    .su-close{
+      position:absolute;top:14px;right:16px;background:none;border:none;
+      color:rgba(180,190,210,0.45);cursor:pointer;font-size:1.4rem;line-height:1;
+      transition:color .2s;padding:4px;
+    }
+    .su-close:hover{color:#dde4f0}
+    .su-title{font-size:1.35rem;font-weight:700;color:#edf0f8;text-align:center;letter-spacing:-0.02em;margin-bottom:3px}
+    .su-sub{font-size:0.78rem;color:var(--text-muted);text-align:center;margin-bottom:4px}
+    .su-divider{margin:10px auto 18px;display:flex;align-items:center;justify-content:center;gap:8px}
+    .su-divider::before,.su-divider::after{content:'';width:46px;height:1px;background:rgba(229,193,88,0.32)}
+    .su-row{display:flex;gap:12px}
+    .su-row .form-group{flex:1}
+    .su-input-wrap{position:relative}
+    .su-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:rgba(180,190,210,0.38);display:flex}
+    .su-icon svg{width:14px;height:14px}
+    .su-input{
+      width:100%;background:var(--input-bg);border:1px solid var(--input-border);
+      border-radius:10px;color:#dde4f0;font-family:inherit;font-size:0.88rem;
+      padding:11px 12px 11px 36px;transition:border-color .25s,box-shadow .25s;
+    }
+    .su-input::placeholder{color:rgba(180,190,210,0.3)}
+    .su-input:focus{outline:none;border-color:rgba(229,193,88,0.55);box-shadow:0 0 0 3px rgba(229,193,88,0.10)}
+    .su-input.error{border-color:#ff7e7e}
+    .su-err{font-size:0.7rem;color:#ff7e7e;margin-top:4px;display:none}
+    .su-btn{
+      width:100%;margin-top:18px;padding:13px 20px;border-radius:10px;border:none;
+      background:linear-gradient(135deg,#E5C158 0%,#BA923E 100%);
+      color:#0a0f1e;font-family:inherit;font-size:0.97rem;font-weight:700;
+      letter-spacing:0.02em;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:9px;
+      transition:all .3s ease;box-shadow:0 4px 20px rgba(229,193,88,0.22);
+    }
+    .su-btn:hover{background:linear-gradient(135deg,#f5d46b 0%,#cf9f44 100%);box-shadow:0 6px 28px rgba(229,193,88,0.36);transform:translateY(-1px)}
+    .su-btn:active{transform:translateY(0)}
+    .su-login-row{text-align:center;margin-top:14px;font-size:0.8rem;color:var(--text-muted)}
+    .su-login-row a{color:#10c990;font-weight:600;text-decoration:none;cursor:pointer;transition:opacity .2s}
+    .su-login-row a:hover{opacity:.72}
+    .su-success{display:none;flex-direction:column;align-items:center;gap:14px;padding:20px 0 10px;text-align:center}
+    .su-success-icon{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,rgba(16,201,144,0.15),rgba(16,201,144,0.05));border:2px solid rgba(16,201,144,0.45);display:flex;align-items:center;justify-content:center}
+    .su-success-icon svg{width:30px;height:30px;color:#10c990}
+    .su-success-title{font-size:1.15rem;font-weight:700;color:#edf0f8}
+    .su-success-msg{font-size:0.82rem;color:var(--text-muted);line-height:1.6;max-width:280px}
+    .su-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(180,190,210,0.38);cursor:pointer;display:flex;padding:3px;transition:color .2s}
+    .su-eye:hover{color:#dde4f0}
+    .su-eye svg{width:15px;height:15px}
+    .su-terms{font-size:0.71rem;color:var(--text-dim);text-align:center;margin-top:10px;line-height:1.5}
+    .su-terms a{color:rgba(229,193,88,0.75);text-decoration:none}
+    .su-terms a:hover{color:#E5C158}
   </style>
 </head>
 <body>
@@ -240,7 +305,7 @@
           Login with OTP
         </button>
 
-        <p class="signup-row">Don't have an account? <a href="#">Sign Up</a></p>
+        <p class="signup-row">Don't have an account? <a href="#" onclick="openSignup();return false;">Sign Up</a></p>
         <div class="security-note">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           Your data is encrypted and secure with us.
@@ -294,7 +359,7 @@
           Login with Password
         </button>
 
-        <p class="signup-row">Don't have an account? <a href="#">Sign Up</a></p>
+        <p class="signup-row">Don't have an account? <a href="#" onclick="openSignup();return false;">Sign Up</a></p>
         <div class="security-note">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           Your data is encrypted and secure with us.
@@ -303,8 +368,171 @@
     </div>
   </div>
 
+  <!-- ── Sign Up Modal ── -->
+  <div class="su-overlay" id="su-overlay" role="dialog" aria-modal="true" aria-labelledby="su-title">
+    <div class="su-modal">
+      <button class="su-close" id="su-close-btn" aria-label="Close signup" onclick="closeSignup()">&times;</button>
+
+      <!-- Form state -->
+      <div id="su-form-state">
+        <h2 class="su-title" id="su-title">Create an Account</h2>
+        <p class="su-sub">Join SaarthiX and start your investment journey</p>
+        <div class="su-divider"><div class="gold-diamond" style="width:6px;height:6px;"></div></div>
+
+        <div class="su-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <div class="su-input-wrap">
+              <span class="su-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <input class="su-input" id="su-fname" type="text" placeholder="First name" autocomplete="given-name"/>
+            </div>
+            <p class="su-err" id="su-fname-err">Required</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <div class="su-input-wrap">
+              <span class="su-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <input class="su-input" id="su-lname" type="text" placeholder="Last name" autocomplete="family-name"/>
+            </div>
+            <p class="su-err" id="su-lname-err">Required</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <div class="input-row">
+            <select class="country-select" id="su-country" aria-label="Signup country code">
+              <option value="+91" selected>+91</option>
+              <option value="+1">+1</option>
+              <option value="+44">+44</option>
+              <option value="+61">+61</option>
+              <option value="+81">+81</option>
+            </select>
+            <div class="su-input-wrap" style="flex:1">
+              <input class="su-input" id="su-phone" type="tel" placeholder="Enter phone number" autocomplete="tel" style="padding-left:14px;"/>
+            </div>
+          </div>
+          <p class="su-err" id="su-phone-err">Enter a valid phone number</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <div class="su-input-wrap">
+            <span class="su-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+            <input class="su-input" id="su-email" type="email" placeholder="you@email.com" autocomplete="email"/>
+          </div>
+          <p class="su-err" id="su-email-err">Enter a valid email address</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="su-input-wrap">
+            <span class="su-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+            <input class="su-input" id="su-pwd" type="password" placeholder="Min. 8 characters" autocomplete="new-password"/>
+            <button class="su-eye" type="button" aria-label="Toggle password" onclick="suTogglePwd('su-pwd',this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="su-err" id="su-pwd-err">Password must be at least 8 characters</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <div class="su-input-wrap">
+            <span class="su-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+            <input class="su-input" id="su-cpwd" type="password" placeholder="Re-enter password" autocomplete="new-password"/>
+            <button class="su-eye" type="button" aria-label="Toggle confirm password" onclick="suTogglePwd('su-cpwd',this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="su-err" id="su-cpwd-err">Passwords do not match</p>
+        </div>
+
+        <button class="su-btn" id="su-submit-btn" onclick="handleSignup()">
+          Create Account
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <p class="su-terms">By signing up you agree to our <a href="#">Terms of Service</a> &amp; <a href="#">Privacy Policy</a></p>
+        <p class="su-login-row">Already have an account? <a onclick="closeSignup()">Log In</a></p>
+      </div>
+
+      <!-- Success state -->
+      <div class="su-success" id="su-success-state">
+        <div class="su-success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <p class="su-success-title">Account Created!</p>
+        <p class="su-success-msg">Welcome to SaarthiX. You can now log in with your credentials.</p>
+      </div>
+    </div>
+  </div>
+
   <script>
     function togglePassword(){var i=document.getElementById('password-input');i.type=i.type==='password'?'text':'password'}
+
+    /* ── Sign Up Modal ── */
+    function openSignup(){
+      var o=document.getElementById('su-overlay');
+      document.getElementById('su-form-state').style.display='block';
+      document.getElementById('su-success-state').style.display='none';
+      ['su-fname','su-lname','su-phone','su-email','su-pwd','su-cpwd'].forEach(function(id){var el=document.getElementById(id);if(el){el.value='';el.classList.remove('error');}});
+      document.querySelectorAll('.su-err').forEach(function(e){e.style.display='none'});
+      o.classList.add('open');
+      setTimeout(function(){var f=document.getElementById('su-fname');if(f)f.focus();},300);
+    }
+    function closeSignup(){
+      document.getElementById('su-overlay').classList.remove('open');
+    }
+    function suTogglePwd(id,btn){
+      var i=document.getElementById(id);
+      i.type=i.type==='password'?'text':'password';
+    }
+    function suShowErr(id,msg){
+      var el=document.getElementById(id+'-err');
+      var inp=document.getElementById(id);
+      if(el){el.textContent=msg||el.textContent;el.style.display='block';}
+      if(inp)inp.classList.add('error');
+    }
+    function suClearErr(id){
+      var el=document.getElementById(id+'-err');
+      var inp=document.getElementById(id);
+      if(el)el.style.display='none';
+      if(inp)inp.classList.remove('error');
+    }
+    function handleSignup(){
+      var ok=true;
+      var fname=document.getElementById('su-fname').value.trim();
+      var lname=document.getElementById('su-lname').value.trim();
+      var phone=document.getElementById('su-phone').value.trim();
+      var email=document.getElementById('su-email').value.trim();
+      var pwd=document.getElementById('su-pwd').value;
+      var cpwd=document.getElementById('su-cpwd').value;
+      ['su-fname','su-lname','su-phone','su-email','su-pwd','su-cpwd'].forEach(suClearErr);
+      if(!fname){suShowErr('su-fname','First name is required');ok=false;}
+      if(!lname){suShowErr('su-lname','Last name is required');ok=false;}
+      if(!phone||phone.replace(/\D/g,'').length<7){suShowErr('su-phone','Enter a valid phone number');ok=false;}
+      if(!email||!/^[^@]+@[^@]+\.[^@]+$/.test(email)){suShowErr('su-email','Enter a valid email address');ok=false;}
+      if(!pwd||pwd.length<8){suShowErr('su-pwd','Password must be at least 8 characters');ok=false;}
+      if(pwd!==cpwd){suShowErr('su-cpwd','Passwords do not match');ok=false;}
+      if(!ok)return;
+      var btn=document.getElementById('su-submit-btn');
+      btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Creating...';
+      btn.disabled=true;
+      setTimeout(function(){
+        document.getElementById('su-form-state').style.display='none';
+        document.getElementById('su-success-state').style.display='flex';
+        btn.innerHTML='Create Account <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+        btn.disabled=false;
+        setTimeout(closeSignup,2000);
+      },1400);
+    }
+    document.getElementById('su-overlay').addEventListener('click',function(e){
+      if(e.target===this)closeSignup();
+    });
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape')closeSignup();
+    });
     function switchToOtp(){document.getElementById('password-panel').style.display='none';document.getElementById('otp-panel').style.display='block'}
     function switchToPassword(){document.getElementById('otp-panel').style.display='none';document.getElementById('password-panel').style.display='block'}
 
