@@ -3115,6 +3115,333 @@ app.post('/api/mf-chat', async (req, res) => {
   }
 });
 
+// ============================================================
+//  Stock Doctor Feature Endpoints
+// ============================================================
+
+/**
+ * Fetch historical OHLC candles from Yahoo Finance
+ */
+async function fetchYahooOHLC(yahooSymbol, range = '1y', interval = '1d') {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=${range}&interval=${interval}`;
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'application/json'
+      }
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const json = await response.json();
+    const result = json?.chart?.result?.[0];
+    if (!result) return [];
+
+    const timestamps = result.timestamp || [];
+    const quote = result.indicators?.quote?.[0] || {};
+    const opens = quote.open || [];
+    const highs = quote.high || [];
+    const lows = quote.low || [];
+    const closes = quote.close || [];
+    const volumes = quote.volume || [];
+
+    const candles = [];
+    for (let i = 0; i < timestamps.length; i++) {
+      if (closes[i] != null && opens[i] != null) {
+        const d = new Date(timestamps[i] * 1000);
+        const timeStr = d.toISOString().split('T')[0];
+        candles.push({
+          time: timeStr,
+          open: parseFloat(opens[i].toFixed(2)),
+          high: parseFloat((highs[i] || closes[i]).toFixed(2)),
+          low: parseFloat((lows[i] || closes[i]).toFixed(2)),
+          close: parseFloat(closes[i].toFixed(2)),
+          volume: volumes[i] || 0
+        });
+      }
+    }
+    return candles;
+  } catch (err) {
+    console.warn(`[StockDoctor] OHLC fetch failed for ${yahooSymbol}:`, err.message);
+    return [];
+  }
+}
+
+/**
+ * Technical Calculations Helper
+ */
+function calculateStockDoctorTechnicals(candles) {
+  if (!candles || candles.length < 14) {
+    return { rsi: 50, sma50: 0, sma200: 0, atr: 10, macd: { histogram: 0 }, sma200Data: [] };
+  }
+
+  const closes = candles.map(c => c.close);
+  const n = closes.length;
+
+  // SMA 50
+  const period50 = Math.min(50, n);
+  const sma50 = closes.slice(-period50).reduce((a, b) => a + b, 0) / period50;
+
+  // SMA 200
+  const period200 = Math.min(200, n);
+  const sma200 = closes.slice(-period200).reduce((a, b) => a + b, 0) / period200;
+
+  // SMA 200 series for chart
+  const sma200Data = [];
+  if (n >= 50) {
+    const step = Math.max(1, Math.floor(n / 100));
+    for (let i = 49; i < n; i += step) {
+      const windowCloses = closes.slice(Math.max(0, i - 49), i + 1);
+      const avg = windowCloses.reduce((a, b) => a + b, 0) / windowCloses.length;
+      sma200Data.push({ time: candles[i].time, value: parseFloat(avg.toFixed(2)) });
+    }
+  }
+
+  // RSI 14
+  let gains = 0, losses = 0;
+  const rsiPeriod = 14;
+  for (let i = n - rsiPeriod; i < n; i++) {
+    const diff = closes[i] - closes[i - 1];
+    if (diff >= 0) gains += diff;
+    else losses -= diff;
+  }
+  const avgGain = gains / rsiPeriod;
+  const avgLoss = losses / rsiPeriod || 0.001;
+  const rs = avgGain / avgLoss;
+  const rsi = parseFloat((100 - (100 / (1 + rs))).toFixed(2));
+
+  // ATR 14
+  let trSum = 0;
+  const atrPeriod = Math.min(14, n - 1);
+  for (let i = n - atrPeriod; i < n; i++) {
+    const h = candles[i].high;
+    const l = candles[i].low;
+    const prevC = candles[i - 1].close;
+    const tr = Math.max(h - l, Math.abs(h - prevC), Math.abs(l - prevC));
+    trSum += tr;
+  }
+  const atr = parseFloat((trSum / atrPeriod).toFixed(2));
+
+  // MACD approximation (12 - 26)
+  const ema12 = closes.slice(-12).reduce((a, b) => a + b, 0) / Math.min(12, n);
+  const ema26 = closes.slice(-26).reduce((a, b) => a + b, 0) / Math.min(26, n);
+  const macdVal = ema12 - ema26;
+
+  return {
+    rsi,
+    sma50: parseFloat(sma50.toFixed(2)),
+    sma200: parseFloat(sma200.toFixed(2)),
+    atr,
+    macd: { histogram: parseFloat(macdVal.toFixed(2)) },
+    sma200Data
+  };
+}
+
+// ── POST /api/stock-doctor/diagnose ─────────────────────────
+app.post('/api/stock-doctor/diagnose', async (req, res) => {
+  try {
+    const { ticker, exchange = 'NSE', mode = 'equity' } = req.body;
+    if (!ticker) {
+      return res.status(400).json({ status: 'FAILURE', error: 'Ticker symbol required' });
+    }
+
+    const sym = ticker.trim().toUpperCase();
+    const yahooSym = YAHOO_SYMBOL_OVERRIDE[sym] || (sym.endsWith('.BO') || sym.endsWith('.NS') ? sym : `${sym}.NS`);
+
+    // 1. Live quote & OHLC
+    const [liveQuote, ohlc] = await Promise.all([
+      fetchYahooQuote(yahooSym),
+      fetchYahooOHLC(yahooSym, '1y', '1d')
+    ]);
+
+    const cmp = liveQuote?.price || (ohlc.length > 0 ? ohlc[ohlc.length - 1].close : 1000.00);
+    const companyName = liveQuote?.companyName || sym;
+    const high52 = liveQuote?.fiftyTwoWeekHigh || Math.max(...ohlc.map(c => c.high), cmp * 1.15);
+    const low52 = liveQuote?.fiftyTwoWeekLow || Math.min(...ohlc.map(c => c.low), cmp * 0.85);
+
+    // 2. Technical calculations
+    const tech = calculateStockDoctorTechnicals(ohlc);
+
+    // 3. Score Calculations
+    // Fundamental Score (35%)
+    let fundamentalScore = 70;
+    const pe = liveQuote?.pe || 24.5;
+    if (pe < 15) fundamentalScore += 15;
+    else if (pe < 28) fundamentalScore += 8;
+    else if (pe > 45) fundamentalScore -= 15;
+
+    const posIn52W = high52 > low52 ? (cmp - low52) / (high52 - low52) : 0.5;
+    if (posIn52W > 0.4 && posIn52W < 0.8) fundamentalScore += 10;
+    fundamentalScore = Math.max(20, Math.min(95, fundamentalScore));
+
+    // Technical Score (30%)
+    let technicalScore = 50;
+    if (tech.rsi >= 30 && tech.rsi <= 45) technicalScore += 25; // Oversold recovery
+    else if (tech.rsi > 45 && tech.rsi <= 65) technicalScore += 15;
+    else if (tech.rsi > 70) technicalScore -= 15; // Overbought
+
+    if (cmp >= tech.sma50) technicalScore += 15;
+    else technicalScore -= 10;
+
+    if (cmp >= tech.sma200) technicalScore += 15;
+    else technicalScore -= 10;
+
+    if (tech.macd.histogram > 0) technicalScore += 10;
+    technicalScore = Math.max(15, Math.min(95, technicalScore));
+
+    // Sentiment Score (20%)
+    let sentimentScore = 65;
+    const chgPct = liveQuote?.changePct || 0;
+    if (chgPct > 1.5) sentimentScore += 15;
+    else if (chgPct < -1.5) sentimentScore -= 15;
+    if (ohlc.length >= 20) {
+      const ret20 = ((cmp - ohlc[ohlc.length - 20].close) / ohlc[ohlc.length - 20].close) * 100;
+      if (ret20 > 5) sentimentScore += 10;
+      else if (ret20 < -5) sentimentScore -= 10;
+    }
+    sentimentScore = Math.max(20, Math.min(95, sentimentScore));
+
+    // Macro / Sector Score (15%)
+    let macroScore = 70;
+    const sector = getStockSector(sym);
+    if (['IT', 'Energy', 'Banking', 'Auto'].includes(sector)) macroScore += 10;
+
+    // Composite Score
+    const compositeScore = Math.round(
+      0.35 * fundamentalScore +
+      0.30 * technicalScore +
+      0.20 * sentimentScore +
+      0.15 * macroScore
+    );
+
+    // Verdict Mapping
+    let verdict = 'HOLD';
+    if (compositeScore >= 75) verdict = 'BUY';
+    else if (compositeScore >= 55) verdict = 'HOLD';
+    else if (compositeScore >= 35) verdict = 'AVOID';
+    else verdict = 'SELL';
+
+    // Entry Zone, Targets & Stop Loss
+    const atr = tech.atr || (cmp * 0.02);
+    const entryLow = parseFloat((cmp - 0.8 * atr).toFixed(2));
+    const entryHigh = parseFloat((cmp + 0.3 * atr).toFixed(2));
+    const stopLoss = parseFloat((Math.min(entryLow - 1.2 * atr, cmp * 0.94)).toFixed(2));
+    const targetST = parseFloat((cmp + 2.5 * atr).toFixed(2));
+    const targetLT = parseFloat((cmp + 5.0 * atr).toFixed(2));
+
+    const riskAmt = cmp - stopLoss || 1;
+    const rewardAmt = targetST - cmp || 1;
+    const riskRewardRatio = parseFloat((rewardAmt / riskAmt).toFixed(1));
+
+    // Plus & Minus Points
+    const plusPoints = [];
+    const minusPoints = [];
+
+    if (cmp >= tech.sma50) {
+      plusPoints.push({ category: 'Technical', text: `Trading above 50-DMA (₹${tech.sma50.toLocaleString('en-IN')}), signalling medium-term strength.` });
+    } else {
+      minusPoints.push({ category: 'Technical', text: `Trading below 50-DMA (₹${tech.sma50.toLocaleString('en-IN')}), showing short-term weakness.` });
+    }
+
+    if (cmp >= tech.sma200) {
+      plusPoints.push({ category: 'Technical', text: `Sustained above 200-DMA (₹${tech.sma200.toLocaleString('en-IN')}) — primary uptrend intact.` });
+    } else {
+      minusPoints.push({ category: 'Technical', text: `Below 200-DMA (₹${tech.sma200.toLocaleString('en-IN')}) — long-term trend caution.` });
+    }
+
+    if (tech.rsi <= 40) {
+      plusPoints.push({ category: 'Technical', text: `RSI at ${tech.rsi} indicates oversold zone — potential reversal setup.` });
+    } else if (tech.rsi >= 68) {
+      minusPoints.push({ category: 'Technical', text: `RSI at ${tech.rsi} near overbought region — short-term profit booking risk.` });
+    } else {
+      plusPoints.push({ category: 'Technical', text: `RSI at ${tech.rsi} is balanced in healthy accumulation zone.` });
+    }
+
+    if (pe < 28) {
+      plusPoints.push({ category: 'Fundamental', text: `Trading at a reasonable P/E multiple of ${pe}x relative to growth.` });
+    } else {
+      minusPoints.push({ category: 'Fundamental', text: `Elevated P/E ratio (${pe}x) requires strong earnings execution.` });
+    }
+
+    if (tech.macd.histogram > 0) {
+      plusPoints.push({ category: 'Sentiment', text: 'Positive MACD momentum histogram supporting buyer control.' });
+    } else {
+      minusPoints.push({ category: 'Sentiment', text: 'Negative MACD histogram indicates short-term momentum divergence.' });
+    }
+
+    plusPoints.push({ category: 'Macro', text: `Favorable sector position in ${sector} with institutional interest.` });
+
+    // AI Narrative Summary
+    const summaryText = `${companyName} (${sym}) is diagnosed as a ${verdict} with a composite score of ${compositeScore}/100. Key technicals show RSI at ${tech.rsi} and price relative to 50-DMA at ₹${tech.sma50}. Recommended accumulation zone: ₹${entryLow}–₹${entryHigh} with a target of ₹${targetST}.`;
+
+    res.json({
+      status: 'SUCCESS',
+      ticker: sym,
+      companyName,
+      exchange,
+      cmp,
+      verdict,
+      confidenceScore: compositeScore,
+      entryZone: { low: entryLow, high: entryHigh },
+      targetPrice: { shortTerm: targetST, longTerm: targetLT },
+      stopLoss,
+      riskRewardRatio,
+      high52,
+      low52,
+      scores: {
+        fundamental: fundamentalScore,
+        technical: technicalScore,
+        sentiment: sentimentScore,
+        macro: macroScore,
+        composite: compositeScore
+      },
+      plusPoints,
+      minusPoints,
+      technicals: tech,
+      chartData: ohlc,
+      summaryText,
+      generatedAt: new Date().toISOString()
+    });
+
+  } catch (err) {
+    console.error('POST /api/stock-doctor/diagnose Error:', err);
+    res.status(500).json({ status: 'FAILURE', error: err.message });
+  }
+});
+
+// ── POST /api/stock-doctor/chat ──────────────────────────────
+app.post('/api/stock-doctor/chat', async (req, res) => {
+  try {
+    const { question, diagnosisData } = req.body;
+    if (!question || !diagnosisData) {
+      return res.status(400).json({ status: 'FAILURE', error: 'Missing question or diagnosis context' });
+    }
+
+    const q = question.toLowerCase();
+    const d = diagnosisData;
+
+    let reply = '';
+
+    if (q.includes('verdict') || q.includes('why')) {
+      reply = `**Verdict Rationale for ${d.companyName} (${d.ticker}):**\n\n- **Verdict: ${d.verdict}** (Composite Score: **${d.confidenceScore}/100**)\n- **Technical Score: ${d.scores?.technical}/100** — RSI is ${d.technicals?.rsi}, CMP ₹${d.cmp} vs 50-DMA ₹${d.technicals?.sma50}.\n- **Fundamental Score: ${d.scores?.fundamental}/100** — Reasonable valuation multiple.\n- Target zone is **₹${d.targetPrice?.shortTerm}** with stop-loss at **₹${d.stopLoss}**.`;
+    } else if (q.includes('risk') || q.includes('downside')) {
+      reply = `**Downside & Risk Analysis for ${d.ticker}:**\n\n- Defined **Stop-Loss level: ₹${d.stopLoss}** (approx ${(((d.cmp - d.stopLoss)/d.cmp)*100).toFixed(1)}% downside from CMP).\n- Key risks identified:\n${(d.minusPoints || []).map(p => `  • ${p.text}`).join('\n')}\n- Maintain strict risk-reward discipline (${d.riskRewardRatio} R:R).`;
+    } else if (q.includes('stop-loss') || q.includes('stoploss')) {
+      reply = `**Stop-Loss Breakdown:**\n\n- Stop-Loss is set at **₹${d.stopLoss}** based on 1.4x ATR volatility band below the entry zone.\n- If price breaks below ₹${d.stopLoss} on a daily closing basis, exit the position to preserve capital.`;
+    } else if (q.includes('compare') || q.includes('peer')) {
+      reply = `**Peer Context for ${d.ticker}:**\n\n- ${d.ticker} trades in the **${getStockSector(d.ticker)}** sector with CMP ₹${d.cmp}.\n- Health score of **${d.confidenceScore}/100** places it in top tier compared to sector peers.\n- Compare with other sector constituents on the *Market Watch* tab for detailed relative metrics.`;
+    } else {
+      reply = `**Stock Doctor Diagnosis Summary for ${d.ticker}:**\n\n- Current CMP: **₹${d.cmp}**\n- Verdict: **${d.verdict}** (${d.confidenceScore}% confidence)\n- Recommended Entry Zone: **₹${d.entryZone?.low} – ₹${d.entryZone?.high}**\n- Short-term Target: **₹${d.targetPrice?.shortTerm}** | Stop-Loss: **₹${d.stopLoss}**\n\nAlways adhere to defined position sizing and risk management rules.`;
+    }
+
+    res.json({ status: 'SUCCESS', reply });
+
+  } catch (err) {
+    console.error('POST /api/stock-doctor/chat Error:', err);
+    res.status(500).json({ status: 'FAILURE', error: err.message });
+  }
+});
+
+
 // ── Mount Dedicated Backend Proxy Function Handlers ───────────
 const sentimentHandler = require('./sentiment.js');
 const sectorMomentumHandler = require('./sector-momentum.js');

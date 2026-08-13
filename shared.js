@@ -207,6 +207,7 @@ function buildNav(activePageId) {
     { id:'portfolio',    label:'Portfolio',    icon:'account_balance_wallet', href:'portfolio.html' },
     { id:'mutual-funds', label:'Mutual Funds', icon:'pie_chart',              href:'mutual-funds.html' },
     { id:'ai-insights',  label:'AI Insights',  icon:'auto_awesome',           href:'ai-insights.html' },
+    { id:'stock-doctor', label:'Stock Doctor', icon:'monitor_heart',          href:'stock-doctor.html' },
     { id:'news',         label:'Market News',  icon:'newspaper',              href:'news.html' }
   ];
 
