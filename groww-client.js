@@ -39,20 +39,20 @@
 
   // Initialize status container in header
   function getOrCreateStatusContainer() {
-    let target = document.getElementById('live-status-pill') || document.getElementById('groww-status-container');
-    if (target) return target;
-    
     let header = document.querySelector('header');
     if (!header) return null;
     
-    let container = document.createElement('div');
-    container.id = 'groww-status-container';
-    container.className = 'flex items-center gap-2';
-    const targetChild = header.querySelector('.flex.items-center.gap-4');
-    if (targetChild) {
-      targetChild.insertBefore(container, targetChild.firstChild);
-    } else {
-      header.appendChild(container);
+    let container = document.getElementById('groww-status-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'groww-status-container';
+      container.className = 'flex items-center gap-2';
+      const targetChild = header.querySelector('.flex.items-center.gap-4');
+      if (targetChild) {
+        targetChild.insertBefore(container, targetChild.firstChild);
+      } else {
+        header.appendChild(container);
+      }
     }
     return container;
   }
@@ -72,14 +72,14 @@
         banner.className += 'bg-secondary/10 border border-secondary/30 text-secondary';
         banner.innerHTML = `
           <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-          <span>NSE Live</span>
+          <span>Live (Yahoo Finance) • ${message}</span>
         `;
         break;
       case 'CLOSED':
-        banner.className += 'bg-white/5 border border-white/10 text-on-surface-variant';
+        banner.className += 'bg-surface-container border border-white/10 text-on-surface-variant';
         banner.innerHTML = `
-          <span class="w-2 h-2 rounded-full bg-on-surface-variant/40"></span>
-          <span>Market Closed</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-on-surface-variant/40"></span>
+          <span>Market Closed (${message})</span>
         `;
         break;
       case 'DELAYED':

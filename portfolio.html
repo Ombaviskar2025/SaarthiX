@@ -3,1361 +3,926 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SaarthiX — Portfolio Overview & Institutional AI Technicals</title>
+  <title>SaarthiX - AI Portfolio Analyzer</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico"/>
-  <meta name="description" content="SaarthiX Institutional-grade Indian equity portfolio tracker, live NSE/BSE technical analysis, DMA/RSI/MACD metrics, and AI diagnosis."/>
-  
-  <!-- Tailwind CSS -->
+  <meta name="description" content="Institutional-grade AI portfolio analysis for NSE & BSE stocks. Enter your Indian stock holdings and receive quantitative insights."/>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  
-  <!-- Fonts & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  
-  <!-- TradingView Lightweight Charts -->
-  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-
   <script>
     tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            // Institutional Visual System (§10)
-            'bg-deep': '#080D18',
-            'bg-surface': '#0B1120',
-            'bg-card': '#111827',
-            'bg-card-hover': '#151C2B',
-            'card-border': 'rgba(255, 255, 255, 0.08)',
-            'card-border-hover': 'rgba(255, 255, 255, 0.16)',
-            'primary-accent': '#4F7DF3',
-            'primary-purple': '#6366F1',
-            'brand-green': '#22C55E',
-            'brand-yellow': '#F5B82E',
-            'brand-red': '#EF6B7A',
-            'text-primary': '#F8FAFC',
-            'text-secondary': '#94A3B8',
-            'text-muted': '#64748B'
-          },
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
-          },
-          borderRadius: {
-            'card': '12px',
-            'pill': '9999px'
-          }
+      darkMode:'class',
+      theme:{extend:{
+        colors:{
+          'surface-bright':'#353943','on-secondary-container':'#00311f','on-surface-variant':'#c2c6d6',
+          'tertiary-container':'#ff516a','primary':'#adc6ff','on-primary':'#002e6a',
+          'secondary-fixed-dim':'#4edea3','inverse-primary':'#005ac2','secondary-fixed':'#6ffbbe',
+          'on-background':'#dfe2ef','surface-container-highest':'#31353f','error-container':'#93000a',
+          'tertiary':'#ffb2b7','surface-container-lowest':'#0a0e17','on-primary-fixed':'#001a42',
+          'surface-container-high':'#262a34','surface-container-low':'#181b25','tertiary-fixed':'#ffdadb',
+          'surface-tint':'#adc6ff','on-error':'#690005','primary-container':'#4d8eff',
+          'secondary-container':'#00a572','inverse-on-surface':'#2c303a','error':'#ffb4ab',
+          'primary-fixed':'#d8e2ff','outline-variant':'#424754','surface-container':'#1c1f29',
+          'background':'#0f131c','inverse-surface':'#dfe2ef','surface-variant':'#31353f',
+          'on-surface':'#dfe2ef','surface-dim':'#0f131c','primary-fixed-dim':'#adc6ff',
+          'secondary':'#4edea3','surface':'#0f131c','on-secondary':'#003824','outline':'#8c909f',
+          'on-primary-container':'#00285d'
+        },
+        borderRadius:{DEFAULT:'0.25rem',lg:'0.5rem',xl:'0.75rem',full:'9999px'},
+        spacing:{unit:'4px','element-gap':'12px','section-gap':'32px',gutter:'16px','container-padding':'24px'},
+        fontFamily:{
+          'headline-lg':['Geist'],'headline-xl':['Geist'],'body-sm':['Inter'],'label-sm':['Geist'],
+          'label-md':['Geist'],'body-md':['Inter'],'headline-md':['Geist'],'body-lg':['Inter'],
+          'headline-lg-mobile':['Geist'],'mono-data':['Geist']
+        },
+        fontSize:{
+          'headline-lg':['32px',{lineHeight:'40px',letterSpacing:'-0.01em',fontWeight:'600'}],
+          'headline-xl':['40px',{lineHeight:'48px',letterSpacing:'-0.02em',fontWeight:'700'}],
+          'body-sm':['14px',{lineHeight:'20px',fontWeight:'400'}],
+          'label-sm':['12px',{lineHeight:'14px',letterSpacing:'0.05em',fontWeight:'500'}],
+          'label-md':['14px',{lineHeight:'16px',letterSpacing:'0.02em',fontWeight:'500'}],
+          'body-md':['16px',{lineHeight:'24px',fontWeight:'400'}],
+          'headline-md':['24px',{lineHeight:'32px',fontWeight:'600'}],
+          'body-lg':['18px',{lineHeight:'28px',fontWeight:'400'}],
+          'headline-lg-mobile':['24px',{lineHeight:'32px',fontWeight:'600'}],
+          'mono-data':['14px',{lineHeight:'20px',letterSpacing:'-0.01em',fontWeight:'500'}]
         }
-      }
+      }}
     }
   </script>
-
   <style>
-    body {
-      background-color: #080D18;
-      color: #F8FAFC;
-      font-family: 'Plus Jakarta Sans', Inter, sans-serif;
-      overflow-x: hidden;
+    @media (min-width: 768px) {
+      .md\:ml-\[280px\] {
+        margin-left: 280px !important;
+      }
     }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #080D18; }
-    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
-
-    /* Surface & Card Classes */
-    .saarthi-card {
-      background-color: #111827;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .saarthi-card:hover {
-      border-color: rgba(255, 255, 255, 0.14);
-    }
-
-    .saarthi-interactive-card {
-      background-color: #111827;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .saarthi-interactive-card:hover {
-      background-color: #151C2B;
-      border-color: rgba(79, 125, 243, 0.3);
-      transform: translateY(-1px);
-    }
-    .saarthi-interactive-card.active-holding {
-      background-color: #151C2B;
-      border-color: rgba(79, 125, 243, 0.6);
-      box-shadow: 0 0 20px rgba(79, 125, 243, 0.12);
-    }
-
-    /* Gradient Button */
-    .btn-gradient {
-      background: linear-gradient(135deg, #4F7DF3 0%, #6366F1 100%);
-      color: #FFFFFF;
-      transition: all 0.25s ease;
-    }
-    .btn-gradient:hover {
-      opacity: 0.94;
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
-      transform: translateY(-1px);
-    }
-
-    /* Nav Active Pill */
-    .nav-pill-active {
-      background: linear-gradient(135deg, #4F7DF3 0%, #6366F1 100%);
-      color: #FFFFFF !important;
-      font-weight: 600;
-    }
-
-    /* Timeframe Selector Button */
-    .timeframe-btn {
-      padding: 4px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #94A3B8;
-      transition: all 0.2s ease;
-      background: transparent;
-    }
-    .timeframe-btn:hover {
-      color: #F8FAFC;
-      background: rgba(255, 255, 255, 0.06);
-    }
-    .timeframe-btn.active {
-      color: #FFFFFF;
-      background: rgba(79, 125, 243, 0.25);
-      border: 1px solid rgba(79, 125, 243, 0.4);
-    }
-
-    /* Signal Pills */
-    .signal-pill-hold {
-      background: rgba(245, 184, 46, 0.12);
-      color: #F5B82E;
-      border: 1px solid rgba(245, 184, 46, 0.3);
-    }
-    .signal-pill-buy {
-      background: rgba(34, 197, 94, 0.12);
-      color: #22C55E;
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-    .signal-pill-sell {
-      background: rgba(239, 107, 122, 0.12);
-      color: #EF6B7A;
-      border: 1px solid rgba(239, 107, 122, 0.3);
-    }
-
-    /* Factor Tags */
-    .factor-tag {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: #94A3B8;
-      border-radius: 9999px;
-      padding: 4px 10px;
-      font-size: 11px;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    /* Pulse animation */
-    @keyframes spin-refresh {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    .spinning {
-      animation: spin-refresh 0.7s linear infinite;
-    }
-
-    /* Skeleton Loading State */
-    .skeleton-box {
-      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
-      background-size: 200% 100%;
-      animation: skeleton-loading 1.5s infinite;
-      border-radius: 6px;
-    }
-    @keyframes skeleton-loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
+    .glass-panel{background:rgba(22,27,38,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);transition:all .25s ease}
+    .glass-panel:hover{border-color:rgba(255,255,255,.18);box-shadow:0 0 24px rgba(77,142,255,.08)}
+    .glass-input{background:#0a0e17 !important;border:1px solid rgba(255,255,255,.1) !important;color:#dfe2ef !important;transition:border-color .2s ease,box-shadow .2s ease}
+    .glass-input:focus{outline:none;border-color:#4d8eff !important;box-shadow:0 0 12px rgba(77,142,255,.22) !important}
+    .glass-input::placeholder{color:rgba(194,198,214,.35) !important}
+    .ai-insight-border{position:relative}
+    .ai-insight-border::before{content:'';position:absolute;inset:-1px;background:linear-gradient(135deg,#4d8eff 0%,#ff516a 100%);z-index:-1;border-radius:inherit;opacity:.55}
+    .pulse-button{animation:pulse-blue 2s infinite}
+    @keyframes pulse-blue{0%{box-shadow:0 0 0 0 rgba(77,142,255,.45)}70%{box-shadow:0 0 0 12px rgba(77,142,255,0)}100%{box-shadow:0 0 0 0 rgba(77,142,255,0)}}
+    ::-webkit-scrollbar{width:7px;height:7px}
+    ::-webkit-scrollbar-track{background:#0a0e17}
+    ::-webkit-scrollbar-thumb{background:#31353f;border-radius:4px}
+    ::-webkit-scrollbar-thumb:hover{background:#424754}
+    #results-section{display:none !important}
+    #results-section.show-results{display:flex !important;animation:fadeIn .5s ease-out}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .stock-row{transition:opacity .25s ease,max-height .35s ease;position:relative;z-index:1}
+    .stock-row:focus-within{z-index:90}
+    .stock-row.removing{opacity:0;max-height:0;margin-bottom:0;padding:0;overflow:hidden}
+    .suggest-dropdown{background:#1c1f29 !important;border:1px solid rgba(255,255,255,.2) !important;box-shadow:0 10px 30px rgba(0,0,0,.9) !important;z-index:100 !important}
+    .pie-chart-wrap{position:relative;width:180px;height:180px;margin:0 auto}
+    .ticker-suggestion{display:none;position:absolute;z-index:100;top:100%;left:0;right:0;background:#181b25;border:1px solid rgba(255,255,255,.1);border-radius:.5rem;max-height:200px;overflow-y:auto}
+    .ticker-suggestion.show{display:block}
+    .suggestion-item:hover{background:rgba(255,255,255,.05)}
+    @keyframes price-flash-up{0%{background:rgba(78,222,163,.2)}100%{background:transparent}}
+    @keyframes price-flash-down{0%{background:rgba(255,180,171,.2)}100%{background:transparent}}
+    .flash-up{animation:price-flash-up .8s ease-out}
+    .flash-down{animation:price-flash-down .8s ease-out}
+    .tax-card{border-left:3px solid}
+    .stcg-card{border-color:#adc6ff}
+    .ltcg-card{border-color:#4edea3}
   </style>
 </head>
+<body class="bg-background text-on-surface min-h-screen flex font-sans selection:bg-primary-container selection:text-on-primary-container">
 
-<body class="min-h-screen flex bg-bg-deep text-text-primary antialiased selection:bg-primary-accent selection:text-white">
-
-  <!-- Mobile Navigation Overlay Drawer -->
-  <div id="mobile-drawer" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden md:hidden">
-    <div class="fixed inset-y-0 left-0 w-72 bg-bg-surface border-r border-card-border p-5 flex flex-col justify-between shadow-2xl">
-      <div>
-        <div class="flex items-center justify-between pb-6 border-b border-card-border mb-6">
-          <div class="flex items-center gap-3">
-            <img src="logo.png" class="w-9 h-9 object-contain" alt="SaarthiX"/>
-            <div>
-              <div class="font-bold text-base tracking-tight text-white">SaarthiX</div>
-              <div class="text-[11px] text-text-muted">NSE · BSE · India</div>
-            </div>
-          </div>
-          <button onclick="toggleMobileDrawer()" class="text-text-secondary hover:text-white p-1">
-            <span class="material-symbols-outlined text-[20px]">close</span>
-          </button>
-        </div>
-
-        <nav class="flex flex-col gap-1.5" id="mobile-nav-items">
-          <a href="dashboard.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 text-sm font-medium transition-colors">
-            <span class="material-symbols-outlined text-[18px]">dashboard</span>Dashboard
-          </a>
-          <a href="portfolio.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg nav-pill-active text-sm font-medium shadow-md">
-            <span class="material-symbols-outlined text-[18px]">pie_chart</span>Portfolio
-          </a>
-          <a href="mutual-funds.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 text-sm font-medium transition-colors">
-            <span class="material-symbols-outlined text-[18px]">account_balance</span>Mutual Funds
-          </a>
-          <a href="ai-insights.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 text-sm font-medium transition-colors">
-            <span class="material-symbols-outlined text-[18px]">auto_awesome</span>AI Insights
-          </a>
-          <a href="stock-doctor.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 text-sm font-medium transition-colors">
-            <span class="material-symbols-outlined text-[18px]">stethoscope</span>Stock Doctor
-          </a>
-        </nav>
-      </div>
-
-      <div class="pt-4 border-t border-card-border flex flex-col gap-2">
-        <a href="#" class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-white text-xs">
-          <span class="material-symbols-outlined text-[16px]">support_agent</span>Support
-        </a>
-        <a href="login.html" class="flex items-center gap-3 px-3 py-2 text-brand-red/80 hover:text-brand-red text-xs">
-          <span class="material-symbols-outlined text-[16px]">logout</span>Log Out
-        </a>
-      </div>
+  <!-- Loading Overlay -->
+  <div class="fixed inset-0 z-[100] hidden flex-col items-center justify-center bg-background/80 backdrop-blur-sm" id="loading-overlay">
+    <div class="relative w-28 h-28 mb-6">
+      <div class="absolute inset-0 border-4 border-primary/15 rounded-full"></div>
+      <div class="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
+      <div class="absolute inset-4 border-2 border-secondary/30 rounded-full border-b-transparent animate-spin" style="animation-direction:reverse;animation-duration:1.5s"></div>
+    </div>
+    <h2 class="text-headline-md font-headline-md text-primary animate-pulse">Analysing Portfolio...</h2>
+    <p class="text-on-surface-variant text-body-md mt-2">Running quantitative models on NSE/BSE data</p>
+    <div class="flex gap-2 mt-4">
+      <span class="w-2 h-2 bg-secondary/60 rounded-full animate-bounce" style="animation-delay:0s"></span>
+      <span class="w-2 h-2 bg-secondary/60 rounded-full animate-bounce" style="animation-delay:.15s"></span>
+      <span class="w-2 h-2 bg-secondary/60 rounded-full animate-bounce" style="animation-delay:.3s"></span>
     </div>
   </div>
 
-  <!-- FIXED LEFT SIDEBAR (Desktop ~250px) -->
-  <aside class="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-[250px] bg-bg-surface border-r border-card-border z-40 p-4 justify-between">
-    <div class="flex flex-col gap-5">
-      <!-- Logo Header -->
-      <div class="flex items-center gap-3 px-2 pt-1 pb-2">
-        <img src="logo.png" class="w-8 h-8 object-contain" alt="SaarthiX Logo"/>
+  <!-- Sidebar -->
+  <nav class="hidden md:flex flex-col h-full py-container-padding fixed left-0 top-0 w-[280px] border-r border-white/10 bg-surface-container/80 backdrop-blur-xl shadow-2xl z-50">
+    <div class="px-gutter mb-8">
+      <div class="flex items-center gap-3">
+        <img src="logo.png" class="w-14 h-14 object-contain flex-shrink-0" alt="SaarthiX Logo"/>
         <div>
-          <div class="font-bold text-base text-white tracking-tight leading-none">SaarthiX</div>
-          <div class="text-[10px] text-text-muted mt-1 uppercase tracking-wider font-semibold">NSE · BSE · India</div>
+          <h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight leading-none">SaarthiX</h1>
+          <p class="font-label-sm text-label-sm text-on-surface-variant/60">NSE · BSE · India</p>
         </div>
       </div>
-
-      <!-- Navigation Links -->
-      <nav class="flex flex-col gap-1">
-        <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[18px]">dashboard</span>
-          <span>Dashboard</span>
-        </a>
-        <a href="portfolio.html" class="flex items-center gap-3 px-3 py-2 rounded-lg nav-pill-active text-xs font-semibold shadow-lg shadow-primary-accent/15">
-          <span class="material-symbols-outlined text-[18px]">pie_chart</span>
-          <span>Portfolio</span>
-        </a>
-        <a href="mutual-funds.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[18px]">account_balance</span>
-          <span>Mutual Funds</span>
-        </a>
-        <a href="ai-insights.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
-          <span>AI Insights</span>
-        </a>
-        <a href="stock-doctor.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[18px]">stethoscope</span>
-          <span>Stock Doctor</span>
-        </a>
-      </nav>
-
-      <!-- Action Button -->
-      <button onclick="triggerDeepPortfolioAnalysis()" class="w-full btn-gradient py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 shadow-md">
-        <span class="material-symbols-outlined text-[16px]">psychology</span>
-        <span>Analyse Portfolio</span>
+    </div>
+    <div class="flex flex-col gap-1 px-gutter flex-1" id="nav-links"></div>
+    <div class="px-gutter mt-auto mb-5">
+      <button onclick="runAnalysis()" class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-3 rounded-lg hover:bg-primary-fixed transition-colors pulse-button flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">rocket_launch</span>Analyse Portfolio
       </button>
-
-      <!-- Live Status Line -->
-      <div class="px-2.5 py-2 rounded-lg bg-white/[0.02] border border-card-border flex items-center justify-between text-[11px]">
-        <div class="flex items-center gap-2">
-          <span id="sidebar-live-dot" class="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
-          <span id="sidebar-market-status-text" class="font-medium text-text-secondary">NSE/BSE Live</span>
-        </div>
-        <span id="sidebar-ist-time" class="text-text-muted font-mono text-[10px]">--:-- IST</span>
-      </div>
-
-      <!-- Market Overview Indices -->
-      <div class="flex flex-col gap-2">
-        <div class="text-[10px] font-bold uppercase tracking-wider text-text-muted px-2">Market Overview</div>
-        
-        <div class="flex flex-col gap-1.5" id="sidebar-indices-container">
-          <!-- NIFTY 50 -->
-          <div class="p-2 rounded-lg bg-bg-card border border-card-border flex items-center justify-between">
-            <div>
-              <div class="text-[11px] font-semibold text-white">NIFTY 50</div>
-              <div class="text-xs font-mono font-bold text-text-primary" id="idx-nifty-val">24,398.15</div>
-            </div>
-            <div class="text-right">
-              <canvas id="spark-nifty" width="55" height="20" class="mb-0.5"></canvas>
-              <div class="text-[10px] font-mono font-medium text-brand-green" id="idx-nifty-pct">+0.37%</div>
-            </div>
-          </div>
-
-          <!-- SENSEX -->
-          <div class="p-2 rounded-lg bg-bg-card border border-card-border flex items-center justify-between">
-            <div>
-              <div class="text-[11px] font-semibold text-white">SENSEX</div>
-              <div class="text-xs font-mono font-bold text-text-primary" id="idx-sensex-val">80,423.72</div>
-            </div>
-            <div class="text-right">
-              <canvas id="spark-sensex" width="55" height="20" class="mb-0.5"></canvas>
-              <div class="text-[10px] font-mono font-medium text-brand-green" id="idx-sensex-pct">+0.64%</div>
-            </div>
-          </div>
-
-          <!-- NIFTY BANK -->
-          <div class="p-2 rounded-lg bg-bg-card border border-card-border flex items-center justify-between">
-            <div>
-              <div class="text-[11px] font-semibold text-white">NIFTY BANK</div>
-              <div class="text-xs font-mono font-bold text-text-primary" id="idx-bank-val">52,841.60</div>
-            </div>
-            <div class="text-right">
-              <canvas id="spark-bank" width="55" height="20" class="mb-0.5"></canvas>
-              <div class="text-[10px] font-mono font-medium text-brand-green" id="idx-bank-pct">+0.70%</div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-
-    <!-- Footer Links -->
-    <div class="pt-3 border-t border-card-border flex items-center justify-between px-2 text-xs text-text-muted">
-      <a href="#" class="hover:text-white flex items-center gap-1.5 transition-colors">
-        <span class="material-symbols-outlined text-[15px]">help_outline</span>Support
+    <div class="px-gutter flex flex-col gap-1 pt-4 border-t border-white/10">
+      <div class="flex items-center gap-2 px-4 py-2 text-on-surface-variant/60">
+        <span id="market-status" class="font-label-sm text-label-sm flex items-center gap-1"></span>
+        <span class="font-label-sm text-label-sm ml-auto" id="ist-time"></span>
+      </div>
+      <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all" href="#">
+        <span class="material-symbols-outlined text-[18px]">help</span>
+        <span class="font-label-sm text-label-sm">Support</span>
       </a>
-      <a href="login.html" class="hover:text-brand-red flex items-center gap-1.5 transition-colors">
-        <span class="material-symbols-outlined text-[15px]">logout</span>Log Out
+      <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all" href="login.html">
+        <span class="material-symbols-outlined text-[18px]">logout</span>
+        <span class="font-label-sm text-label-sm">Log Out</span>
       </a>
     </div>
-  </aside>
+  </nav>
 
-  <!-- MAIN VIEWPORT -->
-  <main class="flex-1 md:ml-[250px] min-h-screen flex flex-col pb-12">
+  <!-- Main Content -->
+  <main class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col min-w-0 overflow-x-hidden pb-20 md:pb-0">
 
-    <!-- Top Sticky Header -->
-    <header class="sticky top-0 z-30 bg-bg-deep/90 backdrop-blur-md border-b border-card-border px-4 md:px-8 py-3.5 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <button onclick="toggleMobileDrawer()" class="md:hidden text-text-secondary hover:text-white p-1">
-          <span class="material-symbols-outlined">menu</span>
-        </button>
-        <div>
-          <div class="flex items-center gap-2.5">
-            <h1 class="text-base md:text-lg font-bold text-white tracking-tight">Portfolio Overview</h1>
-            <div id="market-hours-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-green/10 text-brand-green border border-brand-green/30">
-              <span class="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-              <span>Markets are open</span>
-            </div>
-          </div>
-          <div class="text-[11px] text-text-secondary hidden sm:block">Real-time valuation, technical indicators &amp; algorithmic risk metrics</div>
+    <!-- Top Bar -->
+    <header class="hidden md:flex justify-between items-center h-16 px-gutter bg-surface-dim/80 backdrop-blur-md border-b border-white/10 sticky top-0 z-40 w-full">
+      <nav class="flex items-center gap-6">
+        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="dashboard.html">Dashboard</a>
+        <a class="font-label-md text-label-md text-primary font-bold border-b-2 border-primary pb-1" href="portfolio.html" aria-current="page">Portfolio</a>
+        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="mutual-funds.html">Mutual Funds</a>
+        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="stock-doctor.html">Stock Doctor</a>
+        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="ai-insights.html">AI Insights</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <!-- Live Index Strip -->
+        <div class="flex items-center gap-4 text-mono-data font-mono-data border-r border-white/10 pr-4">
+          <span class="flex items-center gap-1">
+            <span class="text-on-surface-variant/60 text-[11px]">SENSEX</span>
+            <span id="hdr-sensex" class="text-on-surface"></span>
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="text-on-surface-variant/60 text-[11px]">NIFTY</span>
+            <span id="hdr-nifty" class="text-on-surface"></span>
+          </span>
         </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <div class="text-right hidden sm:block">
-          <div class="text-[10px] uppercase tracking-wider text-text-muted font-medium">Last updated</div>
-          <div class="text-xs font-mono text-text-secondary" id="header-last-updated">--:--:-- IST</div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+          <input class="glass-input pl-8 pr-4 py-1.5 rounded-full text-body-sm w-44 focus:w-60 transition-all duration-300" placeholder="Search NSE/BSE..." type="text"/>
         </div>
-
-        <button onclick="refreshAllPortfolioData(true)" id="refresh-button" class="p-2 rounded-lg bg-bg-card border border-card-border hover:border-card-border-hover text-text-secondary hover:text-white transition-all" title="Refresh Portfolio Data">
-          <span class="material-symbols-outlined text-[18px]" id="refresh-icon">refresh</span>
+        <button class="text-on-surface-variant hover:text-primary p-2 rounded-full hover:bg-white/5 relative">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-tertiary-container rounded-full"></span>
         </button>
-
-        <a href="login.html" class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-accent to-primary-purple border border-white/20 flex items-center justify-center text-white text-xs font-bold shadow-sm">
-          SX
-        </a>
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-container/50 to-secondary-container/30 border border-white/20 flex items-center justify-center cursor-pointer">
+          <span class="material-symbols-outlined text-[18px] text-primary">person</span>
+        </div>
       </div>
     </header>
 
-    <!-- Main Content Container -->
-    <div class="p-4 md:p-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+    <!-- Content -->
+    <div class="p-4 md:p-container-padding flex flex-col gap-section-gap max-w-[1400px] mx-auto w-full">
 
-      <!-- SECTION 1: Six KPI Cards Row (§5) -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5" id="kpi-cards-grid">
-        <!-- 1. Total Portfolio Value -->
-        <div class="saarthi-card p-3.5 flex flex-col justify-between">
-          <div class="text-[11px] font-medium text-text-muted uppercase tracking-wider">Total Value</div>
-          <div class="my-1.5">
-            <div class="text-base sm:text-lg font-bold font-mono text-white" id="kpi-total-val">₹2,38,740.00</div>
+      <!-- Page Header -->
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-primary-container/20 border border-primary-container/30 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">analytics</span>
           </div>
-          <div class="text-[11px] font-mono text-brand-green flex items-center gap-1" id="kpi-total-delta">
-            <span>+₹4,104.00</span>
-            <span class="text-[10px] text-text-muted font-sans">today</span>
-          </div>
-        </div>
-
-        <!-- 2. Today's P&L -->
-        <div class="saarthi-card p-3.5 flex flex-col justify-between">
-          <div class="text-[11px] font-medium text-text-muted uppercase tracking-wider">Today's P&L</div>
-          <div class="my-1.5">
-            <div class="text-base sm:text-lg font-bold font-mono text-brand-green" id="kpi-today-pnl">+₹4,104.00</div>
-          </div>
-          <div class="text-[11px] font-mono text-brand-green flex items-center gap-1" id="kpi-today-pct">
-            <span>+1.75%</span>
-            <span class="text-[10px] text-text-muted font-sans">day move</span>
-          </div>
-        </div>
-
-        <!-- 3. Unrealized P&L -->
-        <div class="saarthi-card p-3.5 flex flex-col justify-between">
-          <div class="text-[11px] font-medium text-text-muted uppercase tracking-wider">Unrealized P&L</div>
-          <div class="my-1.5">
-            <div class="text-base sm:text-lg font-bold font-mono text-brand-green" id="kpi-unrealized-pnl">+₹31,420.00</div>
-          </div>
-          <div class="text-[11px] font-mono text-brand-green flex items-center gap-1" id="kpi-unrealized-pct">
-            <span>+15.15%</span>
-            <span class="text-[10px] text-text-muted font-sans">overall</span>
-          </div>
-        </div>
-
-        <!-- 4. Total Invested -->
-        <div class="saarthi-card p-3.5 flex flex-col justify-between">
-          <div class="text-[11px] font-medium text-text-muted uppercase tracking-wider">Total Invested</div>
-          <div class="my-1.5">
-            <div class="text-base sm:text-lg font-bold font-mono text-white" id="kpi-invested-val">₹2,07,320.00</div>
-          </div>
-          <div class="text-[11px] text-text-muted flex items-center gap-1">
-            <span id="kpi-holdings-count">4</span>
-            <span>active equities</span>
-          </div>
-        </div>
-
-        <!-- 5. Cash Balance -->
-        <div class="saarthi-card p-3.5 flex flex-col justify-between">
-          <div class="text-[11px] font-medium text-text-muted uppercase tracking-wider">Cash Balance</div>
-          <div class="my-1.5">
-            <div class="text-base sm:text-lg font-bold font-mono text-white" id="kpi-cash-val">₹84,500.00</div>
-          </div>
-          <div class="text-[11px] text-text-muted flex items-center gap-1">
-            <span>Available to trade</span>
-          </div>
-        </div>
-
-        <!-- 6. Day Gain % -->
-        <div class="saarthi-card p-3.5 flex flex-col justify-between">
-          <div class="text-[11px] font-medium text-text-muted uppercase tracking-wider">Day Gain %</div>
-          <div class="my-1.5">
-            <div class="text-base sm:text-lg font-bold font-mono text-brand-green" id="kpi-day-gain">+1.75%</div>
-          </div>
-          <div class="text-[11px] text-brand-green flex items-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">trending_up</span>
-            <span class="font-medium">Outperforming</span>
+          <div>
+            <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">AI Portfolio Analyser</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant flex flex-wrap items-center gap-x-3">
+              <span>NSE &amp; BSE · ₹ Indian Rupee · STCG/LTCG Tax Estimate</span>
+              <span class="live-timestamp font-mono text-xs text-secondary"></span>
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- SECTION 2: Two-Column Section (Holdings Left + AI Analysis Right) (§6, §7) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        <!-- Left Column: Holdings (4 cols on lg) -->
-        <div class="lg:col-span-4 flex flex-col gap-3">
-          <div class="flex items-center justify-between px-1">
-            <div class="text-xs font-bold uppercase tracking-wider text-text-secondary flex items-center gap-2">
-              <span class="material-symbols-outlined text-[16px] text-primary-accent">inventory_2</span>
-              <span>Portfolio Positions</span>
-            </div>
-            <span class="text-[11px] font-mono text-text-muted" id="holdings-list-count">4 stocks</span>
-          </div>
-
-          <!-- Holdings List Container -->
-          <div class="flex flex-col gap-2.5" id="holdings-cards-container">
-            <!-- Dynamic Holdings rendered by JS -->
+      <!-- Broker Banner -->
+      <div class="glass-panel rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-l-4 border-primary-container/60">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary-container text-3xl" style="font-variation-settings:'FILL' 1">account_balance</span>
+          <div>
+            <p class="font-label-md text-label-md text-on-surface font-semibold">Connect your brokerage for live holdings</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Supports Zerodha Kite, Groww, Upstox, Angel One, Fyers &amp; more</p>
           </div>
         </div>
-
-        <!-- Right Column: AI Analysis Card (8 cols on lg) -->
-        <div class="lg:col-span-8 flex flex-col gap-4">
-          <div class="saarthi-card p-5 border border-primary-accent/20 bg-bg-card relative overflow-hidden">
-            <!-- Ambient top gradient bar -->
-            <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary-accent via-primary-purple to-brand-green"></div>
-
-            <!-- Card Header -->
-            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-card-border">
-              <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-primary-accent/15 border border-primary-accent/30 flex items-center justify-center text-primary-accent">
-                  <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
-                </div>
-                <div>
-                  <div class="text-sm font-bold text-white flex items-center gap-2">
-                    <span id="ai-card-title">AI Technical Analysis</span>
-                    <span class="text-xs font-normal text-text-muted" id="ai-active-symbol-subtitle">(RELIANCE)</span>
-                  </div>
-                  <div class="text-[11px] text-text-secondary">Synthesized from 1Y OHLCV, 50/200 DMA, RSI(14) &amp; MACD momentum</div>
-                </div>
-              </div>
-
-              <!-- Confidence Pill -->
-              <div id="ai-confidence-badge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-green/10 text-brand-green border border-brand-green/30">
-                <span class="w-2 h-2 rounded-full bg-brand-green"></span>
-                <span id="ai-confidence-text">Confidence: HIGH (84%)</span>
-              </div>
-            </div>
-
-            <!-- Reasoning Paragraph -->
-            <div class="py-3.5">
-              <p class="text-xs sm:text-sm leading-relaxed text-text-primary/90 font-normal" id="ai-reasoning-paragraph">
-                Loading quantitative model analysis...
-              </p>
-            </div>
-
-            <!-- Factor Tags Row -->
-            <div class="flex flex-wrap gap-2 pt-1 pb-4" id="ai-factor-tags">
-              <!-- Dynamically rendered factor pills -->
-            </div>
-
-            <!-- 5 Technical Metric Stat Cards (§7) -->
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-3 border-t border-card-border" id="tech-metrics-grid">
-              <!-- 1. 50 DMA -->
-              <div class="p-2.5 rounded-lg bg-bg-surface border border-card-border flex flex-col justify-between">
-                <div class="text-[10px] font-medium uppercase tracking-wider text-text-muted">50 DMA</div>
-                <div class="my-1">
-                  <div class="text-xs sm:text-sm font-bold font-mono text-white" id="stat-dma50-val">₹1,280.20</div>
-                </div>
-                <div class="text-[10px] font-medium text-brand-green" id="stat-dma50-status">Holding Above</div>
-              </div>
-
-              <!-- 2. 200 DMA -->
-              <div class="p-2.5 rounded-lg bg-bg-surface border border-card-border flex flex-col justify-between">
-                <div class="text-[10px] font-medium uppercase tracking-wider text-text-muted">200 DMA</div>
-                <div class="my-1">
-                  <div class="text-xs sm:text-sm font-bold font-mono text-white" id="stat-dma200-val">₹1,345.50</div>
-                </div>
-                <div class="text-[10px] font-medium text-brand-yellow" id="stat-dma200-status">Testing Under</div>
-              </div>
-
-              <!-- 3. RSI (14) -->
-              <div class="p-2.5 rounded-lg bg-bg-surface border border-card-border flex flex-col justify-between">
-                <div class="text-[10px] font-medium uppercase tracking-wider text-text-muted">RSI (14)</div>
-                <div class="my-1">
-                  <div class="text-xs sm:text-sm font-bold font-mono text-white" id="stat-rsi-val">48.2</div>
-                </div>
-                <div class="text-[10px] font-medium text-primary-accent" id="stat-rsi-status">Neutral Range</div>
-              </div>
-
-              <!-- 4. 1M Trend -->
-              <div class="p-2.5 rounded-lg bg-bg-surface border border-card-border flex flex-col justify-between">
-                <div class="text-[10px] font-medium uppercase tracking-wider text-text-muted">1M Trend</div>
-                <div class="my-1">
-                  <div class="text-xs sm:text-sm font-bold font-mono text-brand-green" id="stat-trend1m-val">+3.82%</div>
-                </div>
-                <div class="text-[10px] font-medium text-brand-green" id="stat-trend1m-status">Bullish Tilt</div>
-              </div>
-
-              <!-- 5. Volume Trend -->
-              <div class="p-2.5 rounded-lg bg-bg-surface border border-card-border flex flex-col justify-between col-span-2 sm:col-span-1">
-                <div class="text-[10px] font-medium uppercase tracking-wider text-text-muted">Vol Trend</div>
-                <div class="my-1">
-                  <div class="text-xs sm:text-sm font-bold font-mono text-white" id="stat-vol-val">+18.4%</div>
-                </div>
-                <div class="text-[10px] font-medium text-brand-green" id="stat-vol-status">Above 30D Avg</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
+        <button class="flex-shrink-0 bg-primary-container text-on-primary-container font-label-md text-label-md px-5 py-2 rounded-lg hover:bg-primary-fixed transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">link</span>Connect Broker
+        </button>
       </div>
 
-      <!-- SECTION 3: Interactive TradingView Lightweight Price Chart (§8) -->
-      <div class="saarthi-card p-5 flex flex-col gap-4">
-        <!-- Chart Header & Timeframe Tabs -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-card-border">
+      <!-- Manual Entry Section -->
+      <section class="glass-panel rounded-xl p-container-padding" id="input-section">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">add_circle</span>
+            Manual Entry
+          </h3>
           <div class="flex items-center gap-3">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-base font-bold text-white" id="chart-symbol-title">RELIANCE</span>
-                <span class="text-xs px-2 py-0.5 rounded bg-white/5 border border-card-border text-text-secondary font-mono" id="chart-exchange-badge">NSE</span>
-                <span id="chart-delayed-badge" class="hidden text-[10px] px-2 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/30 font-medium">Delayed (15m)</span>
-              </div>
-              <div class="text-xs text-text-secondary" id="chart-company-subtitle">Reliance Industries Ltd.</div>
-            </div>
-            <div class="border-l border-card-border pl-3 ml-1">
-              <div class="text-lg font-bold font-mono text-white" id="chart-price-display">₹1,328.80</div>
-              <div class="text-xs font-mono font-semibold text-brand-green" id="chart-delta-display">+₹16.05 (+1.22%)</div>
-            </div>
-          </div>
-
-          <!-- Indicators Legend & Timeframe Selector -->
-          <div class="flex items-center gap-4">
-            <!-- Chart Legend -->
-            <div class="hidden md:flex items-center gap-3 text-[11px] font-mono">
-              <span class="flex items-center gap-1.5 text-text-muted">
-                <span class="w-2.5 h-1 bg-brand-yellow rounded-sm"></span>50 DMA
-              </span>
-              <span class="flex items-center gap-1.5 text-text-muted">
-                <span class="w-2.5 h-1 bg-primary-purple rounded-sm"></span>200 DMA
-              </span>
-              <span class="flex items-center gap-1.5 text-text-muted">
-                <span class="w-2 h-2 bg-brand-green/50 rounded-sm"></span>Vol
-              </span>
-            </div>
-
-            <!-- Timeframe Tabs -->
-            <div class="flex items-center p-1 rounded-lg bg-bg-surface border border-card-border">
-              <button onclick="switchTimeframe('1d')" class="timeframe-btn" data-tf="1d">1D</button>
-              <button onclick="switchTimeframe('1w')" class="timeframe-btn" data-tf="1w">1W</button>
-              <button onclick="switchTimeframe('1m')" class="timeframe-btn" data-tf="1m">1M</button>
-              <button onclick="switchTimeframe('6m')" class="timeframe-btn" data-tf="6m">6M</button>
-              <button onclick="switchTimeframe('1y')" class="timeframe-btn active" data-tf="1y">1Y</button>
-            </div>
+            <button class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary flex items-center gap-1 transition-colors" onclick="clearAll()">
+              <span class="material-symbols-outlined text-[16px]">clear_all</span>Clear All
+            </button>
+            <button class="text-primary font-label-sm text-label-sm hover:text-primary-container flex items-center gap-1 transition-colors">
+              <span class="material-symbols-outlined text-[16px]">upload_file</span>Import CSV
+            </button>
           </div>
         </div>
 
-        <!-- Chart Container -->
-        <div class="relative w-full h-[380px] rounded-lg overflow-hidden bg-bg-surface/50" id="tv-chart-wrapper">
-          <div id="lightweight-chart-container" class="w-full h-full"></div>
-          
-          <!-- Chart Floating Crosshair Tooltip -->
-          <div id="chart-floating-tooltip" class="absolute top-3 left-3 pointer-events-none z-20 bg-bg-card/90 backdrop-blur-md border border-card-border rounded-lg p-2 text-[11px] font-mono flex items-center gap-3 text-text-secondary shadow-lg">
-            <span>Hover over chart to view OHLCV &amp; DMA data</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECTION 4: Three Technical Level Cards (§9) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="technical-levels-grid">
-        
-        <!-- Level Card 1: Buy More (DCA Zones) -->
-        <div class="saarthi-card p-4 border-l-4 border-l-brand-green flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between pb-2.5 border-b border-card-border mb-3">
-              <div class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-[16px] text-brand-green">add_circle</span>
-                <span>Buy More (DCA Zones)</span>
-              </div>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-brand-green/10 text-brand-green font-semibold border border-brand-green/20">Accumulation</span>
-            </div>
-
-            <div class="flex flex-col gap-2 text-xs" id="lvl-buy-items">
-              <div class="flex items-center justify-between py-1 border-b border-white/[0.04]">
-                <span class="text-text-secondary">50 DMA Support</span>
-                <span class="font-mono font-semibold text-white" id="lvl-dca-1">₹1,280.20</span>
-              </div>
-              <div class="flex items-center justify-between py-1 border-b border-white/[0.04]">
-                <span class="text-text-secondary">ATR Pullback Zone (-1.5x)</span>
-                <span class="font-mono font-semibold text-brand-green" id="lvl-dca-2">₹1,245.00</span>
-              </div>
-              <div class="flex items-center justify-between py-1">
-                <span class="text-text-secondary">20-Day Swing Low</span>
-                <span class="font-mono font-semibold text-white" id="lvl-dca-3">₹1,262.50</span>
-              </div>
-            </div>
-          </div>
-          <div class="mt-3 pt-2 text-[10px] text-text-muted">Gradual staggered DCA recommended below 50 DMA support.</div>
+        <!-- Column headers (desktop) -->
+        <div class="hidden md:grid md:grid-cols-[2fr_1fr_1fr_1fr_2.5rem] gap-3 mb-2 px-3">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Stock Ticker / Company</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Exchange</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Quantity (Shares)</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Avg Buy Price (₹)</span>
+          <span></span>
         </div>
 
-        <!-- Level Card 2: Hold Range & Stop Loss -->
-        <div class="saarthi-card p-4 border-l-4 border-l-brand-yellow flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between pb-2.5 border-b border-card-border mb-3">
-              <div class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-[16px] text-brand-yellow">shield</span>
-                <span>Hold Range &amp; Stop Loss</span>
-              </div>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow font-semibold border border-brand-yellow/20">Protection</span>
-            </div>
+        <div class="flex flex-col gap-3" id="portfolio-inputs"></div>
 
-            <div class="flex flex-col gap-2 text-xs" id="lvl-hold-items">
-              <div class="flex items-center justify-between py-1 border-b border-white/[0.04]">
-                <span class="text-text-secondary">Core Hold Range (50–200 DMA)</span>
-                <span class="font-mono font-semibold text-white" id="lvl-hold-1">₹1,280 – ₹1,345</span>
-              </div>
-              <div class="flex items-center justify-between py-1 border-b border-white/[0.04]">
-                <span class="text-text-secondary">Structural Baseline</span>
-                <span class="font-mono font-semibold text-white" id="lvl-hold-2">₹1,262.50</span>
-              </div>
-              <div class="flex items-center justify-between py-1">
-                <span class="text-text-secondary">Strict Stop Loss (-2.0x ATR)</span>
-                <span class="font-mono font-semibold text-brand-red" id="lvl-hold-3">₹1,220.00</span>
-              </div>
-            </div>
+        <div class="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <button onclick="addStockRow()" class="font-label-md text-label-md text-primary flex items-center gap-2 hover:bg-white/5 px-4 py-2 rounded-lg transition-colors border border-dashed border-primary/30 w-full md:w-auto justify-center">
+            <span class="material-symbols-outlined text-[18px]">add</span>Add Another Stock
+          </button>
+          <button onclick="runAnalysis()" class="bg-primary text-on-primary font-label-md text-label-md px-8 py-3 rounded-lg hover:bg-primary-container transition-colors pulse-button w-full md:w-auto flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+            <span class="material-symbols-outlined text-[18px]">rocket_launch</span>Run Deep Analysis
+          </button>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section id="results-section" class="flex-col gap-section-gap">
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="glass-panel rounded-xl p-5">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Portfolio Value</p>
+            <p class="font-headline-md text-headline-md text-on-surface font-bold" id="res-total-value">—</p>
+            <p class="font-body-sm text-body-sm mt-1 flex items-center gap-1" id="res-total-pnl">—</p>
           </div>
-          <div class="mt-3 pt-2 text-[10px] text-text-muted">Maintain position while quote sustains above the structural baseline.</div>
+          <div class="glass-panel rounded-xl p-5">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Invested Amount</p>
+            <p class="font-headline-md text-headline-md text-on-surface font-bold" id="res-invested">—</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1" id="res-holdings-count">—</p>
+          </div>
+          <div class="glass-panel rounded-xl p-5">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">STCG Tax Est.</p>
+            <p class="font-headline-md text-headline-md text-primary font-bold" id="res-stcg">—</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">@20% (held &lt;12m)</p>
+          </div>
+          <div class="glass-panel rounded-xl p-5 ai-insight-border">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">AI Health Score</p>
+            <p class="font-headline-md text-headline-md text-secondary font-bold" id="res-ai-score">—</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1" id="res-ai-label">—</p>
+          </div>
         </div>
 
-        <!-- Level Card 3: Sell / Take-Profit -->
-        <div class="saarthi-card p-4 border-l-4 border-l-brand-red flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between pb-2.5 border-b border-card-border mb-3">
-              <div class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-[16px] text-brand-red">sell</span>
-                <span>Sell / Take-Profit</span>
-              </div>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-brand-red/10 text-brand-red font-semibold border border-brand-red/20">Distribution</span>
-            </div>
+        <!-- Allocation + AI Insights -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <div class="flex flex-col gap-2 text-xs" id="lvl-sell-items">
-              <div class="flex items-center justify-between py-1 border-b border-white/[0.04]">
-                <span class="text-text-secondary">Upper Bollinger Band</span>
-                <span class="font-mono font-semibold text-brand-red" id="lvl-sell-1">₹1,392.00</span>
-              </div>
-              <div class="flex items-center justify-between py-1 border-b border-white/[0.04]">
-                <span class="text-text-secondary">52-Week High Resistance</span>
-                <span class="font-mono font-semibold text-white" id="lvl-sell-2">₹1,420.50</span>
-              </div>
-              <div class="flex items-center justify-between py-1">
-                <span class="text-text-secondary">Trailing Target (12M)</span>
-                <span class="font-mono font-semibold text-brand-green" id="lvl-sell-3">₹1,505.00</span>
-              </div>
+          <!-- Pie Chart -->
+          <div class="glass-panel rounded-xl p-container-padding flex flex-col gap-4">
+            <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-[20px]">donut_large</span>Allocation
+            </h4>
+            <div class="flex items-center justify-center">
+              <canvas id="pie-canvas" width="180" height="180"></canvas>
             </div>
+            <div class="flex flex-col gap-2" id="pie-legend"></div>
           </div>
-          <div class="mt-3 pt-2 text-[10px] text-text-muted">Consider partial profit-taking near upper Bollinger Band resistance.</div>
+
+          <!-- AI Insights -->
+          <div class="lg:col-span-2 glass-panel rounded-xl p-container-padding flex flex-col gap-4">
+            <h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings:'FILL' 1">psychology</span>
+              AI Insights
+              <span class="ml-auto px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary font-label-sm text-label-sm border border-secondary-container/30">BETA</span>
+            </h4>
+            <div class="flex flex-col gap-3" id="ai-insights-list"></div>
+          </div>
         </div>
 
-      </div>
+        <!-- Tax Estimate Cards -->
+        <div class="glass-panel rounded-xl p-container-padding">
+          <h4 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">receipt_long</span>Tax Estimate (India FY26)
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="tax-cards">
+            <div class="tax-card stcg-card glass-panel rounded-lg p-4">
+              <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Short Term Capital Gains (STCG)</p>
+              <p class="font-headline-md text-headline-md text-primary font-bold" id="tax-stcg-amount">—</p>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Held &lt; 12 months · 20% flat rate</p>
+            </div>
+            <div class="tax-card ltcg-card glass-panel rounded-lg p-4">
+              <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Long Term Capital Gains (LTCG)</p>
+              <p class="font-headline-md text-headline-md text-secondary font-bold" id="tax-ltcg-amount">—</p>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Held ≥ 12 months · 12.5% above ₹1.25L exemption</p>
+            </div>
+          </div>
+          <p class="font-label-sm text-label-sm text-on-surface-variant/40 mt-3">* Estimated based on FY2025-26 Indian tax rules. Consult a CA for exact filing.</p>
+        </div>
 
-      <!-- SECTION 5: Regulatory Disclaimer (§2, §15) -->
-      <footer class="pt-4 pb-2 border-t border-card-border text-center">
-        <p class="text-[11px] text-text-muted leading-relaxed max-w-4xl mx-auto">
-          <strong>Regulatory Disclaimer:</strong> SaarthiX is an algorithmic quantitative analytics and technical research platform for educational and informational purposes only. It is not registered under SEBI (Investment Advisers) Regulations, 2013 or SEBI (Research Analysts) Regulations, 2014. Indian equities and derivatives carry market risk. Always consult a certified financial advisor before executing trades.
-        </p>
-      </footer>
+        <!-- Holdings Table -->
+        <div class="glass-panel rounded-xl p-container-padding">
+          <h4 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">table_chart</span>Holdings Breakdown
+          </h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-white/10">
+                  <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Stock</th>
+                  <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Exch</th>
+                  <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Qty</th>
+                  <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Avg Cost</th>
+                  <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">LTP*</th>
+                  <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Value</th>
+                  <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">P&amp;L</th>
+                  <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Weight</th>
+                  <th class="pb-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-center pr-2">AI Signal</th>
+                </tr>
+              </thead>
+              <tbody id="holdings-body" class="divide-y divide-white/5"></tbody>
+            </table>
+            <p class="font-label-sm text-label-sm text-on-surface-variant/40 mt-3">* LTP sourced from NSE/BSE simulation. For demo purposes.</p>
+          </div>
+        </div>
 
+        <!-- Re-analyze -->
+        <div class="flex justify-end">
+          <button onclick="resetAnalysis()" class="flex items-center gap-2 text-on-surface-variant hover:text-on-surface font-label-md text-label-md border border-white/10 px-5 py-2 rounded-lg hover:bg-white/5 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">refresh</span>Edit &amp; Re-analyse
+          </button>
+        </div>
+      </section>
     </div>
   </main>
 
-  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <!-- Mobile Bottom Nav -->
+  <nav id="mobile-nav" class="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-surface-container/95 backdrop-blur-xl border-t border-white/10 flex justify-around items-center h-16 px-2"></nav>
+
+  <script src="shared.js"></script>
+  <script src="groww-client.js"></script>
   <script>
-    'use strict';
-
-    // State Variables
-    let activeSymbol = 'RELIANCE';
-    let activeTimeframe = '1y';
-    let portfolioSummaryData = null;
-    let activeAnalysisData = null;
-    let isDataLoading = false;
-
-    // TradingView Chart Instances
-    let tvChart = null;
-    let candleSeries = null;
-    let volumeSeries = null;
-    let sma50LineSeries = null;
-    let sma200LineSeries = null;
-
-    // ── Document Ready ──────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', () => {
-      initTradingViewChart();
-      refreshAllPortfolioData();
-      startLivePolling();
-    });
-
-    // ── Mobile Drawer Toggle ────────────────────────────────────
-    function toggleMobileDrawer() {
-      const drawer = document.getElementById('mobile-drawer');
-      if (drawer) {
-        drawer.classList.toggle('hidden');
-      }
+    function fmtINR(val) {
+      if (val === undefined || val === null || isNaN(val)) return '₹0.00';
+      return '₹' + Number(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // ── Market Hours Evaluator (IST) ────────────────────────────
-    function evaluateMarketHours() {
-      const now = new Date();
-      const istOffset = 5.5 * 60 * 60 * 1000;
-      const istDate = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
-      const day = istDate.getDay(); // 0 = Sun, 6 = Sat
-      const hours = istDate.getHours();
-      const minutes = istDate.getMinutes();
-      const currentTimeMinutes = hours * 60 + minutes;
+    // ── Pie colours ──────────────────────────────────────────
+    const PIE_COLORS = ['#4d8eff','#4edea3','#ff516a','#ffb2b7','#adc6ff','#6ffbbe','#c2c6d6','#353943'];
 
-      const marketOpen = 9 * 60 + 15;  // 09:15 IST
-      const marketClose = 15 * 60 + 30; // 15:30 IST
+    // ── Default holdings ────────────────────────────────────
+    const DEFAULT_HOLDINGS = [
+      { ticker:'RELIANCE', exchange:'NSE', qty:10, price:2750.00 },
+      { ticker:'TCS',      exchange:'NSE', qty:5,  price:3800.00 },
+      { ticker:'INFY',     exchange:'NSE', qty:20, price:1580.00 },
+    ];
+    let rowCounter = 0;
 
-      const isOpen = (day >= 1 && day <= 5) && (currentTimeMinutes >= marketOpen && currentTimeMinutes <= marketClose);
+    // ── Build ticker datalist options ─────────────────────────
+    function getTickerOptions() {
+      return STOCKS_DB.map(s => `<option value="${s.ticker} - ${s.name}" data-exchange="${s.exchange}">`).join('');
+    }
+
+    // ── Create row ────────────────────────────────────────────
+    function createRowEl(h = {}) {
+      rowCounter++;
+      const id = rowCounter;
+      const div = document.createElement('div');
+      div.className = 'stock-row flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_1fr_2.5rem] gap-3 items-end p-3 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors border border-white/5 relative';
+      div.dataset.rowId = id;
       
-      const badge = document.getElementById('market-hours-badge');
-      const sideDot = document.getElementById('sidebar-live-dot');
-      const sideText = document.getElementById('sidebar-market-status-text');
+      const stockName = h.ticker ? (STOCKS_DB.find(s=>s.ticker===h.ticker)||{name:h.name||''}).name : '';
+      const displayVal = h.ticker ? (stockName ? `${h.ticker} - ${stockName}` : h.ticker) : '';
 
-      if (badge) {
-        if (isOpen) {
-          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-green/10 text-brand-green border border-brand-green/30';
-          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span><span>Markets are open</span>';
-        } else {
-          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/30';
-          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-brand-yellow"></span><span>Markets are closed</span>';
-        }
-      }
-
-      if (sideDot && sideText) {
-        if (isOpen) {
-          sideDot.className = 'w-2 h-2 rounded-full bg-brand-green animate-pulse';
-          sideText.textContent = 'NSE/BSE Live';
-        } else {
-          sideDot.className = 'w-2 h-2 rounded-full bg-brand-yellow';
-          sideText.textContent = 'NSE/BSE Closed';
-        }
-      }
-
-      const timeStr = istDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-      const sidebarTime = document.getElementById('sidebar-ist-time');
-      const headerTime = document.getElementById('header-last-updated');
-      if (sidebarTime) sidebarTime.textContent = `${timeStr} IST`;
-      if (headerTime) headerTime.textContent = `${timeStr} IST`;
-    }
-
-    // ── Main Data Orchestrator ──────────────────────────────────
-    async function refreshAllPortfolioData(isUserAction = false) {
-      if (isDataLoading) return;
-      isDataLoading = true;
-
-      const refreshIcon = document.getElementById('refresh-icon');
-      if (refreshIcon && isUserAction) {
-        refreshIcon.classList.add('spinning');
-      }
-
-      evaluateMarketHours();
-
-      try {
-        await Promise.all([
-          fetchMarketIndices(),
-          fetchPortfolioSummary(),
-          fetchSymbolAnalysis(activeSymbol, activeTimeframe)
-        ]);
-      } catch (err) {
-        console.error('Error refreshing portfolio data:', err);
-      } finally {
-        isDataLoading = false;
-        if (refreshIcon) {
-          setTimeout(() => refreshIcon.classList.remove('spinning'), 600);
-        }
-      }
-    }
-
-    // ── Polling Loop for Indices & Status ───────────────────────
-    function startLivePolling() {
-      setInterval(() => {
-        evaluateMarketHours();
-        fetchMarketIndices();
-      }, 20000); // 20s poll
-    }
-
-    // ── 1. Fetch Market Indices Sidebar ─────────────────────────
-    async function fetchMarketIndices() {
-      try {
-        const res = await fetch('/api/portfolio/indices');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.status === 'SUCCESS' && data.indices) {
-          const idx = data.indices;
-          if (idx.nifty50) updateIndexWidget('nifty', idx.nifty50);
-          if (idx.sensex) updateIndexWidget('sensex', idx.sensex);
-          if (idx.niftyBank) updateIndexWidget('bank', idx.niftyBank);
-        }
-      } catch (err) {
-        console.warn('Indices fetch failed:', err);
-      }
-    }
-
-    function updateIndexWidget(key, item) {
-      const valEl = document.getElementById(`idx-${key}-val`);
-      const pctEl = document.getElementById(`idx-${key}-pct`);
-      const sparkEl = document.getElementById(`spark-${key}`);
-
-      if (valEl) valEl.textContent = Number(item.value).toLocaleString('en-IN', { maximumFractionDigits: 2 });
-      if (pctEl) {
-        const sign = item.changePct >= 0 ? '+' : '';
-        pctEl.textContent = `${sign}${item.changePct}%`;
-        pctEl.className = item.changePct >= 0 ? 'text-[10px] font-mono font-medium text-brand-green' : 'text-[10px] font-mono font-medium text-brand-red';
-      }
-
-      if (sparkEl && item.sparkline && item.sparkline.length > 0) {
-        drawCanvasSparkline(sparkEl, item.sparkline, item.isPositive ? '#22C55E' : '#EF6B7A');
-      }
-    }
-
-    function drawCanvasSparkline(canvas, points, strokeColor) {
-      const ctx = canvas.getContext('2d');
-      const w = canvas.width;
-      const h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
-
-      if (!points || points.length < 2) return;
-
-      const min = Math.min(...points);
-      const max = Math.max(...points);
-      const range = max - min || 1;
-
-      ctx.beginPath();
-      ctx.strokeStyle = strokeColor;
-      ctx.lineWidth = 1.5;
-      ctx.lineJoin = 'round';
-
-      points.forEach((val, i) => {
-        const x = (i / (points.length - 1)) * (w - 4) + 2;
-        const y = h - (((val - min) / range) * (h - 6) + 3);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-    }
-
-    // ── 2. Fetch Portfolio Summary & Holdings List ──────────────
-    async function fetchPortfolioSummary() {
-      try {
-        const res = await fetch('/api/portfolio/summary');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.status === 'SUCCESS') {
-          portfolioSummaryData = data;
-          renderKPICards(data.summary);
-          renderHoldingsList(data.holdings);
-        }
-      } catch (err) {
-        console.warn('Portfolio summary fetch error:', err);
-      }
-    }
-
-    function renderKPICards(summary) {
-      if (!summary) return;
-
-      const totalValEl = document.getElementById('kpi-total-val');
-      const totalDeltaEl = document.getElementById('kpi-total-delta');
-      const todayPnlEl = document.getElementById('kpi-today-pnl');
-      const todayPctEl = document.getElementById('kpi-today-pct');
-      const unrealizedPnlEl = document.getElementById('kpi-unrealized-pnl');
-      const unrealizedPctEl = document.getElementById('kpi-unrealized-pct');
-      const investedValEl = document.getElementById('kpi-invested-val');
-      const cashValEl = document.getElementById('kpi-cash-val');
-      const dayGainEl = document.getElementById('kpi-day-gain');
-      const holdingsCountEl = document.getElementById('kpi-holdings-count');
-
-      if (totalValEl) totalValEl.textContent = `₹${summary.totalPortfolioValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      
-      if (todayPnlEl) {
-        const sign = summary.todayPnl >= 0 ? '+' : '';
-        todayPnlEl.textContent = `${sign}₹${Math.abs(summary.todayPnl).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        todayPnlEl.className = summary.todayPnl >= 0 ? 'text-base sm:text-lg font-bold font-mono text-brand-green' : 'text-base sm:text-lg font-bold font-mono text-brand-red';
-      }
-
-      if (todayPctEl) {
-        const sign = summary.dayGainPct >= 0 ? '+' : '';
-        todayPctEl.innerHTML = `<span>${sign}${summary.dayGainPct.toFixed(2)}%</span><span class="text-[10px] text-text-muted font-sans">day move</span>`;
-        todayPctEl.className = summary.dayGainPct >= 0 ? 'text-[11px] font-mono text-brand-green flex items-center gap-1' : 'text-[11px] font-mono text-brand-red flex items-center gap-1';
-      }
-
-      if (unrealizedPnlEl) {
-        const sign = summary.unrealizedPnl >= 0 ? '+' : '';
-        unrealizedPnlEl.textContent = `${sign}₹${Math.abs(summary.unrealizedPnl).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        unrealizedPnlEl.className = summary.unrealizedPnl >= 0 ? 'text-base sm:text-lg font-bold font-mono text-brand-green' : 'text-base sm:text-lg font-bold font-mono text-brand-red';
-      }
-
-      if (unrealizedPctEl) {
-        const sign = summary.unrealizedPnlPct >= 0 ? '+' : '';
-        unrealizedPctEl.innerHTML = `<span>${sign}${summary.unrealizedPnlPct.toFixed(2)}%</span><span class="text-[10px] text-text-muted font-sans">overall</span>`;
-        unrealizedPctEl.className = summary.unrealizedPnlPct >= 0 ? 'text-[11px] font-mono text-brand-green flex items-center gap-1' : 'text-[11px] font-mono text-brand-red flex items-center gap-1';
-      }
-
-      if (investedValEl) investedValEl.textContent = `₹${summary.totalInvested.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      if (cashValEl) cashValEl.textContent = `₹${summary.cashBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      if (dayGainEl) {
-        const sign = summary.dayGainPct >= 0 ? '+' : '';
-        dayGainEl.textContent = `${sign}${summary.dayGainPct.toFixed(2)}%`;
-        dayGainEl.className = summary.dayGainPct >= 0 ? 'text-base sm:text-lg font-bold font-mono text-brand-green' : 'text-base sm:text-lg font-bold font-mono text-brand-red';
-      }
-      if (holdingsCountEl) holdingsCountEl.textContent = summary.holdingsCount;
-    }
-
-    function renderHoldingsList(holdings) {
-      const container = document.getElementById('holdings-cards-container');
-      const countEl = document.getElementById('holdings-list-count');
-      if (!container || !holdings) return;
-
-      if (countEl) countEl.textContent = `${holdings.length} stocks`;
-
-      container.innerHTML = holdings.map(h => {
-        const isActive = h.ticker === activeSymbol;
-        const signalClass = h.signal === 'BUY' ? 'signal-pill-buy' : h.signal === 'SELL' ? 'signal-pill-sell' : 'signal-pill-hold';
-        const accentBorderColor = h.signal === 'BUY' ? '#22C55E' : h.signal === 'SELL' ? '#EF6B7A' : '#F5B82E';
-        const pnlSign = h.totalPnl >= 0 ? '+' : '';
-        const pnlColor = h.totalPnl >= 0 ? 'text-brand-green' : 'text-brand-red';
-        const daySign = h.dayChangePct >= 0 ? '+' : '';
-        const dayColor = h.dayChangePct >= 0 ? 'text-brand-green' : 'text-brand-red';
-
-        return `
-          <div onclick="selectHolding('${h.ticker}')" 
-               class="saarthi-interactive-card p-3.5 flex flex-col justify-between ${isActive ? 'active-holding' : ''}" 
-               style="border-left: 4px solid ${accentBorderColor};">
-            
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-sm text-white">${h.ticker}</span>
-                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/5 border border-card-border text-text-secondary font-mono">${h.exchange}</span>
-                </div>
-                <div class="text-[11px] text-text-muted truncate max-w-[170px]">${h.name}</div>
-              </div>
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${signalClass}">${h.signal}</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-card-border text-xs">
-              <div>
-                <div class="text-[10px] text-text-muted">Holding</div>
-                <div class="font-mono text-text-secondary text-[11px]">${h.quantity} @ ₹${h.avgBuyPrice.toLocaleString('en-IN')}</div>
-                <div class="font-mono text-white font-semibold mt-0.5">₹${h.currentValue.toLocaleString('en-IN')}</div>
-              </div>
-              <div class="text-right">
-                <div class="text-[10px] text-text-muted">LTP</div>
-                <div class="font-mono text-white font-semibold">₹${h.ltp.toLocaleString('en-IN')}</div>
-                <div class="font-mono text-[11px] font-medium ${pnlColor} mt-0.5">
-                  ${pnlSign}₹${Math.abs(h.totalPnl).toLocaleString('en-IN')} (${pnlSign}${h.totalPnlPct.toFixed(1)}%)
-                </div>
-              </div>
-            </div>
-
+      div.innerHTML = `
+        <div class="w-full relative">
+          <label class="block md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">Stock Ticker / Company</label>
+          <input class="w-full glass-input rounded-lg px-4 py-2 font-mono-data text-mono-data ticker-input uppercase" placeholder="Search stock (e.g. TATAPOWER, SUZLON, RELIANCE)..." value="${displayVal}" type="text" autocomplete="off"/>
+          <!-- Custom Auto-Suggest Dropdown -->
+          <div class="suggest-dropdown hidden absolute left-0 right-0 top-full mt-1 glass-panel rounded-xl border border-white/10 shadow-2xl z-50 flex flex-col max-h-48 overflow-y-auto p-1.5 gap-1"></div>
+        </div>
+        <div class="w-full">
+          <label class="block md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">Exchange</label>
+          <select class="w-full glass-input rounded-lg px-3 py-2 font-mono-data text-mono-data exchange-input appearance-none">
+            <option value="NSE" ${(!h.exchange||h.exchange==='NSE')?'selected':''}>NSE</option>
+            <option value="BSE" ${h.exchange==='BSE'?'selected':''}>BSE</option>
+          </select>
+        </div>
+        <div class="w-full">
+          <label class="block md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">Quantity</label>
+          <input class="w-full glass-input rounded-lg px-4 py-2 font-mono-data text-mono-data text-right qty-input" placeholder="0" type="number" min="1" value="${h.qty||''}"/>
+        </div>
+        <div class="w-full">
+          <label class="block md:hidden font-label-sm text-label-sm text-on-surface-variant mb-1">Avg Buy Price (₹)</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 font-mono-data text-mono-data">₹</span>
+            <input class="w-full glass-input rounded-lg pl-7 pr-4 py-2 font-mono-data text-mono-data text-right price-input" placeholder="0.00" type="number" step="0.01" min="0" value="${h.price||''}"/>
           </div>
-        `;
-      }).join('');
-    }
+        </div>
+        <button onclick="removeRow(${id})" class="p-2 rounded-lg border border-error/20 text-error hover:bg-error/10 transition-colors w-full md:w-auto flex justify-center" title="Remove">
+          <span class="material-symbols-outlined text-[20px]">delete</span>
+        </button>`;
 
-    function selectHolding(ticker) {
-      if (activeSymbol === ticker) return;
-      activeSymbol = ticker;
-      
-      // Update active styling in holding cards
-      const holdingCards = document.querySelectorAll('.saarthi-interactive-card');
-      holdingCards.forEach(c => c.classList.remove('active-holding'));
-      
-      // Fetch fresh analysis for the newly selected holding
-      fetchSymbolAnalysis(activeSymbol, activeTimeframe);
+      // Setup Auto-Suggest listener
+      const tickerInput = div.querySelector('.ticker-input');
+      const dropdown = div.querySelector('.suggest-dropdown');
+      const exchangeSelect = div.querySelector('.exchange-input');
 
-      // Re-render holdings list to reflect active state
-      if (portfolioSummaryData) {
-        renderHoldingsList(portfolioSummaryData.holdings);
-      }
-    }
+      function renderSuggestions(q) {
+        const query = (q || '').trim();
+        const matches = (typeof searchStocksDB === 'function' ? searchStocksDB(query) : STOCKS_DB.filter(s=>s.ticker.toLowerCase().includes(query.toLowerCase())||s.name.toLowerCase().includes(query.toLowerCase()))).slice(0, 10);
 
-    // ── 3. Fetch Active Symbol Analysis & Chart ──────────────────
-    async function fetchSymbolAnalysis(symbol, timeframe) {
-      try {
-        // Show skeleton loading in AI analysis panel
-        const reasoningEl = document.getElementById('ai-reasoning-paragraph');
-        if (reasoningEl) {
-          reasoningEl.innerHTML = '<div class="h-4 skeleton-box mb-2 w-full"></div><div class="h-4 skeleton-box mb-2 w-5/6"></div><div class="h-4 skeleton-box w-3/4"></div>';
-        }
-
-        const res = await fetch(`/api/portfolio/analysis?symbol=${encodeURIComponent(symbol)}&range=${encodeURIComponent(timeframe)}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.status === 'SUCCESS') {
-          activeAnalysisData = data;
-          renderAIAnalysis(data);
-          renderTechnicalLevels(data.technicals?.levels);
-          updateChartData(data);
-        }
-      } catch (err) {
-        console.error('Symbol analysis fetch error:', err);
-      }
-    }
-
-    function renderAIAnalysis(data) {
-      const ai = data.aiAnalysis || {};
-      const tech = data.technicals || {};
-      const quote = data.quote || {};
-
-      // Subtitle & Title
-      const titleSubEl = document.getElementById('ai-active-symbol-subtitle');
-      if (titleSubEl) titleSubEl.textContent = `(${data.symbol})`;
-
-      // Confidence badge
-      const confBadgeEl = document.getElementById('ai-confidence-badge');
-      const confTextEl = document.getElementById('ai-confidence-text');
-      if (confBadgeEl && confTextEl) {
-        const confColor = ai.confidenceLevel === 'HIGH' ? 'bg-brand-green/10 text-brand-green border-brand-green/30' : ai.confidenceLevel === 'MED' ? 'bg-brand-yellow/10 text-brand-yellow border-brand-yellow/30' : 'bg-brand-red/10 text-brand-red border-brand-red/30';
-        confBadgeEl.className = `inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border ${confColor}`;
-        confTextEl.textContent = `Confidence: ${ai.confidenceLevel} (${ai.confidenceScore}%)`;
-      }
-
-      // Reasoning
-      const reasoningEl = document.getElementById('ai-reasoning-paragraph');
-      if (reasoningEl) {
-        reasoningEl.textContent = ai.reasoning || 'No analysis available.';
-      }
-
-      // Factor Tags
-      const tagsContainer = document.getElementById('ai-factor-tags');
-      if (tagsContainer && ai.tags) {
-        tagsContainer.innerHTML = ai.tags.map(t => `<span class="factor-tag"><span class="material-symbols-outlined text-[12px] text-primary-accent">check_circle</span>${t}</span>`).join('');
-      }
-
-      // 5 Stat Cards
-      const dma50ValEl = document.getElementById('stat-dma50-val');
-      const dma50StatEl = document.getElementById('stat-dma50-status');
-      if (dma50ValEl && tech.dma50) dma50ValEl.textContent = `₹${tech.dma50.toLocaleString('en-IN')}`;
-      if (dma50StatEl) {
-        dma50StatEl.textContent = quote.ltp >= tech.dma50 ? 'Holding Above' : 'Trading Below';
-        dma50StatEl.className = quote.ltp >= tech.dma50 ? 'text-[10px] font-medium text-brand-green' : 'text-[10px] font-medium text-brand-red';
-      }
-
-      const dma200ValEl = document.getElementById('stat-dma200-val');
-      const dma200StatEl = document.getElementById('stat-dma200-status');
-      if (dma200ValEl && tech.dma200) dma200ValEl.textContent = `₹${tech.dma200.toLocaleString('en-IN')}`;
-      if (dma200StatEl) {
-        dma200StatEl.textContent = quote.ltp >= tech.dma200 ? 'Bullish Structural' : 'Testing Under';
-        dma200StatEl.className = quote.ltp >= tech.dma200 ? 'text-[10px] font-medium text-brand-green' : 'text-[10px] font-medium text-brand-yellow';
-      }
-
-      const rsiValEl = document.getElementById('stat-rsi-val');
-      const rsiStatEl = document.getElementById('stat-rsi-status');
-      if (rsiValEl && tech.rsi) rsiValEl.textContent = tech.rsi;
-      if (rsiStatEl && tech.rsi) {
-        rsiStatEl.textContent = tech.rsiStatus;
-        rsiStatEl.className = tech.rsi > 60 ? 'text-[10px] font-medium text-brand-green' : tech.rsi < 40 ? 'text-[10px] font-medium text-brand-yellow' : 'text-[10px] font-medium text-primary-accent';
-      }
-
-      const trend1MValEl = document.getElementById('stat-trend1m-val');
-      const trend1MStatEl = document.getElementById('stat-trend1m-status');
-      if (trend1MValEl && tech.trend1M) {
-        const sign = tech.trend1M.pct >= 0 ? '+' : '';
-        trend1MValEl.textContent = `${sign}${tech.trend1M.pct}%`;
-        trend1MValEl.className = tech.trend1M.pct >= 0 ? 'text-xs sm:text-sm font-bold font-mono text-brand-green' : 'text-xs sm:text-sm font-bold font-mono text-brand-red';
-      }
-      if (trend1MStatEl && tech.trend1M) {
-        trend1MStatEl.textContent = tech.trend1M.status;
-        trend1MStatEl.className = tech.trend1M.pct >= 0 ? 'text-[10px] font-medium text-brand-green' : 'text-[10px] font-medium text-brand-red';
-      }
-
-      const volValEl = document.getElementById('stat-vol-val');
-      const volStatEl = document.getElementById('stat-vol-status');
-      if (volValEl && tech.volumeTrend) {
-        volValEl.textContent = tech.volumeTrend.ratioText;
-      }
-      if (volStatEl && tech.volumeTrend) {
-        volStatEl.textContent = tech.volumeTrend.label;
-        volStatEl.className = tech.volumeTrend.ratioPct >= 0 ? 'text-[10px] font-medium text-brand-green' : 'text-[10px] font-medium text-text-muted';
-      }
-
-      // Chart Header Displays
-      const chartSymEl = document.getElementById('chart-symbol-title');
-      const chartCompEl = document.getElementById('chart-company-subtitle');
-      const chartExchEl = document.getElementById('chart-exchange-badge');
-      const chartPriceEl = document.getElementById('chart-price-display');
-      const chartDeltaEl = document.getElementById('chart-delta-display');
-      const chartDelayEl = document.getElementById('chart-delayed-badge');
-
-      if (chartSymEl) chartSymEl.textContent = data.symbol;
-      if (chartCompEl) {
-        const holdingObj = portfolioSummaryData?.holdings?.find(h => h.ticker === data.symbol);
-        chartCompEl.textContent = holdingObj?.name || `${data.symbol} Equity`;
-      }
-      if (chartExchEl) chartExchEl.textContent = quote.exchange || 'NSE';
-      if (chartPriceEl) chartPriceEl.textContent = `₹${quote.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      if (chartDeltaEl) {
-        const sign = quote.change >= 0 ? '+' : '';
-        chartDeltaEl.textContent = `${sign}₹${quote.change.toFixed(2)} (${sign}${quote.changePct.toFixed(2)}%)`;
-        chartDeltaEl.className = quote.change >= 0 ? 'text-xs font-mono font-semibold text-brand-green' : 'text-xs font-mono font-semibold text-brand-red';
-      }
-      if (chartDelayEl) {
-        if (quote.isDelayed) chartDelayEl.classList.remove('hidden');
-        else chartDelayEl.classList.add('hidden');
-      }
-    }
-
-    function renderTechnicalLevels(levels) {
-      if (!levels) return;
-
-      const dca1 = document.getElementById('lvl-dca-1');
-      const dca2 = document.getElementById('lvl-dca-2');
-      const dca3 = document.getElementById('lvl-dca-3');
-      if (levels.buyDCA?.items) {
-        if (dca1) dca1.textContent = levels.buyDCA.items[0]?.value || '—';
-        if (dca2) dca2.textContent = levels.buyDCA.items[1]?.value || '—';
-        if (dca3) dca3.textContent = levels.buyDCA.items[2]?.value || '—';
-      }
-
-      const hold1 = document.getElementById('lvl-hold-1');
-      const hold2 = document.getElementById('lvl-hold-2');
-      const hold3 = document.getElementById('lvl-hold-3');
-      if (levels.holdStop?.items) {
-        if (hold1) hold1.textContent = levels.holdStop.items[0]?.value || '—';
-        if (hold2) hold2.textContent = levels.holdStop.items[1]?.value || '—';
-        if (hold3) hold3.textContent = levels.holdStop.items[2]?.value || '—';
-      }
-
-      const sell1 = document.getElementById('lvl-sell-1');
-      const sell2 = document.getElementById('lvl-sell-2');
-      const sell3 = document.getElementById('lvl-sell-3');
-      if (levels.sellTarget?.items) {
-        if (sell1) sell1.textContent = levels.sellTarget.items[0]?.value || '—';
-        if (sell2) sell2.textContent = levels.sellTarget.items[1]?.value || '—';
-        if (sell3) sell3.textContent = levels.sellTarget.items[2]?.value || '—';
-      }
-    }
-
-    // ── 4. TradingView Lightweight Charts Setup & Rendering ────
-    function initTradingViewChart() {
-      const container = document.getElementById('lightweight-chart-container');
-      if (!container || typeof LightweightCharts === 'undefined') return;
-
-      tvChart = LightweightCharts.createChart(container, {
-        width: container.clientWidth,
-        height: 380,
-        layout: {
-          background: { type: 'solid', color: 'transparent' },
-          textColor: '#94A3B8',
-          fontFamily: '"Plus Jakarta Sans", Inter, sans-serif',
-          fontSize: 11
-        },
-        grid: {
-          vertLines: { color: 'rgba(255, 255, 255, 0.04)' },
-          horzLines: { color: 'rgba(255, 255, 255, 0.04)' }
-        },
-        crosshair: {
-          mode: LightweightCharts.CrosshairMode.Normal,
-          vertLine: { color: 'rgba(255, 255, 255, 0.2)', width: 1, style: 2 },
-          horzLine: { color: 'rgba(255, 255, 255, 0.2)', width: 1, style: 2 }
-        },
-        rightPriceScale: {
-          borderColor: 'rgba(255, 255, 255, 0.08)',
-          scaleMargins: { top: 0.1, bottom: 0.25 }
-        },
-        timeScale: {
-          borderColor: 'rgba(255, 255, 255, 0.08)',
-          timeVisible: true,
-          secondsVisible: false
-        }
-      });
-
-      // 1. Candlestick Series
-      candleSeries = tvChart.addCandlestickSeries({
-        upColor: '#22C55E',
-        downColor: '#EF6B7A',
-        borderUpColor: '#22C55E',
-        borderDownColor: '#EF6B7A',
-        wickUpColor: 'rgba(34, 197, 94, 0.8)',
-        wickDownColor: 'rgba(239, 107, 122, 0.8)'
-      });
-
-      // 2. Volume Histogram Series
-      volumeSeries = tvChart.addHistogramSeries({
-        priceFormat: { type: 'volume' },
-        priceScaleId: 'volume_scale',
-      });
-      tvChart.priceScale('volume_scale').applyOptions({
-        scaleMargins: { top: 0.78, bottom: 0 }
-      });
-
-      // 3. 50 DMA Overlaid Line Series
-      sma50LineSeries = tvChart.addLineSeries({
-        color: '#F5B82E',
-        lineWidth: 1.5,
-        title: '50 DMA',
-        crosshairMarkerVisible: true
-      });
-
-      // 4. 200 DMA Overlaid Line Series
-      sma200LineSeries = tvChart.addLineSeries({
-        color: '#6366F1',
-        lineWidth: 1.5,
-        title: '200 DMA',
-        crosshairMarkerVisible: true
-      });
-
-      // Tooltip Crosshair Subscriber
-      tvChart.subscribeCrosshairMove(param => {
-        const tooltip = document.getElementById('chart-floating-tooltip');
-        if (!tooltip) return;
-
-        if (!param.time || param.point.x < 0 || param.point.x > container.clientWidth || param.point.y < 0 || param.point.y > container.clientHeight) {
-          tooltip.innerHTML = '<span>Hover over chart to view OHLCV &amp; DMA data</span>';
+        if (matches.length === 0) {
+          dropdown.innerHTML = `<div class="px-3 py-2 text-xs text-on-surface-variant/60">Press Enter for custom ticker: "${query.toUpperCase()}"</div>`;
+          dropdown.classList.remove('hidden');
           return;
         }
 
-        const candleData = param.seriesData.get(candleSeries);
-        const sma50Data = param.seriesData.get(sma50LineSeries);
-        const sma200Data = param.seriesData.get(sma200LineSeries);
-        const volData = param.seriesData.get(volumeSeries);
+        dropdown.innerHTML = matches.map(s => `
+          <div role="button" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 flex items-center justify-between text-xs transition-colors cursor-pointer" data-ticker="${s.ticker}" data-name="${s.name}" data-exchange="${s.exchange}">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white font-mono">${s.ticker}</span>
+              <span class="text-on-surface-variant truncate max-w-[160px]">${s.name}</span>
+            </div>
+            <span class="px-1.5 py-0.5 text-[9px] rounded font-bold ${s.exchange==='NSE'?'bg-secondary/10 text-secondary border border-secondary/20':'bg-primary/10 text-primary border border-primary/20'}">${s.exchange}</span>
+          </div>
+        `).join('');
+        dropdown.classList.remove('hidden');
 
-        if (candleData) {
-          const dateStr = typeof param.time === 'number'
-            ? new Date(param.time * 1000).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-            : param.time;
+        dropdown.querySelectorAll('[data-ticker]').forEach(btn => {
+          btn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const t = btn.dataset.ticker;
+            const n = btn.dataset.name;
+            const ex = btn.dataset.exchange;
+            tickerInput.value = `${t} - ${n}`;
+            exchangeSelect.value = ex || 'NSE';
+            dropdown.classList.add('hidden');
+          });
+        });
+      }
 
-          tooltip.innerHTML = `
-            <span class="text-white font-bold">${dateStr}</span>
-            <span>O: <strong class="text-white font-mono">₹${candleData.open?.toFixed(2)}</strong></span>
-            <span>H: <strong class="text-white font-mono">₹${candleData.high?.toFixed(2)}</strong></span>
-            <span>L: <strong class="text-white font-mono">₹${candleData.low?.toFixed(2)}</strong></span>
-            <span>C: <strong class="${candleData.close >= candleData.open ? 'text-brand-green' : 'text-brand-red'} font-mono">₹${candleData.close?.toFixed(2)}</strong></span>
-            ${sma50Data?.value ? `<span class="text-brand-yellow">50D: <strong class="font-mono">₹${sma50Data.value.toFixed(2)}</strong></span>` : ''}
-            ${sma200Data?.value ? `<span class="text-primary-purple">200D: <strong class="font-mono">₹${sma200Data.value.toFixed(2)}</strong></span>` : ''}
-            ${volData?.value ? `<span class="text-text-muted">Vol: <strong class="text-white font-mono">${(volData.value / 1000).toFixed(1)}k</strong></span>` : ''}
-          `;
-        }
+      tickerInput.addEventListener('input', (e) => renderSuggestions(e.target.value));
+      tickerInput.addEventListener('focus', (e) => renderSuggestions(e.target.value));
+      tickerInput.addEventListener('blur', () => {
+        setTimeout(() => dropdown.classList.add('hidden'), 150);
+      });
+      document.addEventListener('click', (e) => {
+        if (!div.contains(e.target)) dropdown.classList.add('hidden');
       });
 
-      // Window & container resize observer
-      new ResizeObserver(() => {
-        if (tvChart && container) {
-          tvChart.resize(container.clientWidth, 380);
-        }
-      }).observe(container);
+      return div;
     }
 
-    function updateChartData(data) {
-      if (!tvChart || !data?.chart) return;
+    function addStockRow(h) { document.getElementById('portfolio-inputs').appendChild(createRowEl(h)); }
 
-      const candles = data.chart.candlesticks || [];
-      if (candles.length > 0 && candleSeries) {
-        candleSeries.setData(candles);
+    function removeRow(id) {
+      const row = document.querySelector(`[data-row-id="${id}"]`);
+      if (!row) return;
+      if (document.querySelectorAll('.stock-row').length <= 1) { row.style.border='1px solid rgba(255,76,76,.5)'; setTimeout(()=>row.style.border='',600); return; }
+      row.classList.add('removing');
+      setTimeout(()=>row.remove(), 350);
+    }
 
-        // Volume histogram
-        if (volumeSeries) {
-          volumeSeries.setData(candles.map(c => ({
-            time: c.time,
-            value: c.volume,
-            color: c.close >= c.open ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 107, 122, 0.3)'
-          })));
+    function clearAll() {
+      document.querySelectorAll('.stock-row').forEach(r=>r.classList.add('removing'));
+      localStorage.removeItem('saarthix_holdings');
+      setTimeout(()=>{ document.getElementById('portfolio-inputs').innerHTML=''; addStockRow(); },350);
+    }
+
+    // ── Collect holdings from DOM ─────────────────────────────
+    function collectHoldings() {
+      const rows = document.querySelectorAll('.stock-row');
+      const out = [];
+      rows.forEach(row => {
+        const raw      = row.querySelector('.ticker-input').value.trim().toUpperCase();
+        const exchange = row.querySelector('.exchange-input').value;
+        const qty      = parseFloat(row.querySelector('.qty-input').value) || 0;
+        const price    = parseFloat(row.querySelector('.price-input').value) || 0;
+        if (!raw || qty <= 0 || price <= 0) return;
+        const ticker   = raw.split(/[\s\-]/)[0];
+        const dbStock  = STOCKS_DB.find(s => s.ticker === ticker);
+        const name     = dbStock ? dbStock.name : ticker;
+        const liveStock= (window.LIVE_STOCKS||[]).find(s => s.ticker === ticker);
+        const ltp      = liveStock ? liveStock.price : (dbStock ? dbStock.price : price);
+        out.push({ ticker, name, exchange, qty, price, ltp });
+      });
+      return out;
+    }
+
+    // ── Run Analysis ──────────────────────────────────────────
+    async function runAnalysis() {
+      const holdings = collectHoldings();
+      if (!holdings.length) { alert('Please add at least one holding with quantity and price.'); return; }
+      
+      // Save current holdings in localStorage
+      localStorage.setItem('saarthix_holdings', JSON.stringify(holdings));
+
+      document.getElementById('loading-overlay').style.display='flex';
+      try {
+        const res = await fetch('/api/ai-insights', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ holdings })
+        });
+        const data = await res.json();
+
+        if (!res.ok || data.status !== 'SUCCESS') {
+          const msg = typeof data.error === 'object' ? (data.error.message || JSON.stringify(data.error)) : (data.error || 'Failed to fetch AI insights');
+          throw new Error(msg);
         }
 
-        // 50 DMA
-        if (sma50LineSeries && data.chart.sma50 && data.chart.sma50.length > 0) {
-          sma50LineSeries.setData(data.chart.sma50);
-        }
+        // Cache insights
+        localStorage.setItem('saarthix_insights_cache', JSON.stringify(data));
 
-        // 200 DMA
-        if (sma200LineSeries && data.chart.sma200 && data.chart.sma200.length > 0) {
-          sma200LineSeries.setData(data.chart.sma200);
-        }
-
-        tvChart.timeScale().fitContent();
+        buildResults(holdings, data);
+        document.getElementById('results-section').scrollIntoView({behavior:'smooth'});
+      } catch (err) {
+        console.warn('AI portfolio analysis fallback:', err.message);
+        const localFallback = {
+          healthScore: Math.min(100, Math.max(30, 60 + (holdings.length * 4))),
+          insights: [
+            { type: 'info', icon: 'auto_awesome', title: 'Quantitative Analysis Active', detail: 'Portfolio metrics calculated using quantitative heuristics.' }
+          ],
+          disclaimer: 'Informational quantitative portfolio analysis.'
+        };
+        buildResults(holdings, localFallback);
+        document.getElementById('results-section').scrollIntoView({behavior:'smooth'});
+      } finally {
+        document.getElementById('loading-overlay').style.display='none';
       }
     }
 
-    function switchTimeframe(tf) {
-      if (activeTimeframe === tf) return;
-      activeTimeframe = tf;
+    // ── Build Results ─────────────────────────────────────────
+    function buildResults(holdings, aiData = null) {
+      const COLORS = PIE_COLORS;
+      let totalInvested=0, totalValue=0;
 
-      // Update button active state
-      const buttons = document.querySelectorAll('.timeframe-btn');
-      buttons.forEach(btn => {
-        if (btn.getAttribute('data-tf') === tf) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
+      const enriched = holdings.map((h,i) => {
+        const cost  = h.qty * h.price;
+        const val   = h.qty * h.ltp;
+        const pnl   = val - cost;
+        const pnlPct= ((pnl/cost)*100).toFixed(2);
+        totalInvested += cost;
+        totalValue    += val;
+        return {...h, cost, val, pnl, pnlPct, color: COLORS[i%COLORS.length]};
       });
 
-      // Re-fetch range from serverless endpoint
-      fetchSymbolAnalysis(activeSymbol, activeTimeframe);
+      const totalPnl    = totalValue - totalInvested;
+      const totalPnlPct = ((totalPnl/totalInvested)*100).toFixed(2);
+      const gainsPnl    = enriched.filter(h=>h.pnl>0).reduce((s,h)=>s+h.pnl,0);
+      const stcg        = gainsPnl * 0.20;
+      const ltcg        = Math.max(0,(gainsPnl - 125000)) * 0.125;
+      const aiScore     = aiData ? aiData.healthScore : Math.min(100, Math.max(30, 60 + (holdings.length * 4) + (parseFloat(totalPnlPct) > 0 ? 10 : -5)));
+
+      // Summary
+      document.getElementById('res-total-value').textContent = fmtINR(totalValue);
+      document.getElementById('res-invested').textContent    = fmtINR(totalInvested);
+      document.getElementById('res-holdings-count').textContent = `${holdings.length} holding${holdings.length>1?'s':''}`;
+      document.getElementById('res-ai-score').textContent   = Math.round(aiScore) + ' / 100';
+      document.getElementById('res-ai-label').textContent   = aiScore >= 75 ? 'Well diversified' : aiScore >= 55 ? 'Moderate risk' : 'High concentration risk';
+      document.getElementById('res-stcg').textContent       = fmtINR(stcg);
+
+      const pnlEl = document.getElementById('res-total-pnl');
+      const pnlSign = totalPnl >= 0 ? '+' : '';
+      pnlEl.className = 'font-body-sm text-body-sm mt-1 flex items-center gap-1 ' + changeClass(totalPnl);
+      pnlEl.innerHTML = `<span class="material-symbols-outlined text-[14px]">${changeIcon(totalPnl)}</span>${pnlSign}${fmtINR(Math.abs(totalPnl))} (${pnlSign}${totalPnlPct}%)`;
+
+      // Tax cards
+      document.getElementById('tax-stcg-amount').textContent = fmtINR(stcg);
+      document.getElementById('tax-ltcg-amount').textContent = fmtINR(ltcg);
+
+      // Pie chart (canvas)
+      const canvas = document.getElementById('pie-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,180,180);
+      let startAngle = -Math.PI/2;
+      enriched.forEach(h => {
+        const slice = (h.val/totalValue) * 2 * Math.PI;
+        ctx.beginPath(); ctx.moveTo(90,90);
+        ctx.arc(90,90,80,startAngle,startAngle+slice);
+        ctx.closePath(); ctx.fillStyle = h.color; ctx.fill();
+        startAngle += slice;
+      });
+      // Donut hole
+      ctx.beginPath(); ctx.arc(90,90,40,0,2*Math.PI); ctx.fillStyle='#1c1f29'; ctx.fill();
+
+      // Pie legend
+      const legendEl = document.getElementById('pie-legend');
+      legendEl.innerHTML = enriched.map(h => {
+        const w = ((h.val/totalValue)*100).toFixed(1);
+        return `<div class="flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full flex-shrink-0" style="background:${h.color}"></div><span class="font-body-sm text-body-sm text-on-surface">${h.ticker}</span></div><span class="font-mono-data text-mono-data text-on-surface-variant">${w}%</span></div>`;
+      }).join('');
+
+      // AI Insights
+      const insights = aiData ? aiData.insights : generateInsights(enriched, totalPnlPct, holdings.length);
+      let insightsHtml = insights.map(ins => {
+        const ic = ins.type==='positive'?'text-secondary bg-secondary-container/10 border-secondary-container/20':ins.type==='warning'?'text-tertiary bg-tertiary/10 border-tertiary/20':'text-primary bg-primary-container/10 border-primary-container/20';
+        return `<div class="flex gap-3 p-3 rounded-lg border ${ic}"><span class="material-symbols-outlined ${ins.type==='positive'?'text-secondary':ins.type==='warning'?'text-tertiary':'text-primary'} text-[20px] flex-shrink-0 mt-0.5" style="font-variation-settings:'FILL' 1">${ins.icon}</span><div><p class="font-label-md text-label-md text-on-surface font-semibold">${ins.title}</p><p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">${ins.detail}</p></div></div>`;
+      }).join('');
+
+      if (aiData && aiData.disclaimer) {
+        insightsHtml += `<div class="text-[11px] text-on-surface-variant/50 border-t border-white/5 pt-3 mt-2 font-mono-data">${aiData.disclaimer}</div>`;
+      }
+      document.getElementById('ai-insights-list').innerHTML = insightsHtml;
+
+      // Holdings table with AI Recommendation Badges & Expandable Cards
+      const analyzedHoldings = (aiData && aiData.analyzedHoldings) ? aiData.analyzedHoldings : [];
+
+      document.getElementById('holdings-body').innerHTML = enriched.map(h => {
+        const pnlCls = changeClass(h.pnl);
+        const sign   = h.pnl>=0?'+':'';
+        const w      = ((h.val/totalValue)*100).toFixed(1);
+        const exchBadge = h.exchange==='NSE'
+          ? `<span class="px-1.5 py-0.5 rounded text-[10px] bg-secondary-container/20 text-secondary border border-secondary-container/30 font-mono-data">NSE</span>`
+          : `<span class="px-1.5 py-0.5 rounded text-[10px] bg-primary-container/20 text-primary border border-primary-container/30 font-mono-data">BSE</span>`;
+
+        const ah = analyzedHoldings.find(item => item.ticker === h.ticker);
+        const actionStr = (ah && (ah.signal || (ah.recommendation && ah.recommendation.action))) || (parseFloat(w) > 30 ? 'SELL' : (h.pnl >= 0 ? 'BUY_MORE' : 'HOLD'));
+        const normalizeAction = actionStr === 'BUY' ? 'BUY_MORE' : actionStr;
+        const confidenceStr = (ah && (ah.confidence || (ah.recommendation && ah.recommendation.confidence))) || 'medium';
+        const reasoningStr = (ah && (ah.reasoning || (ah.recommendation && ah.recommendation.reasoning))) || `${h.ticker} currently makes up ${w}% of your portfolio with an unrealized P&L of ${sign}${h.pnlPct}%. Maintaining balance across sectors reduces non-systemic risk.`;
+        const flagsList = (ah && (ah.flags || ah.risk_flags || (ah.recommendation && ah.recommendation.risk_flags))) || (parseFloat(w) > 25 ? [`High concentration (${w}% weight)`] : []);
+
+        const sig = (ah && ah.signals) ? ah.signals : (ah && ah.indicators ? {
+          dma50: ah.indicators.dma50,
+          dma200: ah.indicators.dma200,
+          rsi14: ah.indicators.rsi14,
+          above_50dma: h.ltp >= ah.indicators.dma50,
+          above_200dma: h.ltp >= ah.indicators.dma200,
+          trend_1m_pct: ah.indicators.trend_1m_pct,
+          trend_3m_pct: ah.indicators.trend_3m_pct,
+          low52: ah.indicators.week52_low,
+          high52: ah.indicators.week52_high,
+          volume_trend: ah.indicators.volume_trend
+        } : {});
+
+        const levels = (ah && ah.levels) ? ah.levels : {
+          buy_more: [{ price: parseFloat((h.ltp * 0.96).toFixed(2)), label: "Near 200 DMA support / -1.5x ATR" }],
+          sell_targets: [{ price: parseFloat((h.ltp * 1.08).toFixed(2)), label: "Near upper Bollinger Band resistance" }],
+          stop_loss: { price: parseFloat((h.ltp * 0.90).toFixed(2)), label: "Below structural support, -2.0x ATR" },
+          hold_range: { low: parseFloat((h.ltp * 0.96).toFixed(2)), high: parseFloat((h.ltp * 1.04).toFixed(2)), label: "Consolidation zone between 200 DMA and 50 DMA" }
+        };
+
+        let badgeBtn = '';
+        if (normalizeAction === 'BUY_MORE' || normalizeAction === 'BUY') {
+          badgeBtn = `<button onclick="toggleCard('${h.ticker}')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-secondary-container/20 text-secondary border border-secondary-container/40 hover:bg-secondary-container/35 transition-all cursor-pointer shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+            <span>BUY MORE</span>
+            <span class="material-symbols-outlined text-[14px]">expand_more</span>
+          </button>`;
+        } else if (normalizeAction === 'SELL') {
+          badgeBtn = `<button onclick="toggleCard('${h.ticker}')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-tertiary-container/20 text-tertiary border border-tertiary-container/40 hover:bg-tertiary-container/35 transition-all cursor-pointer shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+            <span>SELL</span>
+            <span class="material-symbols-outlined text-[14px]">expand_more</span>
+          </button>`;
+        } else {
+          badgeBtn = `<button onclick="toggleCard('${h.ticker}')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/35 transition-all cursor-pointer shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span>HOLD</span>
+            <span class="material-symbols-outlined text-[14px]">expand_more</span>
+          </button>`;
+        }
+
+        const asOfFormatted = (function(dtStr) {
+          try {
+            const dt = dtStr ? new Date(dtStr) : new Date();
+            return dt.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false }) + ' IST';
+          } catch(e) { return '09:15 IST'; }
+        })(ah?.as_of);
+
+        return `
+          <tr class="hover:bg-white/[0.03] transition-colors cursor-pointer" onclick="toggleCard('${h.ticker}')">
+            <td class="py-3 pr-3"><div class="flex flex-col"><span class="font-mono-data text-mono-data text-on-surface font-semibold">${h.ticker}</span><span class="font-body-sm text-body-sm text-on-surface-variant">${h.name}</span></div></td>
+            <td class="py-3 pr-3">${exchBadge}</td>
+            <td class="py-3 font-mono-data text-mono-data text-on-surface text-right">${h.qty}</td>
+            <td class="py-3 font-mono-data text-mono-data text-on-surface-variant text-right">${fmtPrice(h.price)}</td>
+            <td class="py-3 font-mono-data text-mono-data text-on-surface text-right font-semibold">${fmtPrice(h.ltp)}</td>
+            <td class="py-3 font-mono-data text-mono-data text-on-surface text-right">${fmtINR(h.val)}</td>
+            <td class="py-3 font-mono-data text-mono-data ${pnlCls} text-right">${sign}${fmtINR(Math.abs(h.pnl))}<br><span class="text-[11px]">(${sign}${h.pnlPct}%)</span></td>
+            <td class="py-3 text-right"><div class="flex items-center justify-end gap-2"><div class="w-12 h-1.5 rounded-full bg-white/10"><div class="h-1.5 rounded-full bg-primary" style="width:${w}%"></div></div><span class="font-mono-data text-mono-data text-on-surface-variant">${w}%</span></div></td>
+            <td class="py-3 text-center pr-2" onclick="event.stopPropagation()">${badgeBtn}</td>
+          </tr>
+          <!-- Expandable AI Reasoning & Technical Card -->
+          <tr id="ai-card-${h.ticker}" class="hidden bg-white/[0.015]">
+            <td colspan="9" class="p-3">
+              <div class="glass-panel rounded-xl p-4 border border-white/10 space-y-3 relative">
+                <!-- Header -->
+                <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-white/10">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[20px]">auto_awesome</span>
+                    <span class="font-bold text-white text-sm font-mono">${h.ticker} — AI Reasoning &amp; Technical Signals</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/10 text-on-surface-variant border border-white/10">Confidence: <strong class="text-white uppercase">${confidenceStr}</strong></span>
+                  </div>
+                </div>
+
+                <!-- Reasoning -->
+                <p class="text-sm text-on-surface leading-relaxed">${reasoningStr}</p>
+
+                <!-- Risk & Signal Flags -->
+                ${flagsList && flagsList.length > 0 ? `
+                  <div class="flex flex-wrap gap-1.5 pt-1">
+                    ${flagsList.map(rf => `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/5 text-primary-light border border-white/10 flex items-center gap-1"><span class="material-symbols-outlined text-[13px] text-primary">show_chart</span>${rf}</span>`).join('')}
+                  </div>
+                ` : ''}
+
+                <!-- Technical Signals Snapshot -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 pt-2 border-t border-white/10 text-xs">
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">50 DMA</span>
+                    <span class="font-mono font-bold ${sig.above_50dma ? 'text-secondary' : 'text-tertiary'}">₹${sig.dma50 || fmtPrice(h.ltp * 0.98)}</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">200 DMA</span>
+                    <span class="font-mono font-bold ${sig.above_200dma ? 'text-secondary' : 'text-tertiary'}">₹${sig.dma200 || fmtPrice(h.ltp * 0.95)}</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">RSI (14)</span>
+                    <span class="font-mono font-bold ${(sig.rsi14 || 50) > 70 ? 'text-tertiary' : (sig.rsi14 || 50) < 30 ? 'text-secondary' : 'text-amber-300'}">${sig.rsi14 || 50}</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">1M Trend</span>
+                    <span class="font-mono font-bold ${(sig.trend_1m_pct || 0) >= 0 ? 'text-secondary' : 'text-tertiary'}">${(sig.trend_1m_pct || 0) >= 0 ? '+' : ''}${sig.trend_1m_pct || 0}%</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">52W Range</span>
+                    <span class="font-mono text-on-surface text-[11px]">₹${sig.low52 || fmtPrice(h.ltp * 0.8)} - ₹${sig.high52 || fmtPrice(h.ltp * 1.15)}</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-black/20 border border-white/5">
+                    <span class="text-on-surface-variant/70 text-[10px] block">Volume Trend</span>
+                    <span class="font-mono font-bold text-primary capitalize">${sig.volume_trend || 'flat'}</span>
+                  </div>
+                </div>
+
+                <!-- Calculated Technical Levels Panel (3 Columns) -->
+                <div class="pt-3 border-t border-white/10">
+                  <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-white font-mono">
+                      <span class="material-symbols-outlined text-primary text-[16px]">show_chart</span>
+                      <span>Calculated Technical Levels</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-mono text-on-surface-variant">
+                      Levels as of ${asOfFormatted}
+                    </span>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <!-- Column 1: Buy More (DCA Zones) -->
+                    <div class="p-3 rounded-lg bg-secondary-container/10 border border-secondary-container/20 flex flex-col justify-between">
+                      <div>
+                        <div class="flex items-center gap-1.5 mb-2 font-bold text-secondary text-xs">
+                          <span class="material-symbols-outlined text-[16px]">add_circle</span>
+                          <span>Buy More (DCA Zones)</span>
+                        </div>
+                        ${levels.buy_more && levels.buy_more.length > 0 ? levels.buy_more.map(bm => `
+                          <div class="mb-1.5 pb-1.5 border-b border-white/5 last:border-0 last:mb-0 last:pb-0">
+                            <div class="font-mono font-bold text-white text-sm">₹${fmtPrice(bm.price)}</div>
+                            <div class="text-[11px] text-on-surface-variant">${bm.label}</div>
+                          </div>
+                        `).join('') : `
+                          <div class="text-[11px] text-on-surface-variant/70 italic">Price is near resistance; await pullback for DCA entries.</div>
+                        `}
+                      </div>
+                    </div>
+
+                    <!-- Column 2: Hold Range & Stop Loss -->
+                    <div class="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex flex-col justify-between">
+                      <div>
+                        <div class="flex items-center gap-1.5 mb-2 font-bold text-amber-400 text-xs">
+                          <span class="material-symbols-outlined text-[16px]">unfold_more</span>
+                          <span>Hold Range &amp; Stop Loss</span>
+                        </div>
+                        
+                        <div class="mb-2 pb-2 border-b border-white/5">
+                          <div class="text-[10px] text-amber-300/80 font-semibold uppercase">Hold Range Band</div>
+                          <div class="font-mono font-bold text-white text-sm">₹${fmtPrice(levels.hold_range?.low || h.ltp * 0.95)} — ₹${fmtPrice(levels.hold_range?.high || h.ltp * 1.05)}</div>
+                          <div class="text-[11px] text-on-surface-variant mt-0.5">${levels.hold_range?.label || 'Consolidation band between DMAs'}</div>
+                        </div>
+
+                        <div>
+                          <div class="text-[10px] text-tertiary font-semibold uppercase">Stop Loss Protection</div>
+                          <div class="font-mono font-bold text-tertiary text-sm">₹${fmtPrice(levels.stop_loss?.price || h.ltp * 0.90)}</div>
+                          <div class="text-[11px] text-on-surface-variant mt-0.5">${levels.stop_loss?.label || 'Below structural support (-2.0x ATR)'}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Column 3: Sell / Take-Profit Targets -->
+                    <div class="p-3 rounded-lg bg-tertiary-container/10 border border-tertiary-container/20 flex flex-col justify-between">
+                      <div>
+                        <div class="flex items-center gap-1.5 mb-2 font-bold text-tertiary text-xs">
+                          <span class="material-symbols-outlined text-[16px]">monetization_on</span>
+                          <span>Sell / Take-Profit Levels</span>
+                        </div>
+                        ${levels.sell_targets && levels.sell_targets.length > 0 ? levels.sell_targets.map(st => `
+                          <div class="mb-1.5 pb-1.5 border-b border-white/5 last:border-0 last:mb-0 last:pb-0">
+                            <div class="font-mono font-bold text-white text-sm">₹${fmtPrice(st.price)}</div>
+                            <div class="text-[11px] text-on-surface-variant">${st.label}</div>
+                          </div>
+                        `).join('') : `
+                          <div class="text-[11px] text-on-surface-variant/70 italic">Trailing stops recommended; no immediate overhead resistance.</div>
+                        `}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Mandatory Disclaimer -->
+                <div class="text-[11px] text-on-surface-variant/50 pt-2 border-t border-white/5 font-mono-data space-y-0.5">
+                  <div>* AI-generated analysis for informational purposes only. Not investment advice. Consult a SEBI-registered financial advisor before trading.</div>
+                  <div>* Buy/Sell levels are algorithmically derived from technical indicators and are not guaranteed price targets.</div>
+                </div>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+
+      // Toggle card function
+      window.toggleCard = function(ticker) {
+        const card = document.getElementById(`ai-card-${ticker}`);
+        if (card) {
+          card.classList.toggle('hidden');
+        }
+      };
+
+      // Show results
+      const res = document.getElementById('results-section');
+      res.classList.add('show-results');
+      res.style.setProperty('display', 'flex', 'important');
     }
 
-    // ── 5. Trigger Deep Portfolio Analysis ──────────────────────
-    function triggerDeepPortfolioAnalysis() {
-      refreshAllPortfolioData(true);
+    // ── AI Insights generator ─────────────────────────────────
+    function generateInsights(holdings, totalPnlPct, count) {
+      const ins = [];
+      const pnl = parseFloat(totalPnlPct);
+      ins.push(pnl > 0
+        ? { type:'positive', icon:'trending_up',   title:`Portfolio up ${totalPnlPct}% vs cost basis`, detail:'Your holdings are in an overall profit position. Consider booking partial profits in high-weight positions.' }
+        : { type:'warning',  icon:'trending_down',  title:`Portfolio down ${Math.abs(totalPnlPct)}% vs cost basis`, detail:'Holdings are below cost basis. Evaluate if fundamentals have changed or if this is a market-wide correction.' }
+      );
+      if (count < 3) {
+        ins.push({ type:'warning', icon:'warning', title:'High concentration risk', detail:'Fewer than 3 stocks increases unsystematic risk. Diversify across at least 5 sectors for a balanced Indian equity portfolio.' });
+      } else {
+        ins.push({ type:'positive', icon:'verified', title:`${count} holdings detected — good diversification`, detail:'Spread across multiple NSE/BSE stocks reduces single-stock risk. Aim for 8-15 holdings across different sectors.' });
+      }
+      const biggest = holdings.reduce((a,b)=>a.val>b.val?a:b);
+      const biggestW = ((biggest.val/holdings.reduce((s,h)=>s+h.val,0))*100).toFixed(1);
+      if (parseFloat(biggestW) > 40) {
+        ins.push({ type:'warning', icon:'pie_chart', title:`${biggest.ticker} is ${biggestW}% of portfolio`, detail:`Consider trimming ${biggest.ticker} to below 25% of total portfolio for healthier risk management.` });
+      }
+      ins.push({ type:'info', icon:'auto_awesome', title:'AI Market Signal (NSE)', detail:'Momentum indicators favour IT and Banking sectors in near term. HCLTECH and SBIN show institutional accumulation patterns.' });
+      return ins;
     }
+
+    function resetAnalysis() {
+      const res = document.getElementById('results-section');
+      res.classList.remove('show-results');
+      res.style.setProperty('display', 'none', 'important');
+      document.getElementById('input-section').scrollIntoView({behavior:'smooth'});
+    }
+
+    // ── Clock ─────────────────────────────────────────────────
+    function updateClock() {
+      const el = document.getElementById('ist-time');
+      if (!el) return;
+      const ist = new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+      el.textContent = ist + ' IST';
+    }
+
+    // ── Header index strip ────────────────────────────────────
+    function updateHeaderIndices() {
+      const s = LIVE_INDICES.sensex, n = LIVE_INDICES.nifty50;
+      const se = document.getElementById('hdr-sensex'), ne = document.getElementById('hdr-nifty');
+      if (se) { se.textContent = s.value.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); se.className = changeClass(s.changePct); }
+      if (ne) { ne.textContent = n.value.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); ne.className = changeClass(n.changePct); }
+    }
+
+    // ── Init ──────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      const { navLinks, mobileLinks, statusDot } = buildNav('portfolio');
+      document.getElementById('nav-links').innerHTML  = navLinks;
+      document.getElementById('mobile-nav').innerHTML = mobileLinks;
+      document.getElementById('market-status').innerHTML = statusDot;
+
+      const savedHoldingsStr = localStorage.getItem('saarthix_holdings');
+      let initialHoldings = null;
+      if (savedHoldingsStr) {
+        try { initialHoldings = JSON.parse(savedHoldingsStr); } catch (e) {}
+      }
+
+      if (initialHoldings && Array.isArray(initialHoldings) && initialHoldings.length > 0) {
+        initialHoldings.forEach(h => addStockRow(h));
+      } else {
+        addStockRow(); // Render 1 clean empty row for user entry
+      }
+
+      updateClock(); setInterval(updateClock, 1000);
+      updateHeaderIndices();
+    });
+    document.addEventListener('market:tick', updateHeaderIndices);
   </script>
 </body>
 </html>

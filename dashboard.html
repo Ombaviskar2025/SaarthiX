@@ -3,173 +3,112 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SaarthiX — Dynamic Live Dashboard Demo</title>
+  <title>SaarthiX - Dashboard</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  
-  <!-- Chart.js for ultra smooth high-performance interactive charting -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
+            sans: ['Geist', 'sans-serif'],
+            mono: ['Inter', 'monospace'],
           },
           colors: {
-            background: '#060913',
+            background: '#0f131c',
             surface: {
-              container: '#0c1222',
-              'container-low': '#080d1a',
-              'container-high': '#131b30',
+              container: '#1c1f29',
+              'container-low': '#181b25',
+              'container-high': '#242835',
             },
             primary: {
-              DEFAULT: '#E5C158',
-              container: '#3b82f6',
+              DEFAULT: '#adc6ff',
+              container: '#4d8eff',
             },
             secondary: {
-              DEFAULT: '#10b981',
-              container: '#059669',
+              DEFAULT: '#4edea3',
+              container: '#00a572',
             },
             error: {
-              DEFAULT: '#ef4444',
-              container: '#dc2626',
+              DEFAULT: '#ffb4ab',
+              container: '#ff5449',
             },
-            'on-surface': '#edf0f8',
-            'on-surface-variant': '#9ca3af',
+            'on-surface': '#dfe2ef',
+            'on-surface-variant': '#c2c6d6',
+            'on-primary-container': '#ffffff',
+            'on-secondary-container': '#ffffff',
+          },
+          spacing: {
+            'gutter': '1.5rem',
+            'container-padding': '2rem',
           }
         }
       }
     }
   </script>
-
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-
-    body {
-      background-color: #060913;
-      color: #edf0f8;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      overflow-x: hidden;
-    }
-
     @media (min-width: 768px) {
       .md\:ml-\[280px\] {
         margin-left: 280px !important;
       }
     }
-
-    /* Glass Panels */
+    /* Glass panel styles */
     .glass-panel {
-      background: rgba(12, 18, 34, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(28, 31, 41, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 1.1rem;
-      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
-      transition: all 0.25s ease;
+      border-radius: 1rem;
     }
-    .glass-panel:hover {
-      border-color: rgba(229, 193, 88, 0.3);
-      box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.65), 0 0 20px rgba(229, 193, 88, 0.05);
-    }
-
-    .glass-card-glow-green {
-      background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.09), transparent 70%), rgba(12, 18, 34, 0.85);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-    }
-    .glass-card-glow-green:hover {
-      border-color: rgba(16, 185, 129, 0.45);
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
-    }
-
-    .glass-card-glow-red {
-      background: radial-gradient(circle at top left, rgba(239, 68, 68, 0.09), transparent 70%), rgba(12, 18, 34, 0.85);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-    }
-    .glass-card-glow-red:hover {
-      border-color: rgba(239, 68, 68, 0.45);
-      box-shadow: 0 0 25px rgba(239, 68, 68, 0.15);
-    }
-
-    .glass-card-glow-gold {
-      background: radial-gradient(circle at top left, rgba(229, 193, 88, 0.09), transparent 70%), rgba(12, 18, 34, 0.85);
-      border: 1px solid rgba(229, 193, 88, 0.25);
-    }
-    .glass-card-glow-gold:hover {
-      border-color: rgba(229, 193, 88, 0.45);
-      box-shadow: 0 0 25px rgba(229, 193, 88, 0.15);
-    }
-
     .glass-input {
-      background: rgba(8, 12, 24, 0.75) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      color: #edf0f8 !important;
-      border-radius: 0.75rem;
+      background: rgba(0, 0, 0, 0.2) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: #dfe2ef !important;
+      border-radius: 0.5rem;
       padding: 0.5rem 1rem;
       outline: none;
       transition: all 0.2s;
     }
     .glass-input:focus {
-      border-color: #E5C158 !important;
-      box-shadow: 0 0 15px rgba(229, 193, 88, 0.25) !important;
+      border-color: #adc6ff !important;
+      background: rgba(0, 0, 0, 0.3) !important;
     }
-
-    .btn-gold {
-      background: linear-gradient(135deg, #E5C158 0%, #B3892B 100%);
-      color: #060913;
-      font-weight: 700;
-      box-shadow: 0 4px 15px rgba(229, 193, 88, 0.25);
-      transition: all 0.25s ease;
+    .pulse-button {
+      animation: pulse-border 2s infinite;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.3s;
     }
-    .btn-gold:hover {
-      background: linear-gradient(135deg, #FFF2A8 0%, #E5C158 100%);
-      box-shadow: 0 6px 22px rgba(229, 193, 88, 0.4);
-      transform: translateY(-1px);
+    @keyframes pulse-border {
+      0% { box-shadow: 0 0 0 0 rgba(77, 142, 255, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(77, 142, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(77, 142, 255, 0); }
     }
-
-    .btn-emerald {
-      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-      color: #fff;
-      font-weight: 700;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
-      transition: all 0.25s ease;
-    }
-    .btn-emerald:hover {
-      background: linear-gradient(135deg, #34D399 0%, #10B981 100%);
-      box-shadow: 0 6px 22px rgba(16, 185, 129, 0.4);
-      transform: translateY(-1px);
-    }
-
-    /* Live Price Flashes */
-    @keyframes flashGreen {
-      0% { background-color: rgba(16, 185, 129, 0.4); }
-      100% { background-color: transparent; }
-    }
-    @keyframes flashRed {
-      0% { background-color: rgba(239, 68, 68, 0.4); }
-      100% { background-color: transparent; }
-    }
-    .flash-green { animation: flashGreen 0.8s ease-out; }
-    .flash-red { animation: flashRed 0.8s ease-out; }
-
     /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(6, 9, 19, 0.5); }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(229,193,88,0.3); }
-
-    .text-up { color: #10B981; }
-    .text-down { color: #EF4444; }
-
-    /* Ticker marquee */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.1);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .text-up { color: #4edea3; }
+    .text-down { color: #ffb4ab; }
+    .bg-up { background-color: rgba(78, 222, 163, 0.1); border-color: rgba(78, 222, 163, 0.2); }
+    .bg-down { background-color: rgba(255, 180, 171, 0.1); border-color: rgba(255, 180, 171, 0.2); }
+    
     .ticker-wrap {
       width: 100%;
       overflow: hidden;
@@ -178,548 +117,283 @@
     }
     .ticker {
       display: inline-block;
-      animation: ticker 35s linear infinite;
+      animation: ticker 30s linear infinite;
     }
-    .ticker:hover { animation-play-state: paused; }
+    .ticker:hover {
+      animation-play-state: paused;
+    }
     @keyframes ticker {
       0% { transform: translate3d(0, 0, 0); }
-      100% { transform: translate3d(-50%, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
     }
     .ticker-item {
-      display: inline-flex;
-      align-items: center;
-      padding: 0 1.75rem;
-    }
-
-    /* Badges */
-    .badge-gain {
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #10B981;
-    }
-    .badge-loss {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #EF4444;
-    }
-
-    /* Pulse Dot */
-    .pulse-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10B981;
-      box-shadow: 0 0 10px #10B981;
-      animation: pulseLive 1.5s infinite;
-    }
-    @keyframes pulseLive {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.7); }
+      display: inline-block;
+      padding: 0 2rem;
     }
   </style>
 </head>
-<body class="bg-background text-on-surface min-h-screen flex font-sans selection:bg-primary selection:text-black">
-
-  <!-- Sidebar Nav -->
-  <nav id="sidebar-nav" class="hidden md:flex flex-col h-full py-6 fixed left-0 top-0 w-[280px] border-r border-white/10 bg-[#080d1a]/95 backdrop-blur-2xl shadow-2xl z-50">
-    <div class="px-6 mb-7 flex items-center gap-3">
-      <img src="logo.png" class="w-11 h-11 object-contain flex-shrink-0" alt="SaarthiX Logo"/>
+<body class="bg-background text-on-surface min-h-screen flex font-sans">
+  
+  <!-- Sidebar nav: id="sidebar-nav" -->
+  <nav id="sidebar-nav" class="hidden md:flex flex-col h-full py-container-padding fixed left-0 top-0 w-[280px] border-r border-white/10 bg-surface-container/80 backdrop-blur-xl shadow-2xl z-50">
+    <div class="px-gutter mb-8 flex items-center gap-3">
+      <img src="logo.png" class="w-14 h-14 object-contain flex-shrink-0" alt="SaarthiX Logo"/>
       <div>
-        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#FFF6D6] via-[#E5C158] to-[#BA923E] tracking-tight">SaarthiX</h1>
-        <p class="text-[10px] text-on-surface-variant/80 tracking-wide uppercase font-semibold">3D AI Market Terminal</p>
+        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#FFF6D6] via-[#E5C158] to-[#BA923E]">SaarthiX</h1>
+        <p class="text-xs text-on-surface-variant">Intelligent Trading</p>
       </div>
     </div>
-
-    <!-- Navigation links container -->
-    <div class="flex flex-col gap-1.5 px-4 flex-1" id="nav-links"></div>
-
-    <!-- Demo Portfolio Wallet Card in Sidebar -->
-    <div class="mx-4 mb-4 p-4 rounded-xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-white/10">
-      <div class="flex justify-between items-center text-xs text-on-surface-variant mb-1">
-        <span>Demo Capital</span>
-        <span class="text-secondary font-mono font-bold">+₹14,250 P&amp;L</span>
-      </div>
-      <div class="text-lg font-mono font-extrabold text-white" id="sidebar-balance">₹10,14,250.00</div>
-      <button onclick="openTradeModal('RELIANCE')" class="w-full mt-2 py-2 rounded-lg btn-gold text-xs font-bold flex items-center justify-center gap-1.5">
-        <span class="material-symbols-outlined text-[16px]">bolt</span> Instant Paper Trade
-      </button>
+    <div class="flex flex-col gap-1 px-gutter flex-1" id="nav-links"></div>
+    <div class="px-gutter mt-auto mb-6">
+      <a href="portfolio.html" class="block w-full bg-primary-container text-on-primary-container pulse-button">Analyze Portfolio</a>
     </div>
-
-    <div class="px-6 flex flex-col gap-1 pt-3 border-t border-white/10 text-xs">
-      <div id="sidebar-status-container" class="flex items-center gap-2 py-1"></div>
-      <a href="login.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-error/80 hover:text-error hover:bg-error/10 transition-colors">
-        <span class="material-symbols-outlined text-[18px]">logout</span>
-        Return to 3D Portal
+    <div class="px-gutter flex flex-col gap-1 pt-4 border-t border-white/10">
+      <a href="support.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors">
+        <span class="material-symbols-outlined">help</span>
+        Support
+      </a>
+      <a href="login.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-error hover:bg-error/10 transition-colors">
+        <span class="material-symbols-outlined">logout</span>
+        Log Out
       </a>
     </div>
   </nav>
 
-  <!-- Main Content Area -->
+  <!-- Main content -->
   <main class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col min-w-0 overflow-x-hidden">
-
-    <!-- Top Dynamic Header Bar -->
-    <header class="flex items-center justify-between px-6 md:px-8 py-3.5 border-b border-white/10 bg-[#080d1a]/85 backdrop-blur-xl sticky top-0 z-40">
-      <!-- Search & Market Badge -->
-      <div class="flex items-center gap-4 flex-1 max-w-lg">
-        <div class="relative w-full">
-          <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
-          <input type="text" id="global-search-input" placeholder="Search NSE/BSE stocks (e.g. Reliance, TCS, HDFC)..." class="glass-input pl-10 pr-12 w-full text-xs font-medium" oninput="handleStockSearch(this.value)" />
-          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-on-surface-variant/50 font-mono bg-white/5 px-1.5 py-0.5 rounded border border-white/10">⌘K</span>
-
-          <!-- Quick Search Dropdown Results -->
-          <div id="search-dropdown" class="hidden absolute left-0 right-0 top-full mt-2 glass-panel p-2 shadow-2xl z-50 max-h-72 overflow-y-auto divide-y divide-white/5"></div>
+    <!-- Top Bar -->
+    <header class="hidden md:flex items-center justify-between px-container-padding py-4 border-b border-white/10 bg-surface-container-low/50 backdrop-blur-md sticky top-0 z-40">
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+          <input type="text" placeholder="Search stocks, indices..." class="glass-input pl-10 w-64 text-sm" />
         </div>
+        <div class="px-3 py-1 text-xs font-semibold rounded bg-white/10 border border-white/10 text-on-surface">NSE | BSE</div>
       </div>
       
-      <!-- Right Status & Dynamic Interactive Controls -->
-      <div class="flex items-center gap-3 md:gap-4">
-        <!-- Live Market Status Pill -->
-        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary/10 border border-secondary/25 text-secondary text-xs font-semibold">
-          <span class="pulse-dot"></span>
-          <span>NSE/BSE Live Feed</span>
-        </div>
-
-        <!-- Simulate Market Surge Demo Button -->
-        <button onclick="triggerMarketSurge()" class="px-3.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 transition-all text-xs font-bold flex items-center gap-1.5" title="Simulate a live market surge burst for demo">
-          <span class="material-symbols-outlined text-[16px] animate-spin text-amber-300" style="animation-duration: 3s;">speed</span>
-          <span class="hidden lg:inline">⚡ Surge Market</span>
-        </button>
-
-        <!-- Live Clock -->
-        <div class="hidden lg:flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl">
-          <span class="material-symbols-outlined text-primary text-[16px]">schedule</span>
-          <span class="text-xs font-mono font-semibold text-on-surface" id="header-time">00:00:00 IST</span>
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2">
+          <span id="market-status" class="flex h-3 w-3"></span>
+          <div class="flex flex-col items-end">
+            <span class="text-sm font-medium" id="header-time">00:00:00</span>
+            <span class="text-[10px] text-on-surface-variant uppercase" id="header-market-text">Loading</span>
+          </div>
         </div>
         
-        <!-- User Avatar Profile -->
-        <div class="flex items-center gap-2.5 cursor-pointer border-l border-white/10 pl-3 md:pl-4">
-          <img id="user-avatar-img" src="https://ui-avatars.com/api/?name=User&background=E5C158&color=000&bold=true" alt="User" class="w-8 h-8 rounded-full border border-primary/40" />
-          <span id="user-avatar-name" class="text-xs font-bold text-on-surface hidden md:block">Omkar</span>
+        <div class="relative cursor-pointer">
+          <span class="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors">notifications</span>
+          <span class="absolute 1 top-0 right-0 w-2 h-2 rounded-full bg-error"></span>
+        </div>
+        
+        <div class="flex items-center gap-2 cursor-pointer">
+          <img id="user-avatar-img" src="https://ui-avatars.com/api/?name=User&background=4d8eff&color=fff" alt="User" class="w-8 h-8 rounded-full" />
+          <span id="user-avatar-name" class="text-sm font-medium text-on-surface hidden md:block"></span>
+          <span class="material-symbols-outlined text-on-surface-variant">arrow_drop_down</span>
         </div>
       </div>
     </header>
 
-    <!-- Index Marquee Bar -->
-    <div class="border-b border-white/5 bg-[#0a0f20]/90 py-2.5 backdrop-blur-md">
-      <div class="ticker-wrap text-xs font-mono" id="ticker-container">
-        <!-- dynamically populated -->
+    <!-- Index Ticker -->
+    <div class="border-b border-white/5 bg-surface-container-high/50">
+      <div class="ticker-wrap py-2 text-sm" id="ticker-container">
+        <!-- populated by js -->
       </div>
     </div>
 
     <!-- Page Content -->
-    <div class="p-5 md:p-8 flex-1 space-y-6">
+    <div class="p-4 md:p-container-padding flex-1 space-y-6">
       
-      <!-- Top Title & Fast Actions Row -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div class="flex items-center gap-3">
-            <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Market Intelligence Terminal</h2>
-            <span class="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[11px] font-bold flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-              Live Sync
-            </span>
-          </div>
-          <p class="text-xs text-on-surface-variant/80 mt-1">Real-time Indian market metrics, interactive candlestick charts, and instant trade execution simulator.</p>
+          <h2 class="text-2xl font-bold">Dashboard Overview</h2>
+          <span class="live-timestamp text-xs text-on-surface-variant/60 font-mono"></span>
         </div>
-
-        <div class="flex items-center gap-2.5 w-full sm:w-auto">
-          <button onclick="openTradeModal('NIFTY50')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl btn-emerald text-xs font-bold flex items-center justify-center gap-1.5">
-            <span class="material-symbols-outlined text-[17px]">shopping_cart</span> Quick Trade
-          </button>
-          <a href="stock-doctor.html" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-all">
-            <span class="material-symbols-outlined text-[17px] text-primary">health_and_safety</span> Stock Doctor
-          </a>
+        <div class="flex gap-3 w-full sm:w-auto">
+          <a href="portfolio.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-surface-container-high border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors">View Portfolio</a>
+          <a href="stock-doctor.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-primary-container text-on-primary-container text-sm font-medium hover:bg-primary-container/80 transition-colors">View Stock Doctor</a>
         </div>
       </div>
 
-      <!-- KPI Summary Cards Row -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        
-        <!-- Advances Card -->
-        <div class="glass-panel glass-card-glow-green p-5 flex flex-col justify-between relative overflow-hidden group">
-          <div class="flex items-center justify-between text-on-surface-variant mb-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-secondary">NIFTY 50 ADVANCES</span>
-            <div class="w-9 h-9 rounded-xl bg-secondary/15 border border-secondary/30 flex items-center justify-center">
-              <span class="material-symbols-outlined text-secondary text-[20px]">trending_up</span>
-            </div>
-          </div>
-          <div class="flex items-baseline gap-3">
-            <div class="text-4xl font-extrabold text-secondary font-mono tracking-tight" id="advances-count">34</div>
-            <span class="text-xs text-secondary/80 font-semibold">stocks bullish</span>
-          </div>
-          <div class="mt-3 pt-3 border-t border-white/5 flex justify-between text-[11px] text-on-surface-variant">
-            <span>Market Momentum</span>
-            <span id="adv-pct-label" class="text-secondary font-bold font-mono">68.0% Advancing</span>
-          </div>
-        </div>
-
-        <!-- Declines Card -->
-        <div class="glass-panel glass-card-glow-red p-5 flex flex-col justify-between relative overflow-hidden group">
-          <div class="flex items-center justify-between text-on-surface-variant mb-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-error">NIFTY 50 DECLINES</span>
-            <div class="w-9 h-9 rounded-xl bg-error/15 border border-error/30 flex items-center justify-center">
-              <span class="material-symbols-outlined text-error text-[20px]">trending_down</span>
-            </div>
-          </div>
-          <div class="flex items-baseline gap-3">
-            <div class="text-4xl font-extrabold text-error font-mono tracking-tight" id="declines-count">16</div>
-            <span class="text-xs text-error/80 font-semibold">stocks consolidating</span>
-          </div>
-          <div class="mt-3 pt-3 border-t border-white/5 flex justify-between text-[11px] text-on-surface-variant">
-            <span>Pullback Ratio</span>
-            <span id="dec-pct-label" class="text-error font-bold font-mono">32.0% Declining</span>
-          </div>
-        </div>
-
-        <!-- Market Breadth Card -->
-        <div class="glass-panel glass-card-glow-gold p-5 flex flex-col justify-between relative overflow-hidden">
+      <!-- Summary Metrics Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-panel p-5 flex flex-col justify-between">
           <div class="flex items-center justify-between text-on-surface-variant mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-primary">MARKET BREADTH RATIO</span>
-            <div class="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
-              <span class="material-symbols-outlined text-primary text-[20px]">donut_large</span>
-            </div>
+            <span class="text-sm font-medium">Nifty 50 Advances</span>
+            <span class="material-symbols-outlined text-secondary">trending_up</span>
           </div>
-          <div class="w-full h-3.5 rounded-full overflow-hidden flex bg-white/10 my-2" id="breadth-bar">
-            <div style="width: 68%" class="bg-secondary h-full transition-all duration-500 rounded-l-full"></div>
-            <div style="width: 32%" class="bg-error h-full transition-all duration-500 rounded-r-full"></div>
-          </div>
-          <div class="flex justify-between text-xs mt-1 font-mono font-semibold" id="breadth-text">
-            <span class="text-secondary">Adv 34 (68%)</span>
-            <span class="text-error">Dec 16 (32%)</span>
-          </div>
+          <div class="text-3xl font-bold text-secondary" id="advances-count">-</div>
         </div>
-
-      </div>
-
-      <!-- ── DYNAMIC LIVE CHART SECTION ── -->
-      <div class="glass-panel p-6">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-5 pb-4 border-b border-white/10">
-          <div class="flex items-center gap-3 flex-wrap">
-            <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold">
-              📈
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <h3 class="font-extrabold text-white text-lg tracking-tight" id="chart-symbol-title">NIFTY 50 INDEX</h3>
-                <span class="px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 text-[11px] font-mono font-bold" id="chart-symbol-ticker">NIFTY 50</span>
-              </div>
-              <p class="text-xs text-on-surface-variant" id="chart-symbol-sub">Real-Time Indian Benchmark Multi-Timeframe Chart</p>
-            </div>
-            <div class="ml-4 pl-4 border-l border-white/10">
-              <div class="text-xl font-mono font-extrabold text-white" id="chart-live-price">₹24,398.15</div>
-              <div class="text-xs font-mono font-bold text-secondary flex items-center gap-1" id="chart-live-change">
-                <span class="material-symbols-outlined text-[14px]">arrow_upward</span> +89.30 (+0.37%) Today
-              </div>
-            </div>
+        <div class="glass-panel p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-on-surface-variant mb-2">
+            <span class="text-sm font-medium">Nifty 50 Declines</span>
+            <span class="material-symbols-outlined text-error">trending_down</span>
           </div>
-
-          <!-- Stock & Timeframe Selector Buttons -->
-          <div class="flex items-center gap-2 flex-wrap">
-            <!-- Stock Switcher -->
-            <select id="chart-stock-select" onchange="switchChartStock(this.value)" class="glass-input text-xs font-bold py-1.5 px-3 cursor-pointer">
-              <option value="NIFTY 50" selected>NIFTY 50</option>
-              <option value="SENSEX">SENSEX</option>
-              <option value="BANK NIFTY">BANK NIFTY</option>
-              <option value="RELIANCE">RELIANCE (₹1,328.80)</option>
-              <option value="TCS">TCS (₹2,266.00)</option>
-              <option value="HDFCBANK">HDFC BANK (₹820.80)</option>
-              <option value="INFY">INFOSYS (₹1,094.20)</option>
-              <option value="TATAMOTORS">TATA MOTORS (₹411.75)</option>
-            </select>
-
-            <!-- Timeframe selector -->
-            <div class="flex bg-white/5 border border-white/10 rounded-xl p-1 gap-1">
-              <button onclick="setChartTimeframe('1D')" id="tf-1D" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary text-black transition-all">1D</button>
-              <button onclick="setChartTimeframe('1W')" id="tf-1W" class="px-2.5 py-1 rounded-lg text-xs font-bold text-on-surface-variant hover:text-white transition-all">1W</button>
-              <button onclick="setChartTimeframe('1M')" id="tf-1M" class="px-2.5 py-1 rounded-lg text-xs font-bold text-on-surface-variant hover:text-white transition-all">1M</button>
-              <button onclick="setChartTimeframe('1Y')" id="tf-1Y" class="px-2.5 py-1 rounded-lg text-xs font-bold text-on-surface-variant hover:text-white transition-all">1Y</button>
-            </div>
-
-            <!-- Instant Trade Modal Trigger for current chart stock -->
-            <button onclick="openTradeModalCurrent()" class="px-3.5 py-1.5 rounded-xl btn-gold text-xs font-bold flex items-center gap-1">
-              <span class="material-symbols-outlined text-[15px]">flash_on</span> Trade Symbol
-            </button>
-          </div>
+          <div class="text-3xl font-bold text-error" id="declines-count">-</div>
         </div>
-
-        <!-- Canvas for Chart.js -->
-        <div class="w-full h-72 md:h-80 relative">
-          <canvas id="interactive-stock-chart"></canvas>
+        <div class="glass-panel p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-on-surface-variant mb-2">
+            <span class="text-sm font-medium">Market Breadth</span>
+            <span class="material-symbols-outlined text-primary">analytics</span>
+          </div>
+          <div class="w-full h-3 rounded-full overflow-hidden flex bg-white/10 mt-2" id="breadth-bar">
+            <!-- filled by js -->
+          </div>
+          <div class="flex justify-between text-xs mt-2 text-on-surface-variant" id="breadth-text">
+            <span>Adv 0</span>
+            <span>Dec 0</span>
+          </div>
         </div>
       </div>
 
-      <!-- Gainers & Losers Tables Row -->
+      <!-- Gainers & Losers -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
         <!-- Top Gainers -->
-        <div class="glass-panel p-6">
-          <div class="flex items-center justify-between mb-5">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-secondary/10 border border-secondary/30 flex items-center justify-center">
-                <span class="material-symbols-outlined text-secondary text-[18px]">rocket_launch</span>
-              </div>
-              <div>
-                <h3 class="font-bold text-white text-base">Top Gainers</h3>
-                <p class="text-[11px] text-on-surface-variant/80">Leading NSE gainers by % price surge</p>
-              </div>
-            </div>
-            <span class="text-[10px] uppercase font-bold px-2.5 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/25">NSE LIVE</span>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left">
-              <thead class="text-[11px] text-on-surface-variant/60 uppercase tracking-wider border-b border-white/10">
-                <tr>
-                  <th class="pb-3 font-semibold">Ticker</th>
-                  <th class="pb-3 font-semibold text-right">LTP (₹)</th>
-                  <th class="pb-3 font-semibold text-right">Change</th>
-                  <th class="pb-3 font-semibold text-right">% Change</th>
-                  <th class="pb-3 font-semibold text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody id="top-gainers-body" class="divide-y divide-white/5 font-mono">
-                <!-- dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Top Losers -->
-        <div class="glass-panel p-6">
-          <div class="flex items-center justify-between mb-5">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-error/10 border border-error/30 flex items-center justify-center">
-                <span class="material-symbols-outlined text-error text-[18px]">trending_down</span>
-              </div>
-              <div>
-                <h3 class="font-bold text-white text-base">Top Losers</h3>
-                <p class="text-[11px] text-on-surface-variant/80">Leading NSE decliners &amp; pullbacks</p>
-              </div>
-            </div>
-            <span class="text-[10px] uppercase font-bold px-2.5 py-1 rounded-full bg-error/10 text-error border border-error/25">NSE LIVE</span>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left">
-              <thead class="text-[11px] text-on-surface-variant/60 uppercase tracking-wider border-b border-white/10">
-                <tr>
-                  <th class="pb-3 font-semibold">Ticker</th>
-                  <th class="pb-3 font-semibold text-right">LTP (₹)</th>
-                  <th class="pb-3 font-semibold text-right">Change</th>
-                  <th class="pb-3 font-semibold text-right">% Change</th>
-                  <th class="pb-3 font-semibold text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody id="top-losers-body" class="divide-y divide-white/5 font-mono">
-                <!-- dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Sector Heatmap & AI Insights Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Sector Heatmap -->
-        <div class="glass-panel p-6 lg:col-span-2">
-          <div class="flex items-center justify-between mb-5">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center">
-                <span class="material-symbols-outlined text-primary text-[18px]">grid_view</span>
-              </div>
-              <div>
-                <h3 class="font-bold text-white text-base">Sector Heatmap Momentum</h3>
-                <p class="text-[11px] text-on-surface-variant/80">Click any sector to filter active market constituents</p>
-              </div>
-            </div>
-            <span class="text-[11px] text-on-surface-variant/70 font-mono">11 Key Sectors</span>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5" id="sector-heatmap">
-            <!-- dynamically populated -->
-          </div>
-        </div>
-
-        <!-- AI Insights & Market Sentiment Feed -->
-        <div class="glass-panel p-6 flex flex-col h-[440px]">
+        <div class="glass-panel p-5 overflow-hidden">
           <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center">
-                <span class="material-symbols-outlined text-primary text-[18px]">psychology</span>
-              </div>
-              <div>
-                <h3 class="font-bold text-white text-base">Saarthi AI Copilot</h3>
-                <p class="text-[11px] text-on-surface-variant/80">Real-time signals &amp; sentiment</p>
-              </div>
-            </div>
-            <span class="px-2 py-0.5 rounded bg-secondary/15 text-secondary border border-secondary/30 text-[10px] font-bold">78% BULLISH</span>
+            <h3 class="font-semibold flex items-center gap-2 text-secondary">
+              <span class="material-symbols-outlined">rocket_launch</span> Top Gainers
+            </h3>
+            <button class="text-xs text-on-surface-variant hover:text-white">View All</button>
           </div>
-          
-          <div class="flex-1 overflow-y-auto pr-1 space-y-3" id="ai-insights-feed">
-            <!-- AI Insights Cards -->
-            <div class="p-3 rounded-xl bg-white/[0.04] border border-secondary/30">
-              <div class="flex items-center justify-between text-[11px] font-bold text-secondary mb-1">
-                <span>🟢 BULLISH BREAKOUT</span>
-                <span class="font-mono text-on-surface-variant">Just now</span>
-              </div>
-              <p class="text-xs text-white leading-relaxed">
-                <strong>Reliance Industries (₹1,328.80)</strong> is surging with +1.22% volume expansion above 20-DMA support. Target ₹1,365.
-              </p>
-            </div>
-
-            <div class="p-3 rounded-xl bg-white/[0.04] border border-primary/30">
-              <div class="flex items-center justify-between text-[11px] font-bold text-primary mb-1">
-                <span>⚡ NIFTY INDEX PIVOT</span>
-                <span class="font-mono text-on-surface-variant">2m ago</span>
-              </div>
-              <p class="text-xs text-white leading-relaxed">
-                Nifty 50 holding key 24,350 support level. Strong call unwinding seen across 24,400 strikes.
-              </p>
-            </div>
-
-            <div class="p-3 rounded-xl bg-white/[0.04] border border-white/10">
-              <div class="flex items-center justify-between text-[11px] font-bold text-amber-400 mb-1">
-                <span>🟡 DEFENSE MOMENTUM</span>
-                <span class="font-mono text-on-surface-variant">5m ago</span>
-              </div>
-              <p class="text-xs text-white leading-relaxed">
-                <strong>HAL &amp; Mazagon Dock</strong> witnessing institutional inflow following fresh MoD contract approvals.
-              </p>
-            </div>
-          </div>
-
-          <!-- Quick AI Prompt Box -->
-          <div class="mt-3 pt-3 border-t border-white/10 flex gap-2">
-            <input type="text" id="ai-question-input" placeholder="Ask AI: e.g. Analyze Tata Motors..." class="glass-input text-xs flex-1" onkeydown="if(event.key==='Enter')askSaarthiAI()" />
-            <button onclick="askSaarthiAI()" class="px-3 py-1.5 rounded-lg btn-gold text-xs font-bold flex items-center">
-              <span class="material-symbols-outlined text-[16px]">send</span>
-            </button>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="text-xs text-on-surface-variant border-b border-white/10">
+                <tr>
+                  <th class="pb-2 font-medium">Ticker</th>
+                  <th class="pb-2 font-medium text-right">LTP (₹)</th>
+                  <th class="pb-2 font-medium text-right">Change</th>
+                  <th class="pb-2 font-medium text-right">% Change</th>
+                </tr>
+              </thead>
+              <tbody id="top-gainers-body" class="divide-y divide-white/5">
+                <!-- js -->
+              </tbody>
+            </table>
           </div>
         </div>
-
+        <!-- Top Losers -->
+        <div class="glass-panel p-5 overflow-hidden">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold flex items-center gap-2 text-error">
+              <span class="material-symbols-outlined">trending_down</span> Top Losers
+            </h3>
+            <button class="text-xs text-on-surface-variant hover:text-white">View All</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="text-xs text-on-surface-variant border-b border-white/10">
+                <tr>
+                  <th class="pb-2 font-medium">Ticker</th>
+                  <th class="pb-2 font-medium text-right">LTP (₹)</th>
+                  <th class="pb-2 font-medium text-right">Change</th>
+                  <th class="pb-2 font-medium text-right">% Change</th>
+                </tr>
+              </thead>
+              <tbody id="top-losers-body" class="divide-y divide-white/5">
+                <!-- js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <!-- Footer Disclosure -->
-      <div class="glass-panel p-4 flex flex-col sm:flex-row items-center justify-between text-xs text-on-surface-variant/80 border-t border-white/5 gap-2">
+      <!-- Sector Heatmap & Mini News -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Sector Heatmap -->
+        <div class="glass-panel p-5 lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold flex items-center gap-2">
+              <span class="material-symbols-outlined">grid_view</span> Sector Heatmap
+            </h3>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="sector-heatmap">
+            <!-- js -->
+          </div>
+        </div>
+        <!-- Mini News Feed -->
+        <div class="glass-panel p-5 flex flex-col h-[400px]">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold flex items-center gap-2">
+              <span class="material-symbols-outlined">newspaper</span> Latest News
+            </h3>
+            <a href="news.html" class="text-xs text-primary hover:underline">View All</a>
+          </div>
+          <div class="flex-1 overflow-y-auto pr-2 space-y-4" id="mini-news">
+            <!-- js -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer Data Sourcing Notice -->
+      <div class="glass-panel p-4 flex flex-col sm:flex-row items-center justify-between text-xs text-on-surface-variant/70 border-t border-white/5 gap-2">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-          <span>SaarthiX Dynamic Market Engine · Simulated Paper Trades &amp; Live Indian Exchange Feeds</span>
+          <span>Data sourced from NSE · Real-Time Updates (15s polling)</span>
         </div>
         <div>
-          <span>NSE / BSE Market Schedule: 09:15 – 15:30 IST</span>
+          <span>NSE / BSE Market Hours: 09:15 – 15:30 IST</span>
         </div>
       </div>
-
+      
     </div>
   </main>
-
-  <!-- ── QUICK PAPER TRADE MODAL ── -->
-  <div id="trade-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="glass-panel p-6 max-w-md w-full border border-primary/40 shadow-2xl relative">
-      <button onclick="closeTradeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-white text-lg">&times;</button>
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold">
-          ⚡
-        </div>
-        <div>
-          <h3 class="font-extrabold text-white text-lg">Instant Paper Order</h3>
-          <p class="text-xs text-on-surface-variant" id="trade-modal-sub">Simulate zero-risk market execution</p>
-        </div>
-      </div>
-
-      <div class="space-y-3.5">
-        <div>
-          <label class="block text-xs font-bold text-on-surface-variant mb-1">Stock Ticker</label>
-          <input type="text" id="trade-ticker-input" class="glass-input w-full font-mono font-bold uppercase" readonly />
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-on-surface-variant mb-1">Execution Price (₹)</label>
-            <input type="text" id="trade-price-input" class="glass-input w-full font-mono font-bold" readonly />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-on-surface-variant mb-1">Quantity</label>
-            <input type="number" id="trade-qty-input" value="10" min="1" max="1000" class="glass-input w-full font-mono font-bold" oninput="updateTradeTotal()" />
-          </div>
-        </div>
-
-        <div class="p-3 rounded-xl bg-white/5 border border-white/10 flex justify-between items-center text-xs">
-          <span class="text-on-surface-variant">Order Value:</span>
-          <span class="font-mono font-bold text-primary text-base" id="trade-total-value">₹13,288.00</span>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3 pt-2">
-          <button onclick="executeTrade('BUY')" class="py-2.5 rounded-xl btn-emerald text-xs font-extrabold flex items-center justify-center gap-1">
-            <span class="material-symbols-outlined text-[16px]">add_circle</span> BUY (Long)
-          </button>
-          <button onclick="executeTrade('SELL')" class="py-2.5 rounded-xl bg-error text-white font-extrabold text-xs flex items-center justify-center gap-1 hover:bg-red-600 transition-all">
-            <span class="material-symbols-outlined text-[16px]">do_not_disturb_on</span> SELL (Short)
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Mobile Nav -->
-  <nav id="mobile-nav" class="fixed bottom-0 left-0 w-full bg-[#080d1a]/95 backdrop-blur-2xl border-t border-white/10 md:hidden flex justify-around items-center h-16 z-50 px-2"></nav>
-
-  <!-- Scripts -->
+  
+  <!-- Mobile bottom nav -->
+  <nav id="mobile-nav" class="fixed bottom-0 left-0 w-full bg-surface-container/90 backdrop-blur-xl border-t border-white/10 md:hidden flex justify-around items-center h-16 z-50 px-2 pb-safe"></nav>
+  
   <script src="shared.js"></script>
   <script src="groww-client.js"></script>
   <script>
     'use strict';
 
-    let currentChartSymbol = 'NIFTY 50';
-    let currentChartTimeframe = '1D';
-    let chartInstance = null;
-    let liveTickInterval = null;
-    let demoCashBalance = 1014250.00;
-
-    // Web Audio Synthesizer for UI feedback
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
-    function playBeep(f = 600, t = 0.06) {
-      try {
-        if(!audioCtx && AudioCtx) audioCtx = new AudioCtx();
-        if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        if(!audioCtx) return;
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        o.frequency.value = f;
-        g.gain.setValueAtTime(0.03, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + t);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + t);
-      } catch(e){}
-    }
+    let dashboardPollTimer = null;
+    let isFetchingDashboard = false;
 
     document.addEventListener('DOMContentLoaded', () => {
-      // User Profile Init
-      const name = localStorage.getItem('sx_user_name') || 'Omkar';
-      const avatarImg = document.getElementById('user-avatar-img');
-      const avatarNameEl = document.getElementById('user-avatar-name');
-      if (avatarImg) avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E5C158&color=000&bold=true`;
-      if (avatarNameEl) avatarNameEl.textContent = name.split(' ')[0];
+      // Update avatar from stored user name
+      (function(){
+        var name = localStorage.getItem('sx_user_name') || 'User';
+        var avatarImg = document.getElementById('user-avatar-img');
+        var avatarNameEl = document.getElementById('user-avatar-name');
+        if(avatarImg){
+          avatarImg.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=4d8eff&color=fff&bold=true';
+          avatarImg.alt = name;
+        }
+        if(avatarNameEl){
+          var firstName = name.split(' ')[0];
+          avatarNameEl.textContent = firstName;
+        }
+      })();
 
-      // Build Navigation
-      if (typeof buildNav !== 'undefined') {
+      if(typeof buildNav !== 'undefined') {
         const { navLinks, mobileLinks, statusDot } = buildNav('dashboard');
         const navLinksEl = document.getElementById('nav-links');
         if (navLinksEl) navLinksEl.innerHTML = navLinks;
         const mobNavEl = document.getElementById('mobile-nav');
         if (mobNavEl) mobNavEl.innerHTML = mobileLinks;
-        const statusEl = document.getElementById('sidebar-status-container');
+        const statusEl = document.getElementById('market-status');
         if (statusEl) statusEl.innerHTML = statusDot;
       }
 
+      showDashboardSkeletons();
+      initLiveDashboard();
       startClock();
-      initInteractiveChart();
-      renderDashboardComponents();
-      startLiveTickerSimulation();
+      setupVisibilityListener();
+    });
+
+    document.addEventListener('market:tick', () => {
+      // Local fallback refresh on ticker update
+      if (typeof getMarketBreadth === 'function') {
+        renderSummaryMetricsLocal();
+        renderGainersLosersLocal();
+        renderSectorHeatmapLocal();
+      }
     });
 
     function startClock() {
       const timeEl = document.getElementById('header-time');
+      const textEl = document.getElementById('header-market-text');
+      
       setInterval(() => {
         const now = new Date();
         const istTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
@@ -727,105 +401,311 @@
         const m = istTime.getMinutes().toString().padStart(2, '0');
         const s = istTime.getSeconds().toString().padStart(2, '0');
         const ampm = h >= 12 ? 'PM' : 'AM';
-        h = h % 12; h = h ? h : 12;
+        h = h % 12;
+        h = h ? h : 12;
+        
         if (timeEl) timeEl.textContent = `${h}:${m}:${s} ${ampm} IST`;
+        
+        if(typeof isMarketOpen === 'function') {
+          if (textEl) {
+            textEl.textContent = isMarketOpen() ? 'Market Open' : 'Market Closed';
+          }
+          const statusEl = document.getElementById('market-status');
+          if (statusEl && typeof buildNav === 'function') {
+            statusEl.innerHTML = buildNav('dashboard').statusDot;
+          }
+        }
       }, 1000);
     }
 
-    /* ── DYNAMIC LIVE TICKS ENGINE ── */
-    function startLiveTickerSimulation() {
-      if (liveTickInterval) clearInterval(liveTickInterval);
-      liveTickInterval = setInterval(() => {
-        // Randomly nudge 2-3 stocks
-        if (window.LIVE_STOCKS && window.LIVE_STOCKS.length > 0) {
-          for(let i = 0; i < 3; i++) {
-            const rIdx = Math.floor(Math.random() * window.LIVE_STOCKS.length);
-            const stk = window.LIVE_STOCKS[rIdx];
-            const changeDelta = (Math.random() - 0.48) * (stk.price * 0.002);
-            stk.price = Math.max(1, +(stk.price + changeDelta).toFixed(2));
-            stk.change = +(stk.change + changeDelta).toFixed(2);
-            stk.changePct = +((stk.change / (stk.price - stk.change)) * 100).toFixed(2);
-          }
+    function setupVisibilityListener() {
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          stopDashboardPolling();
+        } else {
+          fetchDashboardData();
+          startDashboardPolling();
         }
-        renderDashboardComponents();
-      }, 2500);
+      });
     }
 
-    function triggerMarketSurge() {
-      playBeep(880, 0.15);
-      if (window.LIVE_STOCKS) {
-        window.LIVE_STOCKS.forEach(stk => {
-          const delta = (Math.random() * 0.012 + 0.003) * stk.price;
-          stk.price = +(stk.price + delta).toFixed(2);
-          stk.change = +(stk.change + delta).toFixed(2);
-          stk.changePct = +((stk.change / (stk.price - stk.change)) * 100).toFixed(2);
-        });
-      }
-      renderDashboardComponents();
-      updateChartWithLivePrice();
+    function startDashboardPolling() {
+      stopDashboardPolling();
+      dashboardPollTimer = setInterval(fetchDashboardData, 20000); // 20 sec polling
+    }
 
-      // Broadcast simulated AI Insight
-      const aiFeed = document.getElementById('ai-insights-feed');
-      if (aiFeed) {
-        const item = document.createElement('div');
-        item.className = 'p-3 rounded-xl bg-secondary/10 border border-secondary/40 animate-pulse';
-        item.innerHTML = `
-          <div class="flex items-center justify-between text-[11px] font-bold text-secondary mb-1">
-            <span>🚀 MARKET SURGE DETECTED</span>
-            <span class="font-mono text-on-surface-variant">Just now</span>
+    function stopDashboardPolling() {
+      if (dashboardPollTimer) {
+        clearInterval(dashboardPollTimer);
+        dashboardPollTimer = null;
+      }
+    }
+
+    function showDashboardSkeletons() {
+      const gBody = document.getElementById('top-gainers-body');
+      const lBody = document.getElementById('top-losers-body');
+      const heatmap = document.getElementById('sector-heatmap');
+      const news = document.getElementById('mini-news');
+
+      const skRow = `
+        <tr class="animate-pulse">
+          <td class="py-3"><div class="h-4 bg-white/10 rounded w-16"></div></td>
+          <td class="py-3 text-right"><div class="h-4 bg-white/10 rounded w-14 ml-auto"></div></td>
+          <td class="py-3 text-right"><div class="h-4 bg-white/10 rounded w-12 ml-auto"></div></td>
+          <td class="py-3 text-right"><div class="h-4 bg-white/10 rounded w-12 ml-auto"></div></td>
+        </tr>
+      `;
+
+      if (gBody) gBody.innerHTML = skRow + skRow + skRow + skRow + skRow;
+      if (lBody) lBody.innerHTML = skRow + skRow + skRow + skRow + skRow;
+
+      if (heatmap) {
+        heatmap.innerHTML = Array(6).fill(0).map(() => `
+          <div class="rounded-lg border border-white/5 p-3 flex flex-col justify-between h-20 animate-pulse bg-white/5">
+            <div class="h-3 bg-white/10 rounded w-2/3"></div>
+            <div class="h-4 bg-white/10 rounded w-1/2 ml-auto"></div>
           </div>
-          <p class="text-xs text-white leading-relaxed">
-            Broad market inflow triggered across Indian Equities. Advances expanding rapidly.
-          </p>
-        `;
-        aiFeed.prepend(item);
+        `).join('');
+      }
+
+      if (news) {
+        news.innerHTML = Array(4).fill(0).map(() => `
+          <div class="border-b border-white/5 pb-3 animate-pulse">
+            <div class="h-3 bg-white/10 rounded w-1/3 mb-2"></div>
+            <div class="h-4 bg-white/10 rounded w-full mb-1"></div>
+            <div class="h-4 bg-white/10 rounded w-2/3"></div>
+          </div>
+        `).join('');
       }
     }
 
-    function renderDashboardComponents() {
-      renderTicker();
-      renderGainersLosers();
-      renderSectorHeatmap();
-      updateBreadthMetrics();
+    async function initLiveDashboard() {
+      await fetchDashboardData();
+      startDashboardPolling();
     }
 
-    function updateBreadthMetrics() {
-      if (!window.LIVE_STOCKS) return;
-      const adv = window.LIVE_STOCKS.filter(s => s.changePct > 0).length;
-      const dec = window.LIVE_STOCKS.filter(s => s.changePct <= 0).length;
-      const tot = window.LIVE_STOCKS.length;
-      const advPct = Math.round((adv / tot) * 100);
-      const decPct = 100 - advPct;
+    async function fetchDashboardData() {
+      if (isFetchingDashboard) return;
+      isFetchingDashboard = true;
 
+      try {
+        await Promise.allSettled([
+          fetchBreadthAPI(),
+          fetchGainersAPI(),
+          fetchLosersAPI(),
+          fetchSectorHeatmapAPI(),
+          fetchNewsAPI()
+        ]);
+      } catch (e) {
+        console.warn('Dashboard live sync warning:', e);
+      } finally {
+        isFetchingDashboard = false;
+        renderTicker();
+      }
+    }
+
+    async function fetchBreadthAPI() {
+      try {
+        const res = await fetch('/api/dashboard/breadth');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (data.status === 'SUCCESS') {
+          renderBreadthUI(data);
+          return;
+        }
+      } catch (err) {
+        console.warn('Breadth API fallback:', err.message);
+      }
+      renderSummaryMetricsLocal();
+    }
+
+    function renderBreadthUI(data) {
       const advEl = document.getElementById('advances-count');
       const decEl = document.getElementById('declines-count');
-      const advPctLabel = document.getElementById('adv-pct-label');
-      const decPctLabel = document.getElementById('dec-pct-label');
       const bar = document.getElementById('breadth-bar');
       const text = document.getElementById('breadth-text');
 
-      if (advEl) advEl.textContent = adv;
-      if (decEl) decEl.textContent = dec;
-      if (advPctLabel) advPctLabel.textContent = `${advPct}% Advancing`;
-      if (decPctLabel) decPctLabel.textContent = `${decPct}% Declining`;
+      if (advEl) advEl.textContent = data.advances;
+      if (decEl) decEl.textContent = data.declines;
 
-      if (bar) {
+      if (bar && data.total > 0) {
         bar.innerHTML = `
-          <div style="width: ${advPct}%" class="bg-secondary h-full transition-all duration-500 rounded-l-full"></div>
-          <div style="width: ${decPct}%" class="bg-error h-full transition-all duration-500 rounded-r-full"></div>
+          <div style="width: ${data.advPct}%" class="bg-secondary h-full transition-all duration-500" title="Advances ${data.advances}"></div>
+          <div style="width: ${data.unchPct}%" class="bg-yellow-500 h-full transition-all duration-500" title="Unchanged ${data.unchanged}"></div>
+          <div style="width: ${data.decPct}%" class="bg-error h-full transition-all duration-500" title="Declines ${data.declines}"></div>
         `;
       }
+
       if (text) {
         text.innerHTML = `
-          <span class="text-secondary">Adv ${adv} (${advPct}%)</span>
-          <span class="text-error">Dec ${dec} (${decPct}%)</span>
+          <span class="text-secondary font-medium">Adv ${data.advances} (${data.advPct}%)</span>
+          <span class="text-yellow-500 font-medium">Unch ${data.unchanged}</span>
+          <span class="text-error font-medium">Dec ${data.declines} (${data.decPct}%)</span>
         `;
+      }
+    }
+
+    async function fetchGainersAPI() {
+      try {
+        const res = await fetch('/api/dashboard/gainers?limit=5');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (data.status === 'SUCCESS' && Array.isArray(data.gainers)) {
+          const gBody = document.getElementById('top-gainers-body');
+          if (gBody) gBody.innerHTML = generateTableRows(data.gainers, 'secondary');
+          return;
+        }
+      } catch (err) {
+        console.warn('Gainers API fallback:', err.message);
+      }
+      renderGainersLosersLocal();
+    }
+
+    async function fetchLosersAPI() {
+      try {
+        const res = await fetch('/api/dashboard/losers?limit=5');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (data.status === 'SUCCESS' && Array.isArray(data.losers)) {
+          const lBody = document.getElementById('top-losers-body');
+          if (lBody) lBody.innerHTML = generateTableRows(data.losers, 'error');
+          return;
+        }
+      } catch (err) {
+        console.warn('Losers API fallback:', err.message);
+      }
+      renderGainersLosersLocal();
+    }
+
+    async function fetchSectorHeatmapAPI() {
+      try {
+        const res = await fetch('/api/dashboard/sector-heatmap');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (data.status === 'SUCCESS' && Array.isArray(data.sectors)) {
+          renderSectorHeatmapUI(data.sectors);
+          return;
+        }
+      } catch (err) {
+        console.warn('Heatmap API fallback:', err.message);
+      }
+      renderSectorHeatmapLocal();
+    }
+
+    function renderSectorHeatmapUI(sectors) {
+      const container = document.getElementById('sector-heatmap');
+      if (!container) return;
+
+      let html = '';
+      sectors.forEach(sec => {
+        const avg = sec.avgChangePct;
+        const sign = avg > 0 ? '+' : '';
+        const valStr = avg.toFixed(2);
+        
+        let bgStyle = 'background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1);';
+        let textClass = 'text-on-surface';
+
+        if (avg >= 2.0) {
+          bgStyle = 'background: rgba(78, 222, 163, 0.22); border-color: rgba(78, 222, 163, 0.4);';
+          textClass = 'text-secondary font-bold';
+        } else if (avg > 0) {
+          bgStyle = 'background: rgba(78, 222, 163, 0.12); border-color: rgba(78, 222, 163, 0.25);';
+          textClass = 'text-secondary';
+        } else if (avg <= -2.0) {
+          bgStyle = 'background: rgba(255, 180, 171, 0.22); border-color: rgba(255, 180, 171, 0.4);';
+          textClass = 'text-error font-bold';
+        } else if (avg < 0) {
+          bgStyle = 'background: rgba(255, 180, 171, 0.12); border-color: rgba(255, 180, 171, 0.25);';
+          textClass = 'text-error';
+        }
+
+        html += `
+          <div style="${bgStyle}" class="rounded-lg border p-3 flex flex-col justify-between h-20 transition-all duration-300 hover:scale-[1.02]">
+            <div class="text-xs text-on-surface truncate font-semibold" title="${sec.sector}">${sec.sector}</div>
+            <div class="flex justify-between items-end">
+              <span class="text-[10px] text-on-surface-variant/70">${sec.count || 0} stocks</span>
+              <span class="font-mono text-sm ${textClass}">${sign}${valStr}%</span>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    async function fetchNewsAPI() {
+      try {
+        const res = await fetch('/api/dashboard/news?limit=4');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (data.status === 'SUCCESS' && Array.isArray(data.news)) {
+          renderNewsUI(data.news);
+          return;
+        }
+      } catch (err) {
+        console.warn('News API fallback:', err.message);
+      }
+      renderNewsLocal();
+    }
+
+    function renderNewsUI(newsItems) {
+      const container = document.getElementById('mini-news');
+      if(!container) return;
+      
+      let html = '';
+      newsItems.slice(0, 4).forEach(item => {
+        let sentClass = 'bg-white/10 text-on-surface';
+        const s = (item.sentiment || '').toLowerCase();
+        if (s.includes('bull')) sentClass = 'bg-secondary/20 text-secondary border border-secondary/30';
+        else if (s.includes('bear')) sentClass = 'bg-error/20 text-error border border-error/30';
+
+        const tickerBadge = item.relatedTicker ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary font-mono font-bold">${item.relatedTicker}</span>` : '';
+
+        html += `
+          <div class="border-b border-white/5 pb-3 last:border-0 last:pb-0">
+            <div class="flex gap-2 mb-1.5 items-center flex-wrap">
+              <span class="text-[10px] px-1.5 py-0.5 rounded ${sentClass}">${item.sentiment || 'News'}</span>
+              ${tickerBadge}
+              <span class="text-[10px] text-on-surface-variant ml-auto flex items-center gap-1">
+                <span class="material-symbols-outlined text-[10px]">schedule</span> ${item.publishedAt || item.time || 'Recent'}
+              </span>
+            </div>
+            <a href="${item.url || '#'}" target="_blank" class="text-sm font-medium text-on-surface hover:text-primary transition-colors line-clamp-2 leading-snug">
+              ${item.headline}
+            </a>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // Local Fallbacks using shared.js
+    function renderSummaryMetricsLocal() {
+      if(typeof getMarketBreadth !== 'function') return;
+      renderBreadthUI(getMarketBreadth());
+    }
+
+    function renderGainersLosersLocal() {
+      if(typeof getTopGainers !== 'function' || typeof getTopLosers !== 'function') return;
+      const gBody = document.getElementById('top-gainers-body');
+      const lBody = document.getElementById('top-losers-body');
+      if(gBody) gBody.innerHTML = generateTableRows(getTopGainers(5), 'secondary');
+      if(lBody) lBody.innerHTML = generateTableRows(getTopLosers(5), 'error');
+    }
+
+    function renderSectorHeatmapLocal() {
+      if(typeof getSectorSummary !== 'function') return;
+      renderSectorHeatmapUI(getSectorSummary());
+    }
+
+    function renderNewsLocal() {
+      if(typeof NEWS_DATA !== 'undefined') {
+        renderNewsUI(NEWS_DATA.slice(0, 4));
       }
     }
 
     function renderTicker() {
       const container = document.getElementById('ticker-container');
-      if (!container || !window.LIVE_INDICES) return;
+      if(!container || !window.LIVE_INDICES) return;
       
       let html = '<div class="ticker">';
       const indices = ['SENSEX', 'NIFTY 50', 'BANK NIFTY', 'NIFTY IT', 'NIFTY MIDCAP'];
@@ -834,16 +714,16 @@
         indices.forEach(idx => {
           const data = Object.values(window.LIVE_INDICES).find(item => item.name === idx);
           if(data) {
-            const colorClass = data.changePct >= 0 ? 'text-secondary' : 'text-error';
-            const sign = data.changePct >= 0 ? '+' : '';
-            const icon = data.changePct >= 0 ? 'arrow_upward' : 'arrow_downward';
+            const colorClass = changeClass(data.changePct);
+            const sign = changeSign(data.changePct);
+            const icon = changeIcon(data.changePct);
             
             html += `
-              <div class="ticker-item font-mono cursor-pointer" onclick="switchChartStock('${idx}')">
-                <span class="font-bold text-on-surface uppercase tracking-wider mr-2">${idx}</span>
-                <span class="font-bold ${colorClass} mr-2">${fmtPrice(data.value)}</span>
-                <span class="text-[11px] ${colorClass} bg-white/5 px-2 py-0.5 rounded-full border border-white/10 inline-flex items-center gap-0.5">
-                  <span class="material-symbols-outlined text-[12px]">${icon}</span>
+              <div class="ticker-item inline-flex items-center gap-2">
+                <span class="font-semibold text-on-surface">${idx}</span>
+                <span class="font-mono ${colorClass}">${fmtPrice(data.value)}</span>
+                <span class="text-xs ${colorClass} bg-${colorClass.replace('text-', '')}/10 px-1 py-0.5 rounded flex items-center gap-0.5">
+                  <span class="material-symbols-outlined text-[10px]">${icon}</span>
                   ${sign}${fmtPrice(Math.abs(data.change))} (${sign}${Math.abs(data.changePct).toFixed(2)}%)
                 </span>
               </div>
@@ -855,329 +735,35 @@
       container.innerHTML = html;
     }
 
-    function renderGainersLosers() {
-      if (!window.LIVE_STOCKS) return;
-      const sorted = [...window.LIVE_STOCKS].sort((a, b) => b.changePct - a.changePct);
-      const gainers = sorted.slice(0, 5);
-      const losers = sorted.slice(-5).reverse();
-
-      const gBody = document.getElementById('top-gainers-body');
-      const lBody = document.getElementById('top-losers-body');
-
-      if (gBody) gBody.innerHTML = generateRows(gainers);
-      if (lBody) lBody.innerHTML = generateRows(losers);
-    }
-
-    function generateRows(stocks) {
-      return stocks.map(stk => {
-        const isUp = stk.changePct >= 0;
-        const color = isUp ? 'text-secondary' : 'text-error';
-        const badge = isUp ? 'badge-gain' : 'badge-loss';
-        const sign = isUp ? '+' : '';
-        const icon = isUp ? 'arrow_upward' : 'arrow_downward';
+    function generateTableRows(stocks, colorType) {
+      if (!Array.isArray(stocks) || stocks.length === 0) {
+        return `<tr><td colspan="4" class="py-4 text-center text-on-surface-variant text-xs">No live stock data</td></tr>`;
+      }
+      return stocks.map(stock => {
+        const pct = stock.changePct != null ? stock.changePct : stock.pChange || 0;
+        const chg = stock.change != null ? stock.change : 0;
+        const price = stock.price || stock.ltp || 0;
+        const sign = changeSign(pct);
+        const color = changeClass(pct);
+        const icon = changeIcon(pct);
         return `
-          <tr class="hover:bg-white/[0.04] transition-colors group">
-            <td class="py-2.5 pr-2">
-              <div class="font-bold text-white group-hover:text-primary transition-colors cursor-pointer" onclick="switchChartStock('${stk.ticker}')">
-                <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-xs">${stk.ticker}</span>
-              </div>
+          <tr class="hover:bg-white/5 transition-colors group">
+            <td class="py-3 pr-2">
+              <div class="font-semibold text-on-surface group-hover:text-primary transition-colors">${stock.ticker}</div>
             </td>
-            <td class="py-2.5 text-right font-mono font-bold text-white">₹${fmtPrice(stk.price)}</td>
-            <td class="py-2.5 text-right font-mono ${color}">${sign}₹${fmtPrice(Math.abs(stk.change))}</td>
-            <td class="py-2.5 text-right font-mono">
-              <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${badge} inline-flex items-center gap-0.5">
-                <span class="material-symbols-outlined text-[12px]">${icon}</span> ${sign}${Math.abs(stk.changePct).toFixed(2)}%
-              </span>
-            </td>
-            <td class="py-2.5 text-center">
-              <button onclick="openTradeModal('${stk.ticker}')" class="px-2 py-1 rounded bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-bold border border-primary/20 transition-all">
-                Trade
-              </button>
+            <td class="py-3 text-right font-mono text-on-surface">${fmtPrice(price)}</td>
+            <td class="py-3 text-right font-mono ${color}">${sign}${fmtPrice(Math.abs(chg))}</td>
+            <td class="py-3 text-right font-mono ${color}">
+               <div class="flex items-center justify-end gap-1">
+                 <span class="material-symbols-outlined text-[12px]">${icon}</span>
+                 ${sign}${Math.abs(pct).toFixed(2)}%
+               </div>
             </td>
           </tr>
         `;
       }).join('');
     }
-
-    function renderSectorHeatmap() {
-      const container = document.getElementById('sector-heatmap');
-      if (!container || !window.LIVE_STOCKS) return;
-
-      const sectors = {};
-      window.LIVE_STOCKS.forEach(s => {
-        if (!sectors[s.sector]) sectors[s.sector] = { totalPct: 0, count: 0 };
-        sectors[s.sector].totalPct += s.changePct;
-        sectors[s.sector].count++;
-      });
-
-      let html = '';
-      Object.keys(sectors).forEach(sec => {
-        const avg = sectors[sec].totalPct / sectors[sec].count;
-        const isUp = avg >= 0;
-        const sign = isUp ? '+' : '';
-        const color = isUp ? 'text-secondary' : 'text-error';
-        const bg = isUp ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)';
-        const border = isUp ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)';
-
-        html += `
-          <div style="background: ${bg}; border-color: ${border};" onclick="filterBySector('${sec}')" class="rounded-xl border p-3.5 flex flex-col justify-between h-20 transition-all duration-300 hover:scale-[1.03] cursor-pointer shadow-md">
-            <div class="text-xs text-white truncate font-bold">${sec}</div>
-            <div class="flex justify-between items-end">
-              <span class="text-[10px] text-on-surface-variant font-mono">${sectors[sec].count} stocks</span>
-              <span class="font-mono text-xs font-bold ${color}">${sign}${avg.toFixed(2)}%</span>
-            </div>
-          </div>
-        `;
-      });
-      container.innerHTML = html;
-    }
-
-    function filterBySector(sec) {
-      playBeep(520, 0.08);
-      const searchInput = document.getElementById('global-search-input');
-      if (searchInput) {
-        searchInput.value = sec;
-        handleStockSearch(sec);
-      }
-    }
-
-    /* ── INTERACTIVE CHART ENGINE ── */
-    function initInteractiveChart() {
-      const ctx = document.getElementById('interactive-stock-chart').getContext('2d');
-      const labels = ['09:15', '10:00', '10:45', '11:30', '12:15', '13:00', '13:45', '14:30', '15:15', '15:30'];
-      const dataPoints = [24310, 24330, 24320, 24350, 24345, 24375, 24360, 24390, 24385, 24398.15];
-
-      const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-      gradient.addColorStop(0, 'rgba(229, 193, 88, 0.35)');
-      gradient.addColorStop(1, 'rgba(229, 193, 88, 0.0)');
-
-      chartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Price',
-            data: dataPoints,
-            borderColor: '#E5C158',
-            borderWidth: 2.5,
-            pointBackgroundColor: '#FFF2A8',
-            pointBorderColor: '#E5C158',
-            pointRadius: 3.5,
-            pointHoverRadius: 6,
-            tension: 0.35,
-            fill: true,
-            backgroundColor: gradient
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(8, 13, 26, 0.95)',
-              borderColor: 'rgba(229, 193, 88, 0.4)',
-              borderWidth: 1,
-              titleFont: { family: 'JetBrains Mono', size: 12 },
-              bodyFont: { family: 'JetBrains Mono', size: 12, weight: 'bold' },
-              padding: 10,
-              displayColors: false,
-              callbacks: {
-                label: function(ctx) { return 'Price: ₹' + ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2}); }
-              }
-            }
-          },
-          scales: {
-            x: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } }
-            },
-            y: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } }
-            }
-          }
-        }
-      });
-    }
-
-    function switchChartStock(symbol) {
-      playBeep(660, 0.08);
-      currentChartSymbol = symbol;
-      const select = document.getElementById('chart-stock-select');
-      if (select) select.value = symbol;
-
-      let basePrice = 24398.15;
-      let title = symbol;
-      let change = "+89.30 (+0.37%) Today";
-
-      if (window.LIVE_STOCKS) {
-        const found = window.LIVE_STOCKS.find(s => s.ticker === symbol);
-        if (found) {
-          basePrice = found.price;
-          title = found.name;
-          change = `${found.changePct >= 0 ? '+' : ''}${found.change} (${found.changePct}%) Today`;
-        }
-      }
-
-      document.getElementById('chart-symbol-title').textContent = title;
-      document.getElementById('chart-symbol-ticker').textContent = symbol;
-      document.getElementById('chart-live-price').textContent = '₹' + fmtPrice(basePrice);
-      document.getElementById('chart-live-change').textContent = change;
-
-      // Generate realistic price curve
-      const newPoints = [];
-      let cur = basePrice * 0.985;
-      for (let i = 0; i < 10; i++) {
-        cur += (Math.random() - 0.45) * (basePrice * 0.005);
-        newPoints.push(+cur.toFixed(2));
-      }
-      newPoints[newPoints.length - 1] = basePrice;
-
-      if (chartInstance) {
-        chartInstance.data.datasets[0].data = newPoints;
-        chartInstance.update();
-      }
-    }
-
-    function updateChartWithLivePrice() {
-      if (!chartInstance) return;
-      const data = chartInstance.data.datasets[0].data;
-      if (data && data.length > 0) {
-        data[data.length - 1] += (Math.random() - 0.45) * 5;
-        chartInstance.update();
-      }
-    }
-
-    function setChartTimeframe(tf) {
-      playBeep(520, 0.05);
-      ['1D', '1W', '1M', '1Y'].forEach(t => {
-        const btn = document.getElementById(`tf-${t}`);
-        if (btn) {
-          if (t === tf) {
-            btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-primary text-black transition-all";
-          } else {
-            btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold text-on-surface-variant hover:text-white transition-all";
-          }
-        }
-      });
-      switchChartStock(currentChartSymbol);
-    }
-
-    /* ── SEARCH DROPDOWN ── */
-    function handleStockSearch(q) {
-      const drop = document.getElementById('search-dropdown');
-      if (!drop) return;
-      if (!q || q.trim().length === 0) {
-        drop.classList.add('hidden');
-        return;
-      }
-
-      const query = q.trim().toLowerCase();
-      const matches = window.LIVE_STOCKS.filter(s => 
-        s.ticker.toLowerCase().includes(query) || 
-        s.name.toLowerCase().includes(query) ||
-        s.sector.toLowerCase().includes(query)
-      ).slice(0, 6);
-
-      if (matches.length === 0) {
-        drop.innerHTML = '<div class="p-3 text-xs text-on-surface-variant">No stocks found matching "' + q + '"</div>';
-        drop.classList.remove('hidden');
-        return;
-      }
-
-      drop.innerHTML = matches.map(s => `
-        <div class="p-2.5 hover:bg-white/10 rounded-lg flex items-center justify-between cursor-pointer transition-colors" onclick="selectSearchStock('${s.ticker}')">
-          <div>
-            <span class="font-bold font-mono text-white text-xs mr-2">${s.ticker}</span>
-            <span class="text-xs text-on-surface-variant">${s.name}</span>
-          </div>
-          <div class="text-right font-mono text-xs">
-            <div class="font-bold text-white">₹${fmtPrice(s.price)}</div>
-            <div class="${s.changePct >= 0 ? 'text-secondary' : 'text-error'} font-semibold">${s.changePct >= 0 ? '+' : ''}${s.changePct}%</div>
-          </div>
-        </div>
-      `).join('');
-      drop.classList.remove('hidden');
-    }
-
-    function selectSearchStock(ticker) {
-      document.getElementById('search-dropdown').classList.add('hidden');
-      document.getElementById('global-search-input').value = ticker;
-      switchChartStock(ticker);
-    }
-
-    /* ── INSTANT PAPER TRADING MODAL ── */
-    function openTradeModal(ticker) {
-      playBeep(700, 0.08);
-      const stk = window.LIVE_STOCKS ? window.LIVE_STOCKS.find(s => s.ticker === ticker) : null;
-      const price = stk ? stk.price : 1328.80;
-
-      document.getElementById('trade-ticker-input').value = ticker;
-      document.getElementById('trade-price-input').value = price;
-      document.getElementById('trade-qty-input').value = 10;
-      updateTradeTotal();
-      document.getElementById('trade-modal').classList.remove('hidden');
-    }
-
-    function openTradeModalCurrent() {
-      openTradeModal(currentChartSymbol === 'NIFTY 50' ? 'RELIANCE' : currentChartSymbol);
-    }
-
-    function closeTradeModal() {
-      document.getElementById('trade-modal').classList.add('hidden');
-    }
-
-    function updateTradeTotal() {
-      const price = parseFloat(document.getElementById('trade-price-input').value) || 0;
-      const qty = parseInt(document.getElementById('trade-qty-input').value) || 1;
-      const tot = price * qty;
-      document.getElementById('trade-total-value').textContent = '₹' + fmtPrice(tot);
-    }
-
-    function executeTrade(type) {
-      playBeep(1046, 0.15);
-      const ticker = document.getElementById('trade-ticker-input').value;
-      const qty = parseInt(document.getElementById('trade-qty-input').value) || 1;
-      const price = parseFloat(document.getElementById('trade-price-input').value) || 0;
-      const val = price * qty;
-
-      if (type === 'BUY') {
-        demoCashBalance -= val;
-      } else {
-        demoCashBalance += val;
-      }
-
-      document.getElementById('sidebar-balance').textContent = '₹' + fmtPrice(demoCashBalance);
-      closeTradeModal();
-
-      alert(`✅ Order Executed Successfully!\n\n${type} ${qty} shares of ${ticker} at ₹${price}.\nNew Demo Cash Balance: ₹${fmtPrice(demoCashBalance)}`);
-    }
-
-    function askSaarthiAI() {
-      const input = document.getElementById('ai-question-input');
-      const val = input.value.trim();
-      if (!val) return;
-      playBeep(780, 0.1);
-
-      const aiFeed = document.getElementById('ai-insights-feed');
-      if (aiFeed) {
-        const item = document.createElement('div');
-        item.className = 'p-3 rounded-xl bg-primary/10 border border-primary/40 animate-fadeIn';
-        item.innerHTML = `
-          <div class="flex items-center justify-between text-[11px] font-bold text-primary mb-1">
-            <span>✨ SAARTHI AI DIAGNOSIS</span>
-            <span class="font-mono text-on-surface-variant">Instant</span>
-          </div>
-          <p class="text-xs text-white leading-relaxed">
-            <strong>Analysis on "${val}":</strong> Technical momentum score 8.4/10. RSI neutral at 54. FII accumulation detected with bullish consolidation setup.
-          </p>
-        `;
-        aiFeed.prepend(item);
-        input.value = '';
-      }
-    }
   </script>
 </body>
 </html>
+
