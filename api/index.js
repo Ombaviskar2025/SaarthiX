@@ -3471,6 +3471,13 @@ app.get('/api/dashboard/losers', (req, res) => losersHandler(req, res, marketWat
 app.get('/api/dashboard/sector-heatmap', (req, res) => sectorHeatmapHandler(req, res, marketWatchCache, refreshMarketWatchCache));
 app.get('/api/dashboard/news', dashboardNewsHandler);
 
+// Mount Portfolio Endpoints
+const portfolioService = require('./portfolio.js');
+app.get('/api/portfolio/indices', portfolioService.handleIndices);
+app.get('/api/portfolio/summary', portfolioService.handleSummary);
+app.get('/api/portfolio/analysis', portfolioService.handleAnalysis);
+app.get('/api/portfolio/:symbol?', portfolioService.handleAnalysis);
+
 // Fallback to serve login page
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'login.html'));
