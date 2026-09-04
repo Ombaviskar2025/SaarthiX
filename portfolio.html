@@ -129,7 +129,7 @@
         <span id="market-status" class="font-label-sm text-label-sm flex items-center gap-1"></span>
         <span class="font-label-sm text-label-sm ml-auto" id="ist-time"></span>
       </div>
-      <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all" href="#">
+      <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all" href="support.html">
         <span class="material-symbols-outlined text-[18px]">help</span>
         <span class="font-label-sm text-label-sm">Support</span>
       </a>
@@ -145,14 +145,19 @@
 
     <!-- Top Bar -->
     <header class="hidden md:flex justify-between items-center h-16 px-gutter bg-surface-dim/80 backdrop-blur-md border-b border-white/10 sticky top-0 z-40 w-full">
-      <nav class="flex items-center gap-6">
-        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="dashboard.html">Dashboard</a>
-        <a class="font-label-md text-label-md text-primary font-bold border-b-2 border-primary pb-1" href="portfolio.html" aria-current="page">Portfolio</a>
-        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="mutual-funds.html">Mutual Funds</a>
-        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="stock-doctor.html">Stock Doctor</a>
-        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="ai-insights.html">AI Insights</a>
+      <nav class="flex items-center gap-6" id="portfolio-header-nav">
+        <!-- populated dynamically by buildNav -->
       </nav>
       <div class="flex items-center gap-4">
+        <!-- Language Selector -->
+        <div id="portfolio-lang-container"></div>
+
+        <!-- Compliance Pill -->
+        <button onclick="window.openComplianceModal()" class="compliance-pill" title="SEBI Compliance Information">
+          <span class="material-symbols-outlined text-[14px]">gavel</span>
+          <span>Compliance</span>
+        </button>
+
         <!-- Live Index Strip -->
         <div class="flex items-center gap-4 text-mono-data font-mono-data border-r border-white/10 pr-4">
           <span class="flex items-center gap-1">
@@ -222,7 +227,7 @@
             <button class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary flex items-center gap-1 transition-colors" onclick="clearAll()">
               <span class="material-symbols-outlined text-[16px]">clear_all</span>Clear All
             </button>
-            <button class="text-primary font-label-sm text-label-sm hover:text-primary-container flex items-center gap-1 transition-colors">
+            <button onclick="importCsv()" class="text-primary font-label-sm text-label-sm hover:text-primary-container flex items-center gap-1 transition-colors">
               <span class="material-symbols-outlined text-[16px]">upload_file</span>Import CSV
             </button>
           </div>
@@ -239,40 +244,105 @@
 
         <div class="flex flex-col gap-3" id="portfolio-inputs"></div>
 
-        <div class="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <button onclick="addStockRow()" class="font-label-md text-label-md text-primary flex items-center gap-2 hover:bg-white/5 px-4 py-2 rounded-lg transition-colors border border-dashed border-primary/30 w-full md:w-auto justify-center">
+        <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <button onclick="addStockRow()" class="font-label-md text-label-md text-primary flex items-center gap-2 hover:bg-white/5 px-4 py-2.5 rounded-lg transition-colors border border-dashed border-primary/30 w-full sm:w-auto justify-center">
             <span class="material-symbols-outlined text-[18px]">add</span>Add Another Stock
           </button>
-          <button onclick="runAnalysis()" class="bg-primary text-on-primary font-label-md text-label-md px-8 py-3 rounded-lg hover:bg-primary-container transition-colors pulse-button w-full md:w-auto flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
-            <span class="material-symbols-outlined text-[18px]">rocket_launch</span>Run Deep Analysis
-          </button>
+          
+          <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <button onclick="triggerPortfolioDiagnosisAction()" class="bg-surface-container-high border border-primary/40 text-primary hover:bg-primary/10 font-label-md text-label-md px-6 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto shadow-md">
+              <span class="material-symbols-outlined text-[18px] text-primary">monitor_heart</span>
+              <span data-i18n="run_diagnosis">Run Portfolio Diagnosis</span>
+            </button>
+            <button onclick="runAnalysis()" class="bg-primary text-on-primary font-label-md text-label-md px-8 py-2.5 rounded-lg hover:bg-primary-container transition-colors pulse-button w-full sm:w-auto flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+              <span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+              <span data-i18n="analyze_portfolio">Run Deep Analysis</span>
+            </button>
+          </div>
         </div>
       </section>
 
       <!-- Results Section -->
       <section id="results-section" class="flex-col gap-section-gap">
 
+        <!-- Task 2: Portfolio Doctor Diagnosis Result Card -->
+        <div id="portfolio-doctor-card" class="glass-panel rounded-2xl p-6 border-l-4 border-l-primary shadow-2xl relative overflow-hidden bg-gradient-to-br from-surface-container/90 via-surface-container/60 to-primary/5">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary shadow-lg shadow-primary/10">
+                <span class="material-symbols-outlined text-2xl">monitor_heart</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-lg text-on-surface">Portfolio Doctor — Health Diagnosis</h3>
+                  <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-mono border border-primary/20">AI Engine</span>
+                </div>
+                <p class="text-xs text-on-surface-variant">Weighted multi-stock diagnosis across fundamental, technical, sentiment & macro factors</p>
+              </div>
+            </div>
+            <div id="portfolio-health-badge-container" class="flex items-center gap-3 self-start md:self-auto">
+              <!-- filled by JS -->
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
+            <!-- Left 6 cols: Score Breakdown Component -->
+            <div class="lg:col-span-6 flex flex-col justify-between" id="portfolio-score-breakdown-mount">
+              <!-- mounted by shared.js renderScoreBreakdown -->
+            </div>
+
+            <!-- Right 6 cols: 3 Weakest Holdings & Rebalancing -->
+            <div class="lg:col-span-6 flex flex-col gap-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-error">
+                  <span class="material-symbols-outlined text-[16px]">warning</span>
+                  <span>Top 3 Vulnerable / Weakest Holdings</span>
+                </div>
+                <span class="text-[10px] text-on-surface-variant">Ranked by lowest composite AI score</span>
+              </div>
+
+              <div id="weakest-holdings-list" class="space-y-2.5">
+                <!-- filled by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Summary Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div class="glass-panel rounded-xl p-5">
             <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Portfolio Value</p>
-            <p class="font-headline-md text-headline-md text-on-surface font-bold" id="res-total-value">—</p>
-            <p class="font-body-sm text-body-sm mt-1 flex items-center gap-1" id="res-total-pnl">—</p>
+            <p class="font-headline-md text-headline-md text-on-surface font-bold" id="res-total-value">
+              <span class="skeleton skeleton-num"></span>
+            </p>
+            <p class="font-body-sm text-body-sm mt-1 flex items-center gap-1" id="res-total-pnl">
+              <span class="skeleton skeleton-text w-16"></span>
+            </p>
           </div>
           <div class="glass-panel rounded-xl p-5">
             <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Invested Amount</p>
-            <p class="font-headline-md text-headline-md text-on-surface font-bold" id="res-invested">—</p>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1" id="res-holdings-count">—</p>
+            <p class="font-headline-md text-headline-md text-on-surface font-bold" id="res-invested">
+              <span class="skeleton skeleton-num"></span>
+            </p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1" id="res-holdings-count">
+              <span class="skeleton skeleton-text w-12"></span>
+            </p>
           </div>
           <div class="glass-panel rounded-xl p-5">
             <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">STCG Tax Est.</p>
-            <p class="font-headline-md text-headline-md text-primary font-bold" id="res-stcg">—</p>
+            <p class="font-headline-md text-headline-md text-primary font-bold" id="res-stcg">
+              <span class="skeleton skeleton-num"></span>
+            </p>
             <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">@20% (held &lt;12m)</p>
           </div>
           <div class="glass-panel rounded-xl p-5 ai-insight-border">
             <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">AI Health Score</p>
-            <p class="font-headline-md text-headline-md text-secondary font-bold" id="res-ai-score">—</p>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1" id="res-ai-label">—</p>
+            <p class="font-headline-md text-headline-md text-secondary font-bold" id="res-ai-score">
+              <span class="skeleton skeleton-num"></span>
+            </p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1" id="res-ai-label">
+              <span class="skeleton skeleton-text w-20"></span>
+            </p>
           </div>
         </div>
 
@@ -491,6 +561,33 @@
       setTimeout(()=>{ document.getElementById('portfolio-inputs').innerHTML=''; addStockRow(); },350);
     }
 
+    function importCsv() {
+      const sample = `Ticker, Exchange, Quantity, Avg Buy Price
+RELIANCE, NSE, 10, 1280.50
+TCS, NSE, 5, 2350.00
+HDFCBANK, NSE, 15, 810.00`;
+      const input = prompt("Paste CSV data (Ticker, Exchange, Quantity, Avg Buy Price):", sample);
+      if (!input) return;
+      const lines = input.trim().split('\n');
+      if (lines.length < 2) return;
+      document.getElementById('portfolio-inputs').innerHTML = '';
+      let added = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const parts = lines[i].split(',').map(p => p.trim());
+        if (parts.length >= 4) {
+          const ticker = parts[0].toUpperCase();
+          const exchange = parts[1].toUpperCase() === 'BSE' ? 'BSE' : 'NSE';
+          const qty = parseInt(parts[2], 10) || 1;
+          const avgPrice = parseFloat(parts[3]) || 100;
+          if (ticker) {
+            addStockRow({ ticker, exchange, qty, avgPrice });
+            added++;
+          }
+        }
+      }
+      if (added === 0) addStockRow();
+    }
+
     // ── Collect holdings from DOM ─────────────────────────────
     function collectHoldings() {
       const rows = document.querySelectorAll('.stock-row');
@@ -570,11 +667,11 @@
       });
 
       const totalPnl    = totalValue - totalInvested;
-      const totalPnlPct = ((totalPnl/totalInvested)*100).toFixed(2);
+      const totalPnlPct = totalInvested > 0 ? ((totalPnl/totalInvested)*100).toFixed(2) : '0.00';
       const gainsPnl    = enriched.filter(h=>h.pnl>0).reduce((s,h)=>s+h.pnl,0);
       const stcg        = gainsPnl * 0.20;
       const ltcg        = Math.max(0,(gainsPnl - 125000)) * 0.125;
-      const aiScore     = aiData ? aiData.healthScore : Math.min(100, Math.max(30, 60 + (holdings.length * 4) + (parseFloat(totalPnlPct) > 0 ? 10 : -5)));
+      const aiScore     = aiData ? aiData.healthScore : Math.min(100, Math.max(30, 60 + (holdings.length * 4) + (parseFloat(totalPnlPct || 0) > 0 ? 10 : -5)));
 
       // Summary
       document.getElementById('res-total-value').textContent = fmtINR(totalValue);
@@ -726,7 +823,7 @@
                 <!-- Risk & Signal Flags -->
                 ${flagsList && flagsList.length > 0 ? `
                   <div class="flex flex-wrap gap-1.5 pt-1">
-                    ${flagsList.map(rf => `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/5 text-primary-light border border-white/10 flex items-center gap-1"><span class="material-symbols-outlined text-[13px] text-primary">show_chart</span>${rf}</span>`).join('')}
+                    ${flagsList.map(rf => `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/5 text-primary border border-white/10 flex items-center gap-1"><span class="material-symbols-outlined text-[13px] text-primary">show_chart</span>${rf}</span>`).join('')}
                   </div>
                 ` : ''}
 
@@ -902,10 +999,26 @@
 
     // ── Init ──────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-      const { navLinks, mobileLinks, statusDot } = buildNav('portfolio');
+      const { navLinks, mobileLinks, headerNavLinks, statusDot } = buildNav('portfolio');
       document.getElementById('nav-links').innerHTML  = navLinks;
       document.getElementById('mobile-nav').innerHTML = mobileLinks;
-      document.getElementById('market-status').innerHTML = statusDot;
+      const hdrNav = document.getElementById('portfolio-header-nav');
+      if (hdrNav) hdrNav.innerHTML = headerNavLinks;
+      const msEl = document.getElementById('market-status');
+      if (msEl && statusDot) msEl.innerHTML = statusDot;
+
+      if (window.SaarthiI18n) {
+        window.SaarthiI18n.renderLanguageSelector('portfolio-lang-container');
+        window.SaarthiI18n.applyTranslations();
+        window.addEventListener('saarthix_lang_change', () => {
+          const { navLinks, mobileLinks, headerNavLinks } = buildNav('portfolio');
+          document.getElementById('nav-links').innerHTML  = navLinks;
+          document.getElementById('mobile-nav').innerHTML = mobileLinks;
+          const hdrNav = document.getElementById('portfolio-header-nav');
+          if (hdrNav) hdrNav.innerHTML = headerNavLinks;
+          window.SaarthiI18n.applyTranslations();
+        });
+      }
 
       const savedHoldingsStr = localStorage.getItem('saarthix_holdings');
       let initialHoldings = null;
@@ -922,6 +1035,92 @@
       updateClock(); setInterval(updateClock, 1000);
       updateHeaderIndices();
     });
+
+    // ── Task 2: Portfolio Doctor Diagnosis Logic ───────────────
+    function triggerPortfolioDiagnosisAction() {
+      const rows = document.querySelectorAll('.stock-row');
+      const userHoldings = [];
+      rows.forEach(r => {
+        const tickerIn = r.querySelector('.ticker-input');
+        const qtyIn = r.querySelector('.qty-input');
+        const priceIn = r.querySelector('.price-input');
+        if (tickerIn && qtyIn && priceIn) {
+          const rawTicker = tickerIn.value.split(' - ')[0].trim().toUpperCase();
+          const qty = parseFloat(qtyIn.value);
+          const buyPrice = parseFloat(priceIn.value);
+          if (rawTicker && !isNaN(qty) && qty > 0) {
+            userHoldings.push({ ticker: rawTicker, qty, buyPrice: isNaN(buyPrice) ? 100 : buyPrice });
+          }
+        }
+      });
+
+      const diag = runPortfolioDiagnosis(userHoldings.length > 0 ? userHoldings : null);
+      renderPortfolioDoctorUI(diag);
+      
+      const res = document.getElementById('results-section');
+      res.classList.add('show-results');
+      res.style.setProperty('display', 'flex', 'important');
+      document.getElementById('portfolio-doctor-card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderPortfolioDoctorUI(diag) {
+      const badgeContainer = document.getElementById('portfolio-health-badge-container');
+      if (badgeContainer) {
+        badgeContainer.innerHTML = `
+          <div class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
+            <div class="text-right">
+              <div class="text-[10px] text-on-surface-variant font-mono uppercase">Health Score</div>
+              <div class="text-lg font-bold font-mono" style="color: ${diag.badgeColor}">${diag.weightedScore}/100</div>
+            </div>
+            <div class="px-3 py-1 rounded-lg text-xs font-bold font-mono border" style="background-color: ${diag.badgeColor}20; color: ${diag.badgeColor}; border-color: ${diag.badgeColor}40">
+              ${diag.verdict}
+            </div>
+          </div>
+        `;
+      }
+
+      const mountEl = document.getElementById('portfolio-score-breakdown-mount');
+      if (mountEl && typeof renderScoreBreakdown === 'function') {
+        mountEl.innerHTML = renderScoreBreakdown({
+          fundamental: diag.fundamentalAvg,
+          technical: diag.technicalAvg,
+          sentiment: diag.sentimentAvg,
+          macro: diag.macroAvg,
+          overallScore: diag.weightedScore,
+          showHeader: true
+        });
+      }
+
+      const weakestList = document.getElementById('weakest-holdings-list');
+      if (weakestList) {
+        if (diag.weakestHoldings && diag.weakestHoldings.length > 0) {
+          weakestList.innerHTML = diag.weakestHoldings.map((wh, idx) => `
+            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-error/20 text-error text-[10px] font-mono font-bold flex items-center justify-center">#${idx+1}</span>
+                  <span class="font-bold text-white font-mono text-sm">${wh.ticker}</span>
+                  <span class="text-[11px] text-on-surface-variant/70 font-mono">(${wh.weightPct?.toFixed(1) || '0.0'}% wt)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono border" style="background-color: ${wh.badgeColor}20; color: ${wh.badgeColor}; border-color: ${wh.badgeColor}40">${wh.verdict}</span>
+                  <span class="text-xs font-mono font-bold text-on-surface">${wh.overallScore}/100</span>
+                </div>
+              </div>
+              <p class="text-xs text-on-surface-variant leading-tight">${wh.reason}</p>
+              <div class="flex items-center justify-between pt-1 border-t border-white/5 text-[11px]">
+                <span class="text-on-surface-variant/60 font-mono">LTP: ₹${fmtPrice(wh.price)}</span>
+                <button onclick="window.openOrderBridgeModal({ symbol: '${wh.ticker}', defaultPrice: ${wh.price || 100}, defaultQty: ${wh.qty || 1} })" class="text-primary hover:underline flex items-center gap-1 font-semibold">
+                  <span>Rebalance / Order</span>
+                  <span class="material-symbols-outlined text-[13px]">open_in_new</span>
+                </button>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
     document.addEventListener('market:tick', updateHeaderIndices);
   </script>
 </body>

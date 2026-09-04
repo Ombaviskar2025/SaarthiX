@@ -200,37 +200,314 @@ function changeIcon(val) {
   return 'remove';
 }
 
+// ── 1. Icon Font Safety & CSS Injection ────────────────────────
+(function injectGlobalStyles() {
+  if (typeof document === 'undefined') return;
+  const styleId = 'saarthix-core-styles';
+  if (document.getElementById(styleId)) return;
+  
+  const style = document.createElement('style');
+  style.id = styleId;
+  style.textContent = `
+    /* Material Symbols safety fallback: never render raw text words */
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined', 'Material Icons', sans-serif !important;
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+      vertical-align: middle;
+    }
+    @supports (font-variation-settings: normal) {
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    }
+
+    /* Skeleton & Shimmer Loaders */
+    @keyframes saarthiShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton, .skeleton-pulse {
+      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 75%);
+      background-size: 200% 100%;
+      animation: saarthiShimmer 1.8s infinite ease-in-out;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .skeleton-text { height: 1em; width: 70%; min-width: 40px; border-radius: 4px; }
+    .skeleton-num { height: 1.2em; width: 85px; border-radius: 4px; }
+    .skeleton-badge { height: 24px; width: 75px; border-radius: 9999px; }
+    .skeleton-card { width: 100%; height: 140px; border-radius: 12px; }
+    .skeleton-row { width: 100%; height: 44px; border-radius: 8px; margin-bottom: 8px; }
+
+    /* Score Breakdown styles */
+    .score-breakdown-card {
+      background: rgba(18, 22, 34, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(12px);
+    }
+    .score-factor-bar {
+      height: 6px;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.1);
+      overflow: hidden;
+      position: relative;
+    }
+    .score-factor-fill {
+      height: 100%;
+      border-radius: 9999px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .score-high { background: linear-gradient(90deg, #4edea3, #22c55e); }
+    .score-mid { background: linear-gradient(90deg, #f59e0b, #eab308); }
+    .score-low { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    /* Compliance Tooltip / Modal styles */
+    .compliance-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(77, 142, 255, 0.1);
+      border: 1px solid rgba(77, 142, 255, 0.25);
+      border-radius: 9999px;
+      font-size: 11px;
+      color: #adc6ff;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .compliance-pill:hover {
+      background: rgba(77, 142, 255, 0.2);
+      border-color: #4d8eff;
+      color: #fff;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+// ── 2. Regional Language & i18n System (Pilot: EN + HI) ───────
+const I18N_DICTIONARY = {
+  en: {
+    nav_dashboard: 'Dashboard',
+    nav_portfolio: 'Portfolio',
+    nav_stock_doctor: 'Stock Doctor',
+    nav_mutual_funds: 'Mutual Funds',
+    nav_market_watch: 'Market Watch',
+    nav_news: 'News',
+    nav_ai_insights: 'AI Insights',
+    search_placeholder: 'Search NSE/BSE stocks (e.g. Reliance, TCS, HDFC)...',
+    quick_trade: 'Quick Trade',
+    analyze_portfolio: 'Analyze Portfolio',
+    run_diagnosis: 'Run Portfolio Diagnosis',
+    market_intelligence: 'Market Intelligence Terminal',
+    advances: 'Advances',
+    declines: 'Declines',
+    breadth: 'Market Breadth',
+    top_gainers: 'Top Gainers',
+    top_losers: 'Top Losers',
+    sector_performance: 'Sector Performance',
+    compare_peers: 'Compare Peers',
+    price_alert: 'Set Price Alert',
+    verdict_strong_buy: 'STRONG BUY',
+    verdict_buy: 'BUY',
+    verdict_hold: 'HOLD',
+    verdict_avoid: 'AVOID',
+    verdict_sell: 'SELL',
+    bullish: 'Bullish',
+    bearish: 'Bearish',
+    neutral: 'Neutral',
+    compliance_label: 'SEBI RA Compliance',
+    sebi_disclaimer_short: 'Data & AI outputs are for informational & simulated educational purposes only. Not SEBI registered investment advice.',
+    lang_notice: '⚡ AI-generated dynamic market narratives are currently delivered in English.',
+    what_changed_title: 'What Changed Since Yesterday',
+    what_changed_subtitle: 'Overnight intelligence & key session catalyst digest'
+  },
+  hi: {
+    nav_dashboard: 'डैशबोर्ड',
+    nav_portfolio: 'पोर्टफोलियो',
+    nav_stock_doctor: 'स्टॉक डॉक्टर',
+    nav_mutual_funds: 'म्यूचुअल फंड',
+    nav_market_watch: 'मार्केट वॉच',
+    nav_news: 'समाचार',
+    nav_ai_insights: 'एआई इनसाइट्स',
+    search_placeholder: 'NSE/BSE स्टॉक खोजें (उदा. Reliance, TCS, HDFC)...',
+    quick_trade: 'त्वरित ट्रेड',
+    analyze_portfolio: 'पोर्टफोलियो विश्लेषण',
+    run_diagnosis: 'पोर्टफोलियो डायग्नोसिस चलाएं',
+    market_intelligence: 'मार्केट इंटेलिजेंस टर्मिनल',
+    advances: 'बढ़त वाले शेयर',
+    declines: 'गिरावट वाले शेयर',
+    breadth: 'मार्केट चौड़ाई',
+    top_gainers: 'शीर्ष लाभार्थी (Gainers)',
+    top_losers: 'शीर्ष नुकसान वाले (Losers)',
+    sector_performance: 'सेक्टर प्रदर्शन',
+    compare_peers: 'साथियों से तुलना',
+    price_alert: 'मूल्य अलर्ट सेट करें',
+    verdict_strong_buy: 'मजबूत खरीद (STRONG BUY)',
+    verdict_buy: 'खरीदें (BUY)',
+    verdict_hold: 'बनाए रखें (HOLD)',
+    verdict_avoid: 'दूर रहें (AVOID)',
+    verdict_sell: 'बेचें (SELL)',
+    bullish: 'बुलिश / तेजी',
+    bearish: 'बेयरिश / मंदी',
+    neutral: 'तटस्थ',
+    compliance_label: 'SEBI RA अनुपालन',
+    sebi_disclaimer_short: 'डेटा और एआई परिणाम केवल शैक्षिक और सिमुलेशन उद्देश्यों के लिए हैं। यह SEBI पंजीकृत सलाह नहीं है।',
+    lang_notice: '⚡ एआई-जनरेटेड गतिशील बाजार विवरण वर्तमान में अंग्रेजी में प्रस्तुत किए जाते हैं।',
+    what_changed_title: 'कल से अब तक क्या बदला?',
+    what_changed_subtitle: 'रात भर की बाजार खुफिया जानकारी और मुख्य प्रेरक सारांश'
+  }
+};
+
+class SaarthiI18nManager {
+  constructor() {
+    this.currentLang = (typeof localStorage !== 'undefined' && localStorage.getItem('saarthix_lang')) || 'en';
+  }
+  
+  getLanguage() {
+    return this.currentLang;
+  }
+  
+  setLanguage(lang) {
+    if (!I18N_DICTIONARY[lang]) lang = 'en';
+    this.currentLang = lang;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('saarthix_lang', lang);
+    }
+    this.applyTranslations();
+  }
+  
+  t(key, fallback = '') {
+    const dict = I18N_DICTIONARY[this.currentLang] || I18N_DICTIONARY.en;
+    return dict[key] || fallback || key;
+  }
+
+  applyTranslations() {
+    if (typeof document === 'undefined') return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (key) {
+        el.textContent = this.t(key, el.textContent);
+      }
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (key) {
+        el.placeholder = this.t(key, el.placeholder);
+      }
+    });
+    window.dispatchEvent(new CustomEvent('saarthix_lang_change', { detail: { lang: this.currentLang } }));
+  }
+
+  renderLanguageSelector(containerId = null) {
+    const current = this.currentLang;
+    const html = `
+      <div class="relative inline-block text-left" id="saarthi-lang-picker">
+        <button type="button" onclick="window.SaarthiI18n.toggleDropdown()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container/60 hover:bg-surface-container border border-white/10 text-xs text-on-surface font-medium transition-all" title="Select UI Language">
+          <span class="material-symbols-outlined text-[16px] text-primary">translate</span>
+          <span>${current === 'hi' ? 'हिंदी (HI)' : 'English (EN)'}</span>
+          <span class="material-symbols-outlined text-[14px] text-on-surface-variant">expand_more</span>
+        </button>
+        <div id="saarthi-lang-menu" class="hidden absolute right-0 mt-2 w-36 rounded-xl bg-surface-container-high border border-white/15 shadow-2xl z-50 overflow-hidden backdrop-blur-xl">
+          <button onclick="window.SaarthiI18n.setLanguage('en'); window.SaarthiI18n.toggleDropdown(false);" class="w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-white/10 text-on-surface ${current === 'en' ? 'text-primary font-bold bg-primary/10' : ''}">
+            <span>English (EN)</span>
+            ${current === 'en' ? '<span class="material-symbols-outlined text-[14px] text-primary">check</span>' : ''}
+          </button>
+          <button onclick="window.SaarthiI18n.setLanguage('hi'); window.SaarthiI18n.toggleDropdown(false);" class="w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-white/10 text-on-surface ${current === 'hi' ? 'text-primary font-bold bg-primary/10' : ''}">
+            <span>हिंदी (Hindi)</span>
+            ${current === 'hi' ? '<span class="material-symbols-outlined text-[14px] text-primary">check</span>' : ''}
+          </button>
+        </div>
+      </div>
+    `;
+    if (containerId) {
+      const target = document.getElementById(containerId);
+      if (target) target.innerHTML = html;
+    }
+    return html;
+  }
+
+  toggleDropdown(forceState = null) {
+    const menu = document.getElementById('saarthi-lang-menu');
+    if (!menu) return;
+    if (forceState !== null) {
+      if (forceState) menu.classList.remove('hidden');
+      else menu.classList.add('hidden');
+    } else {
+      menu.classList.toggle('hidden');
+    }
+  }
+}
+
+window.SaarthiI18n = new SaarthiI18nManager();
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('click', (e) => {
+    const picker = document.getElementById('saarthi-lang-picker');
+    const menu = document.getElementById('saarthi-lang-menu');
+    if (picker && menu && !picker.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+}
+
+// ── 3. Canonical Global Navigation (7 Items) ──────────────────
 function buildNav(activePageId) {
+  const i18n = window.SaarthiI18n;
   const pages = [
-    { id:'dashboard',    label:'Dashboard',    icon:'dashboard',              href:'dashboard.html' },
-    { id:'portfolio',    label:'Portfolio',    icon:'account_balance_wallet', href:'portfolio.html' },
-    { id:'mutual-funds', label:'Mutual Funds', icon:'pie_chart',              href:'mutual-funds.html' },
-    { id:'ai-insights',  label:'AI Insights',  icon:'auto_awesome',           href:'ai-insights.html' },
-    { id:'stock-doctor', label:'Stock Doctor', icon:'monitor_heart',          href:'stock-doctor.html' }
+    { id:'dashboard',    key:'nav_dashboard',    label:'Dashboard',    icon:'dashboard',              href:'dashboard.html' },
+    { id:'portfolio',    key:'nav_portfolio',    label:'Portfolio',    icon:'account_balance_wallet', href:'portfolio.html' },
+    { id:'stock-doctor', key:'nav_stock_doctor', label:'Stock Doctor', icon:'monitor_heart',          href:'stock-doctor.html' },
+    { id:'mutual-funds', key:'nav_mutual_funds', label:'Mutual Funds', icon:'pie_chart',              href:'mutual-funds.html' },
+    { id:'market-watch', key:'nav_market_watch', label:'Market Watch', icon:'candlestick_chart',      href:'market-watch.html' },
+    { id:'news',         key:'nav_news',         label:'News',         icon:'newspaper',              href:'news.html' },
+    { id:'ai-insights',  key:'nav_ai_insights',  label:'AI Insights',  icon:'auto_awesome',           href:'ai-insights.html' }
   ];
 
   let navLinks = '';
   let mobileLinks = '';
+  let headerNavLinks = '';
 
   pages.forEach(p => {
     const isActive = p.id === activePageId;
+    const label = i18n ? i18n.t(p.key, p.label) : p.label;
+    
     const activeCls = isActive 
-      ? 'bg-primary-container text-on-primary-container font-semibold' 
+      ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm' 
       : 'text-on-surface-variant hover:text-on-surface hover:bg-white/5';
     
     navLinks += `
-      <a href="${p.href}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all ${activeCls}">
+      <a href="${p.href}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all ${activeCls}">
         <span class="material-symbols-outlined text-[20px]">${p.icon}</span>
-        <span>${p.label}</span>
+        <span>${label}</span>
       </a>
     `;
 
-    const mobActive = isActive ? 'text-primary' : 'text-on-surface-variant';
+    const mobActive = isActive ? 'text-primary font-bold' : 'text-on-surface-variant';
     mobileLinks += `
-      <a href="${p.href}" class="flex flex-col items-center gap-1 ${mobActive}">
-        <span class="material-symbols-outlined text-[22px]">${p.icon}</span>
-        <span class="text-[10px] font-medium">${p.label}</span>
+      <a href="${p.href}" class="flex flex-col items-center gap-0.5 px-2 py-1 ${mobActive}">
+        <span class="material-symbols-outlined text-[20px]">${p.icon}</span>
+        <span class="text-[9px] font-medium tracking-tight truncate max-w-[50px]">${label}</span>
       </a>
+    `;
+
+    const hdrActive = isActive 
+      ? 'text-primary font-bold border-b-2 border-primary pb-1' 
+      : 'text-on-surface-variant hover:text-primary transition-colors';
+    headerNavLinks += `
+      <a class="font-label-md text-label-md ${hdrActive}" href="${p.href}">${label}</a>
     `;
   });
 
@@ -239,9 +516,460 @@ function buildNav(activePageId) {
     <span class="text-xs text-secondary font-medium">NSE/BSE Live</span>
   `;
 
-  return { navLinks, mobileLinks, statusDot };
+  return { navLinks, mobileLinks, headerNavLinks, statusDot };
 }
 
+// ── 4. Explainable AI Score Breakdown Component ───────────────
+function renderScoreBreakdown({ fundamental = 75, technical = 70, sentiment = 65, macro = 70, overallScore = null, showHeader = true, id = null }) {
+  const f = Math.min(100, Math.max(0, Math.round(fundamental)));
+  const t = Math.min(100, Math.max(0, Math.round(technical)));
+  const s = Math.min(100, Math.max(0, Math.round(sentiment)));
+  const m = Math.min(100, Math.max(0, Math.round(macro)));
+
+  const computedOverall = overallScore !== null 
+    ? Math.round(overallScore)
+    : Math.round((f * 0.35) + (t * 0.30) + (s * 0.20) + (m * 0.15));
+
+  const getScoreColorCls = (val) => val >= 70 ? 'score-high' : (val >= 45 ? 'score-mid' : 'score-low');
+  const getTextColor = (val) => val >= 70 ? '#4edea3' : (val >= 45 ? '#f59e0b' : '#ef4444');
+
+  const containerId = id || 'sb_' + Math.random().toString(36).substr(2, 8);
+
+  return `
+    <div id="${containerId}" class="score-breakdown-card text-xs">
+      ${showHeader ? `
+        <div class="flex items-center justify-between border-b border-white/10 pb-2.5 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[18px]">psychology</span>
+            <span class="font-semibold text-on-surface text-sm">4-Factor AI Composite Scoring</span>
+          </div>
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 font-bold" style="color: ${getTextColor(computedOverall)}">
+            <span>Score:</span>
+            <span class="text-sm">${computedOverall}/100</span>
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="space-y-2.5">
+        <!-- Fundamental (35%) -->
+        <div>
+          <div class="flex justify-between text-[11px] mb-1">
+            <span class="text-on-surface-variant flex items-center gap-1">
+              <span class="font-semibold text-on-surface">Fundamental Analysis</span>
+              <span class="text-[10px] text-primary/80 font-mono">(35% weight)</span>
+            </span>
+            <span class="font-bold font-mono" style="color: ${getTextColor(f)}">${f}/100</span>
+          </div>
+          <div class="score-factor-bar">
+            <div class="score-factor-fill ${getScoreColorCls(f)}" style="width: ${f}%"></div>
+          </div>
+        </div>
+
+        <!-- Technical (30%) -->
+        <div>
+          <div class="flex justify-between text-[11px] mb-1">
+            <span class="text-on-surface-variant flex items-center gap-1">
+              <span class="font-semibold text-on-surface">Technical & Momentum</span>
+              <span class="text-[10px] text-primary/80 font-mono">(30% weight)</span>
+            </span>
+            <span class="font-bold font-mono" style="color: ${getTextColor(t)}">${t}/100</span>
+          </div>
+          <div class="score-factor-bar">
+            <div class="score-factor-fill ${getScoreColorCls(t)}" style="width: ${t}%"></div>
+          </div>
+        </div>
+
+        <!-- Sentiment (20%) -->
+        <div>
+          <div class="flex justify-between text-[11px] mb-1">
+            <span class="text-on-surface-variant flex items-center gap-1">
+              <span class="font-semibold text-on-surface">Market Sentiment</span>
+              <span class="text-[10px] text-primary/80 font-mono">(20% weight)</span>
+            </span>
+            <span class="font-bold font-mono" style="color: ${getTextColor(s)}">${s}/100</span>
+          </div>
+          <div class="score-factor-bar">
+            <div class="score-factor-fill ${getScoreColorCls(s)}" style="width: ${s}%"></div>
+          </div>
+        </div>
+
+        <!-- Macro (15%) -->
+        <div>
+          <div class="flex justify-between text-[11px] mb-1">
+            <span class="text-on-surface-variant flex items-center gap-1">
+              <span class="font-semibold text-on-surface">Macro & Sector Regime</span>
+              <span class="text-[10px] text-primary/80 font-mono">(15% weight)</span>
+            </span>
+            <span class="font-bold font-mono" style="color: ${getTextColor(m)}">${m}/100</span>
+          </div>
+          <div class="score-factor-bar">
+            <div class="score-factor-fill ${getScoreColorCls(m)}" style="width: ${m}%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-on-surface-variant/70">
+        <span>Formula: 0.35F + 0.30T + 0.20S + 0.15M</span>
+        <span class="cursor-pointer text-primary hover:underline" onclick="window.openComplianceModal()">SEBI Disclaimer</span>
+      </div>
+    </div>
+  `;
+}
+
+// ── 5. Portfolio Doctor: Multi-Stock Diagnosis Engine ─────────
+function calculateStockDoctorScore(stock) {
+  const pe = stock.pe || 25;
+  const changePct = stock.changePct || 0;
+  const price = stock.price || 1000;
+  const high52 = stock.high52 || (price * 1.2);
+  const low52 = stock.low52 || (price * 0.8);
+  
+  // 1. Fundamental (PE valuation vs standard Indian market 24x)
+  let fundScore = 70;
+  if (pe < 15) fundScore = 88;
+  else if (pe < 25) fundScore = 78;
+  else if (pe < 40) fundScore = 62;
+  else if (pe < 75) fundScore = 48;
+  else fundScore = 32;
+
+  // 2. Technical (Distance from 52-week low/high + price momentum)
+  const rangePos = (price - low52) / (high52 - low52 || 1);
+  let techScore = Math.round(rangePos * 60 + (changePct > 0 ? 30 : 15));
+  techScore = Math.max(20, Math.min(95, techScore));
+
+  // 3. Sentiment (Volume and recent movement)
+  let sentScore = changePct > 1.0 ? 82 : (changePct > 0 ? 68 : (changePct > -1 ? 52 : 36));
+
+  // 4. Macro (Sector specific tailwind)
+  const sectorMap = { 'Defense': 85, 'Energy': 76, 'Banking': 74, 'Tech': 68, 'IT': 72, 'Auto': 70, 'FMCG': 65, 'Metals': 58 };
+  let macroScore = sectorMap[stock.sector] || 65;
+
+  const composite = Math.round((fundScore * 0.35) + (techScore * 0.30) + (sentScore * 0.20) + (macroScore * 0.15));
+
+  let verdict = 'HOLD';
+  let badgeColor = '#f59e0b';
+  let reason = 'Consolidating within technical range. Healthy risk-reward profile.';
+
+  if (composite >= 78) {
+    verdict = 'STRONG BUY';
+    badgeColor = '#4edea3';
+    reason = 'Superior fundamental valuation coupled with strong institutional accumulation.';
+  } else if (composite >= 64) {
+    verdict = 'BUY';
+    badgeColor = '#22c55e';
+    reason = 'Favorable earnings visibility and positive sector momentum tailwind.';
+  } else if (composite >= 48) {
+    verdict = 'HOLD';
+    badgeColor = '#f59e0b';
+    reason = 'Trading within moving average bounds. Maintain position until breakout confirmation.';
+  } else if (composite >= 36) {
+    verdict = 'AVOID / TRIM';
+    badgeColor = '#f97316';
+    reason = 'Elevated valuation multiple and distribution observed near 52-week resistance.';
+  } else {
+    verdict = 'SELL';
+    badgeColor = '#ef4444';
+    reason = 'Weak earnings delivery and break below key 200 DMA structural support.';
+  }
+
+  return {
+    ticker: stock.ticker,
+    name: stock.name,
+    sector: stock.sector,
+    price: stock.price,
+    changePct: stock.changePct,
+    fundamental: fundScore,
+    technical: techScore,
+    sentiment: sentScore,
+    macro: macroScore,
+    overallScore: composite,
+    verdict,
+    badgeColor,
+    reason
+  };
+}
+
+function runPortfolioDiagnosis(holdingsList = null) {
+  const holdings = holdingsList || [
+    { ticker: 'RELIANCE', qty: 10, buyPrice: 1000.00 },
+    { ticker: 'INFY', qty: 15, buyPrice: 1120.00 },
+    { ticker: 'HDFCBANK', qty: 20, buyPrice: 850.00 },
+    { ticker: 'TCS', qty: 5, buyPrice: 2400.00 },
+    { ticker: 'TATAMOTORS', qty: 25, buyPrice: 480.00 },
+    { ticker: 'PAYTM', qty: 10, buyPrice: 1450.00 }
+  ];
+
+  let totalPortfolioValue = 0;
+  const diagnosedHoldings = [];
+
+  holdings.forEach(h => {
+    const stockInfo = (window.LIVE_STOCKS || STOCKS_DB).find(s => s.ticker === h.ticker) || {
+      ticker: h.ticker,
+      name: h.ticker,
+      sector: 'Diversified',
+      price: h.buyPrice || 100,
+      changePct: 0,
+      pe: 25,
+      high52: (h.buyPrice || 100) * 1.2,
+      low52: (h.buyPrice || 100) * 0.8
+    };
+
+    const currentPrice = stockInfo.price || h.buyPrice;
+    const val = currentPrice * h.qty;
+    totalPortfolioValue += val;
+
+    const diag = calculateStockDoctorScore(stockInfo);
+    diagnosedHoldings.push({
+      ...h,
+      ...diag,
+      currentValue: val,
+      gainLoss: (currentPrice - h.buyPrice) * h.qty,
+      gainLossPct: ((currentPrice - h.buyPrice) / h.buyPrice) * 100
+    });
+  });
+
+  let weightedScore = 0;
+  diagnosedHoldings.forEach(h => {
+    h.weightPct = totalPortfolioValue > 0 ? (h.currentValue / totalPortfolioValue) * 100 : 0;
+    weightedScore += (h.overallScore * (h.weightPct / 100));
+  });
+
+  weightedScore = Math.round(weightedScore);
+
+  const sortedByScore = [...diagnosedHoldings].sort((a, b) => a.overallScore - b.overallScore);
+  const weakestHoldings = sortedByScore.slice(0, 3);
+
+  let aggVerdict = 'BALANCED & RESILIENT (HOLD / ACCUMULATE)';
+  let aggColor = '#4edea3';
+  if (weightedScore >= 75) {
+    aggVerdict = 'EXCELLENT (STRONG BUY / CORE COMPOUNDER)';
+    aggColor = '#4edea3';
+  } else if (weightedScore >= 60) {
+    aggVerdict = 'HEALTHY & RESILIENT (ACCUMULATE ON DIPS)';
+    aggColor = '#22c55e';
+  } else if (weightedScore >= 45) {
+    aggVerdict = 'MODERATE HEALTH (HOLD WITH SELECTIVE TRIM)';
+    aggColor = '#f59e0b';
+  } else {
+    aggVerdict = 'VULNERABLE (REBALANCE / DEFENSIVE ROTATION)';
+    aggColor = '#ef4444';
+  }
+
+  return {
+    totalValue: totalPortfolioValue,
+    weightedScore,
+    verdict: aggVerdict,
+    badgeColor: aggColor,
+    holdings: diagnosedHoldings,
+    weakestHoldings,
+    fundamentalAvg: Math.round(diagnosedHoldings.reduce((acc, h) => acc + h.fundamental, 0) / diagnosedHoldings.length),
+    technicalAvg: Math.round(diagnosedHoldings.reduce((acc, h) => acc + h.technical, 0) / diagnosedHoldings.length),
+    sentimentAvg: Math.round(diagnosedHoldings.reduce((acc, h) => acc + h.sentiment, 0) / diagnosedHoldings.length),
+    macroAvg: Math.round(diagnosedHoldings.reduce((acc, h) => acc + h.macro, 0) / diagnosedHoldings.length)
+  };
+}
+
+// ── 6. Broker Deep-Link & Order Bridge ─────────────────────────
+function generateBrokerOrderLink({ broker = 'zerodha', symbol = 'RELIANCE', qty = 1, price = 0, orderType = 'LIMIT' }) {
+  const sym = encodeURIComponent(symbol.toUpperCase());
+  const q = encodeURIComponent(qty || 1);
+  const p = encodeURIComponent(price || 0);
+
+  const links = {
+    zerodha: `https://kite.zerodha.com/quick-order?symbol=${sym}&exchange=NSE&type=${orderType}&qty=${q}&price=${p}`,
+    groww: `https://groww.in/stocks/${sym.toLowerCase()}`,
+    upstox: `https://pro.upstox.com/order?symbol=NSE_EQ%7C${sym}&qty=${q}&price=${p}`,
+    angelone: `https://trade.angelone.in/trade/trading/symbol/${sym}`,
+    fyers: `https://trade.fyers.in/web/order?symbol=NSE:${sym}-EQ&qty=${q}&price=${p}`
+  };
+
+  return links[broker] || links.zerodha;
+}
+
+function openOrderBridgeModal({ symbol = 'RELIANCE', defaultPrice = 1328.80, defaultQty = 10 }) {
+  if (typeof document === 'undefined') return;
+  const modalId = 'saarthi-order-bridge-modal';
+  let modal = document.getElementById(modalId);
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = modalId;
+    document.body.appendChild(modal);
+  }
+
+  modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50';
+  modal.innerHTML = `
+    <div class="bg-surface-container-high border border-white/15 rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-on-surface">
+      <button onclick="document.getElementById('${modalId}').remove()" class="absolute top-4 right-4 text-on-surface-variant hover:text-white p-1 rounded-lg">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined">launch</span>
+        </div>
+        <div>
+          <h3 class="text-base font-bold">Broker Order Deep-Link</h3>
+          <p class="text-xs text-on-surface-variant">Pre-fill order on your registered broker</p>
+        </div>
+      </div>
+
+      <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs mb-4 flex items-start gap-2">
+        <span class="material-symbols-outlined text-[16px] text-amber-400 mt-0.5 flex-shrink-0">gavel</span>
+        <span><strong>SEBI Compliance Notice:</strong> SaarthiX does <em>not</em> execute auto-trades. Clicking below opens a pre-filled ticket in your broker's official app/site for your manual verification.</span>
+      </div>
+
+      <div class="space-y-3 text-xs mb-5">
+        <div>
+          <label class="block text-on-surface-variant font-medium mb-1">Select Broker</label>
+          <select id="bridge-broker-select" class="w-full bg-surface-container border border-white/10 rounded-lg px-3 py-2 text-on-surface">
+            <option value="zerodha">Zerodha (Kite)</option>
+            <option value="groww">Groww</option>
+            <option value="upstox">Upstox Pro</option>
+            <option value="angelone">Angel One (SmartAPI)</option>
+            <option value="fyers">Fyers Web</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-on-surface-variant font-medium mb-1">Symbol</label>
+            <input type="text" id="bridge-symbol" value="${symbol}" readonly class="w-full bg-surface-container border border-white/10 rounded-lg px-3 py-2 text-on-surface font-mono font-bold" />
+          </div>
+          <div>
+            <label class="block text-on-surface-variant font-medium mb-1">Quantity (Qty)</label>
+            <input type="number" id="bridge-qty" value="${defaultQty}" class="w-full bg-surface-container border border-white/10 rounded-lg px-3 py-2 text-on-surface font-mono" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-on-surface-variant font-medium mb-1">Trigger / Target Price (₹)</label>
+            <input type="number" step="0.05" id="bridge-price" value="${defaultPrice}" class="w-full bg-surface-container border border-white/10 rounded-lg px-3 py-2 text-on-surface font-mono" />
+          </div>
+          <div>
+            <label class="block text-on-surface-variant font-medium mb-1">Order Type</label>
+            <select id="bridge-type" class="w-full bg-surface-container border border-white/10 rounded-lg px-3 py-2 text-on-surface">
+              <option value="LIMIT">LIMIT (Recommended)</option>
+              <option value="MARKET">MARKET</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="document.getElementById('${modalId}').remove()" class="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-xs font-semibold hover:bg-white/5 transition-colors">
+          Cancel
+        </button>
+        <button onclick="window.confirmBrokerBridgeLaunch()" class="flex-1 px-4 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary/90 flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+          <span>Proceed to Broker</span>
+          <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  window.confirmBrokerBridgeLaunch = function() {
+    const broker = document.getElementById('bridge-broker-select').value;
+    const sym = document.getElementById('bridge-symbol').value;
+    const qty = document.getElementById('bridge-qty').value;
+    const price = document.getElementById('bridge-price').value;
+    const orderType = document.getElementById('bridge-type').value;
+
+    const url = generateBrokerOrderLink({ broker, symbol: sym, qty, price, orderType });
+    document.getElementById(modalId).remove();
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+}
+
+// ── 7. "What Changed Since Yesterday" Daily Digest ───────────
+function generateDailyDigest() {
+  const stocks = window.LIVE_STOCKS || STOCKS_DB;
+  const gainers = getTopGainers(3);
+  const losers = getTopLosers(2);
+  const breadth = getMarketBreadth();
+
+  const bullets = [
+    {
+      type: 'up',
+      icon: 'trending_up',
+      badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      title: `${gainers[0]?.ticker || 'RELIANCE'} (+${gainers[0]?.changePct || '1.22'}%)`,
+      text: `Surged on heavy institutional volume and margin expansion tailwinds in core business units.`
+    },
+    {
+      type: breadth.advances >= breadth.declines ? 'up' : 'down',
+      icon: breadth.advances >= breadth.declines ? 'check_circle' : 'warning',
+      badgeClass: breadth.advances >= breadth.declines ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20',
+      title: `Market Breadth (${breadth.advances} Adv / ${breadth.declines} Dec)`,
+      text: `Broad-based sentiment remains ${breadth.advances >= breadth.declines ? 'constructive' : 'cautious'} with ${Math.round((breadth.advances/breadth.total)*100)}% of NIFTY Universe trading in positive territory.`
+    },
+    {
+      type: 'down',
+      icon: 'trending_down',
+      badgeClass: 'bg-red-500/10 text-red-400 border-red-500/20',
+      title: `${losers[0]?.ticker || 'TATAMOTORS'} (${losers[0]?.changePct || '-1.15'}%)`,
+      text: `Witnessed mild pullback after failing to hold 50 DMA resistance zone; consolidating support.`
+    },
+    {
+      type: 'neutral',
+      icon: 'auto_graph',
+      badgeClass: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      title: `Macro Regime: FY2025-26 Tax & RBI Policy Neutral`,
+      text: `STCG at 20%, LTCG 12.5% (>₹1.25L exemption) intact. High liquidity keeps risk premiums tight.`
+    }
+  ];
+
+  return bullets;
+}
+
+// ── 8. SEBI Compliance Modal Helper ───────────────────────────
+function openComplianceModal() {
+  if (typeof document === 'undefined') return;
+  const modalId = 'saarthi-compliance-modal';
+  let modal = document.getElementById(modalId);
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = modalId;
+    document.body.appendChild(modal);
+  }
+
+  modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50';
+  modal.innerHTML = `
+    <div class="bg-surface-container-high border border-white/15 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative text-on-surface">
+      <button onclick="document.getElementById('${modalId}').remove()" class="absolute top-4 right-4 text-on-surface-variant hover:text-white p-1 rounded-lg">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+          <span class="material-symbols-outlined">verified_user</span>
+        </div>
+        <div>
+          <h3 class="text-base font-bold">SEBI Regulatory Disclosures</h3>
+          <p class="text-xs text-on-surface-variant">Statutory Compliance & Risk Information</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-xs text-on-surface-variant/90 max-h-72 overflow-y-auto pr-2">
+        <p><strong>1. Informational & Simulated Nature:</strong> SaarthiX AI Terminal provides algorithmic analytics, technical indicators, and educational research syntheses. None of the verdicts (BUY / HOLD / SELL / AVOID) constitute guaranteed financial recommendations or SEBI-registered portfolio management advice.</p>
+        
+        <p><strong>2. Indian Tax Law Alignment:</strong> Capital gain calculations adhere to Union Budget FY2025-26 (Short Term Capital Gains at 20%, Long Term Capital Gains at 12.5% above ₹1,25,000 threshold). Consult a qualified Chartered Accountant for personal tax assessment.</p>
+
+        <p><strong>3. Market Risk Warning:</strong> Investments in securities market are subject to market risks. Read all scheme and offer documents carefully before investing.</p>
+
+        <p><strong>4. No Automated Execution:</strong> SaarthiX does not initiate or execute automated orders on stock exchanges. Any broker bridge link operates solely as a deep-link convenience requiring direct manual authorization in your broker app.</p>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-white/10 flex justify-end">
+        <button onclick="document.getElementById('${modalId}').remove()" class="px-5 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-primary/90">
+          Understood & Acknowledged
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// ── Market Breadth & Aggregators ──────────────────────────────
 function getMarketBreadth() {
   const stocks = window.LIVE_STOCKS || STOCKS_DB;
   const adv = stocks.filter(s => (s.changePct || s.change || 0) > 0).length;
@@ -277,9 +1005,31 @@ function getSectorSummary() {
   })).sort((a, b) => b.avgChangePct - a.avgChangePct);
 }
 
+function isMarketOpen() {
+  const now = new Date();
+  const istString = now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+  const istDate = new Date(istString);
+  const day = istDate.getDay(); // 0 = Sunday, 6 = Saturday
+  if (day === 0 || day === 6) return false;
+  const hours = istDate.getHours();
+  const minutes = istDate.getMinutes();
+  const timeInMinutes = hours * 60 + minutes;
+  // NSE/BSE Trading Hours: 09:15 to 15:30 IST
+  return timeInMinutes >= 555 && timeInMinutes <= 930;
+}
+
 // Expose globally
+window.buildNav = buildNav;
+window.renderScoreBreakdown = renderScoreBreakdown;
+window.calculateStockDoctorScore = calculateStockDoctorScore;
+window.runPortfolioDiagnosis = runPortfolioDiagnosis;
+window.generateBrokerOrderLink = generateBrokerOrderLink;
+window.openOrderBridgeModal = openOrderBridgeModal;
+window.generateDailyDigest = generateDailyDigest;
+window.openComplianceModal = openComplianceModal;
 window.getMarketBreadth = getMarketBreadth;
 window.getTopGainers = getTopGainers;
 window.getTopLosers = getTopLosers;
 window.getSectorSummary = getSectorSummary;
+window.isMarketOpen = isMarketOpen;
 

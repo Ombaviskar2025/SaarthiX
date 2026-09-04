@@ -166,29 +166,79 @@
       <div class="flex items-center gap-4">
         <div class="relative">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-          <input type="text" placeholder="Search stocks, indices..." class="glass-input pl-10 w-64 text-sm" />
+          <input id="dashboard-stock-search" type="text" placeholder="Search stocks, indices..." class="glass-input pl-10 w-64 text-sm" autocomplete="off" />
+          <div id="dashboard-search-results" class="hidden absolute left-0 top-full mt-2 w-80 max-h-72 overflow-y-auto bg-surface-container-high/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl z-50 p-1"></div>
         </div>
         <div class="px-3 py-1 text-xs font-semibold rounded bg-white/10 border border-white/10 text-on-surface">NSE | BSE</div>
       </div>
       
-      <div class="flex items-center gap-6">
-        <div class="flex items-center gap-2">
-          <span id="market-status" class="flex h-3 w-3"></span>
+      <div class="flex items-center gap-5">
+        <!-- Language Selector -->
+        <div id="dashboard-lang-container"></div>
+
+        <div class="flex items-center gap-3 border-l border-white/10 pl-4">
+          <div id="market-status" class="flex items-center gap-1.5"></div>
           <div class="flex flex-col items-end">
-            <span class="text-sm font-medium" id="header-time">00:00:00</span>
+            <span class="text-sm font-medium font-mono" id="header-time">00:00:00</span>
             <span class="text-[10px] text-on-surface-variant uppercase" id="header-market-text">Loading</span>
           </div>
         </div>
         
-        <div class="relative cursor-pointer">
-          <span class="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors">notifications</span>
-          <span class="absolute 1 top-0 right-0 w-2 h-2 rounded-full bg-error"></span>
+        <button onclick="window.openComplianceModal()" class="compliance-pill" title="SEBI RA Compliance Information">
+          <span class="material-symbols-outlined text-[14px]">gavel</span>
+          <span>Compliance</span>
+        </button>
+
+        <!-- Notification Bell & Dropdown -->
+        <div class="relative" id="dash-notif-container">
+          <button type="button" onclick="toggleDashNotif()" class="p-1.5 rounded-lg hover:bg-white/5 text-on-surface-variant hover:text-on-surface transition-colors relative flex items-center" title="Notifications">
+            <span class="material-symbols-outlined text-[20px]">notifications</span>
+            <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+          </button>
+          <div id="dash-notif-menu" class="hidden absolute right-0 mt-2 w-72 p-3 bg-surface-container-high/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl z-50 text-xs space-y-2">
+            <div class="font-bold text-on-surface border-b border-white/10 pb-1.5 flex items-center justify-between">
+              <span>Market Alerts</span>
+              <span class="text-[10px] text-primary">Live</span>
+            </div>
+            <div class="p-2 rounded bg-white/5 flex items-start gap-2">
+              <span class="material-symbols-outlined text-secondary text-[16px]">trending_up</span>
+              <div>
+                <p class="font-semibold text-white">NSE Breadth Positive</p>
+                <p class="text-on-surface-variant text-[11px]">Nifty 50 advances leading session.</p>
+              </div>
+            </div>
+            <div class="p-2 rounded bg-white/5 flex items-start gap-2">
+              <span class="material-symbols-outlined text-primary text-[16px]">analytics</span>
+              <div>
+                <p class="font-semibold text-white">AI Health Scan Active</p>
+                <p class="text-on-surface-variant text-[11px]">Daily digest refreshed with live data.</p>
+              </div>
+            </div>
+          </div>
         </div>
         
-        <div class="flex items-center gap-2 cursor-pointer">
-          <img id="user-avatar-img" src="https://ui-avatars.com/api/?name=User&background=4d8eff&color=fff" alt="User" class="w-8 h-8 rounded-full" />
-          <span id="user-avatar-name" class="text-sm font-medium text-on-surface hidden md:block"></span>
-          <span class="material-symbols-outlined text-on-surface-variant">arrow_drop_down</span>
+        <!-- User Avatar & Menu -->
+        <div class="relative" id="dash-user-container">
+          <div onclick="toggleDashUserMenu()" class="flex items-center gap-2 cursor-pointer p-1 rounded-lg hover:bg-white/5 transition-colors">
+            <img id="user-avatar-img" src="https://ui-avatars.com/api/?name=User&background=4d8eff&color=fff" alt="User" class="w-8 h-8 rounded-full" />
+            <span id="user-avatar-name" class="text-sm font-medium text-on-surface hidden md:block"></span>
+            <span class="material-symbols-outlined text-on-surface-variant">arrow_drop_down</span>
+          </div>
+          <div id="dash-user-menu" class="hidden absolute right-0 mt-2 w-48 bg-surface-container-high/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl z-50 p-1.5 text-xs">
+            <div class="px-3 py-2 border-b border-white/10 mb-1">
+              <p class="font-bold text-on-surface" id="dash-menu-username">User</p>
+              <p class="text-on-surface-variant text-[10px]" id="dash-menu-email">Logged In</p>
+            </div>
+            <a href="portfolio.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-on-surface hover:bg-white/10 transition-colors">
+              <span class="material-symbols-outlined text-[16px] text-primary">account_balance_wallet</span> My Portfolio
+            </a>
+            <a href="support.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-on-surface hover:bg-white/10 transition-colors">
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">help</span> Help & Support
+            </a>
+            <a href="login.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-error hover:bg-error/10 transition-colors mt-1 border-t border-white/5">
+              <span class="material-symbols-outlined text-[16px]">logout</span> Log Out
+            </a>
+          </div>
         </div>
       </div>
     </header>
@@ -196,7 +246,12 @@
     <!-- Index Ticker -->
     <div class="border-b border-white/5 bg-surface-container-high/50">
       <div class="ticker-wrap py-2 text-sm" id="ticker-container">
-        <!-- populated by js -->
+        <div class="ticker">
+          <span class="ticker-item text-on-surface-variant text-xs flex items-center gap-2">
+            <span class="skeleton skeleton-badge"></span>
+            <span class="skeleton skeleton-num"></span>
+          </span>
+        </div>
       </div>
     </div>
 
@@ -205,12 +260,36 @@
       
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 class="text-2xl font-bold">Dashboard Overview</h2>
-          <span class="live-timestamp text-xs text-on-surface-variant/60 font-mono"></span>
+          <h2 class="text-2xl font-bold" data-i18n="market_intelligence">Market Intelligence Terminal</h2>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="live-timestamp text-xs text-on-surface-variant/60 font-mono"></span>
+            <span class="text-[11px] text-primary/80" data-i18n="lang_notice">⚡ AI-generated dynamic market narratives are currently delivered in English.</span>
+          </div>
         </div>
         <div class="flex gap-3 w-full sm:w-auto">
-          <a href="portfolio.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-surface-container-high border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors">View Portfolio</a>
-          <a href="stock-doctor.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-primary-container text-on-primary-container text-sm font-medium hover:bg-primary-container/80 transition-colors">View Stock Doctor</a>
+          <a href="portfolio.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-surface-container-high border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors" data-i18n="nav_portfolio">View Portfolio</a>
+          <a href="stock-doctor.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-primary-container text-on-primary-container text-sm font-medium hover:bg-primary-container/80 transition-colors" data-i18n="nav_stock_doctor">View Stock Doctor</a>
+        </div>
+      </div>
+
+      <!-- Task 6: "What Changed Since Yesterday" AI Digest Card -->
+      <div class="glass-panel p-5 relative overflow-hidden border-l-4 border-l-primary shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-primary text-[22px]">history_toggle_off</span>
+            <div>
+              <h3 class="font-bold text-base text-on-surface" data-i18n="what_changed_title">What Changed Since Yesterday</h3>
+              <p class="text-xs text-on-surface-variant" data-i18n="what_changed_subtitle">Overnight intelligence & key session catalyst digest</p>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-[11px] text-primary font-mono self-start sm:self-auto flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+            AI Catalyst Synthesis
+          </span>
+        </div>
+
+        <div id="daily-digest-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- Filled dynamically by generateDailyDigest -->
         </div>
       </div>
 
@@ -218,29 +297,33 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="glass-panel p-5 flex flex-col justify-between">
           <div class="flex items-center justify-between text-on-surface-variant mb-2">
-            <span class="text-sm font-medium">Nifty 50 Advances</span>
+            <span class="text-sm font-medium" data-i18n="advances">Nifty 50 Advances</span>
             <span class="material-symbols-outlined text-secondary">trending_up</span>
           </div>
-          <div class="text-3xl font-bold text-secondary" id="advances-count">-</div>
+          <div class="text-3xl font-bold text-secondary" id="advances-count">
+            <span class="skeleton skeleton-num"></span>
+          </div>
         </div>
         <div class="glass-panel p-5 flex flex-col justify-between">
           <div class="flex items-center justify-between text-on-surface-variant mb-2">
-            <span class="text-sm font-medium">Nifty 50 Declines</span>
+            <span class="text-sm font-medium" data-i18n="declines">Nifty 50 Declines</span>
             <span class="material-symbols-outlined text-error">trending_down</span>
           </div>
-          <div class="text-3xl font-bold text-error" id="declines-count">-</div>
+          <div class="text-3xl font-bold text-error" id="declines-count">
+            <span class="skeleton skeleton-num"></span>
+          </div>
         </div>
         <div class="glass-panel p-5 flex flex-col justify-between">
           <div class="flex items-center justify-between text-on-surface-variant mb-2">
-            <span class="text-sm font-medium">Market Breadth</span>
+            <span class="text-sm font-medium" data-i18n="breadth">Market Breadth</span>
             <span class="material-symbols-outlined text-primary">analytics</span>
           </div>
           <div class="w-full h-3 rounded-full overflow-hidden flex bg-white/10 mt-2" id="breadth-bar">
-            <!-- filled by js -->
+            <div class="skeleton w-full h-full"></div>
           </div>
           <div class="flex justify-between text-xs mt-2 text-on-surface-variant" id="breadth-text">
-            <span>Adv 0</span>
-            <span>Dec 0</span>
+            <span>Adv <span class="skeleton skeleton-text w-8 inline-block"></span></span>
+            <span>Dec <span class="skeleton skeleton-text w-8 inline-block"></span></span>
           </div>
         </div>
       </div>
@@ -375,14 +458,121 @@
         if (statusEl) statusEl.innerHTML = statusDot;
       }
 
+      if (window.SaarthiI18n) {
+        window.SaarthiI18n.renderLanguageSelector('dashboard-lang-container');
+        window.SaarthiI18n.applyTranslations();
+        window.addEventListener('saarthix_lang_change', () => {
+          if (typeof buildNav !== 'undefined') {
+            const { navLinks, mobileLinks } = buildNav('dashboard');
+            const navLinksEl = document.getElementById('nav-links');
+            if (navLinksEl) navLinksEl.innerHTML = navLinks;
+            const mobNavEl = document.getElementById('mobile-nav');
+            if (mobNavEl) mobNavEl.innerHTML = mobileLinks;
+          }
+          window.SaarthiI18n.applyTranslations();
+          renderDailyDigestUI();
+        });
+      }
+
       showDashboardSkeletons();
+      renderDailyDigestUI();
       initLiveDashboard();
       startClock();
       setupVisibilityListener();
+      initDashHeaderFeatures();
     });
+
+    function toggleDashNotif() {
+      const m = document.getElementById('dash-notif-menu');
+      if (m) m.classList.toggle('hidden');
+      const u = document.getElementById('dash-user-menu');
+      if (u) u.classList.add('hidden');
+    }
+
+    function toggleDashUserMenu() {
+      const m = document.getElementById('dash-user-menu');
+      if (m) m.classList.toggle('hidden');
+      const n = document.getElementById('dash-notif-menu');
+      if (n) n.classList.add('hidden');
+    }
+
+    function initDashHeaderFeatures() {
+      const searchInp = document.getElementById('dashboard-stock-search');
+      const resultsBox = document.getElementById('dashboard-search-results');
+      const userName = localStorage.getItem('sx_user_name') || 'User';
+      const userEmail = localStorage.getItem('sx_user_email') || 'Active Session';
+      const nameEl = document.getElementById('dash-menu-username');
+      const emailEl = document.getElementById('dash-menu-email');
+      if (nameEl) nameEl.textContent = userName;
+      if (emailEl) emailEl.textContent = userEmail;
+
+      if (searchInp && resultsBox) {
+        searchInp.addEventListener('input', (e) => {
+          const q = e.target.value.trim();
+          if (!q) {
+            resultsBox.classList.add('hidden');
+            resultsBox.innerHTML = '';
+            return;
+          }
+          const matches = typeof searchStocksDB === 'function' ? searchStocksDB(q).slice(0, 6) : [];
+          if (!matches.length) {
+            resultsBox.innerHTML = '<div class="p-3 text-center text-xs text-on-surface-variant">No matching stocks found</div>';
+            resultsBox.classList.remove('hidden');
+            return;
+          }
+          resultsBox.innerHTML = matches.map(s => `
+            <a href="stock-doctor.html" onclick="localStorage.setItem('sx_selected_ticker','${s.ticker}')" class="flex items-center justify-between p-2.5 rounded-lg hover:bg-white/10 transition-colors">
+              <div>
+                <span class="font-bold text-white text-xs">${s.ticker}</span>
+                <span class="text-[10px] text-on-surface-variant ml-1.5">${s.name}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-semibold text-white">₹${s.price.toFixed(2)}</span>
+                <span class="text-[10px] block ${s.change >= 0 ? 'text-secondary' : 'text-error'}">${s.change >= 0 ? '+' : ''}${s.changePct}%</span>
+              </div>
+            </a>
+          `).join('');
+          resultsBox.classList.remove('hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!searchInp.contains(e.target) && !resultsBox.contains(e.target)) {
+            resultsBox.classList.add('hidden');
+          }
+          const notifCont = document.getElementById('dash-notif-container');
+          const notifMenu = document.getElementById('dash-notif-menu');
+          if (notifCont && notifMenu && !notifCont.contains(e.target)) {
+            notifMenu.classList.add('hidden');
+          }
+          const userCont = document.getElementById('dash-user-container');
+          const userMenu = document.getElementById('dash-user-menu');
+          if (userCont && userMenu && !userCont.contains(e.target)) {
+            userMenu.classList.add('hidden');
+          }
+        });
+      }
+    }
+
+    function renderDailyDigestUI() {
+      const container = document.getElementById('daily-digest-container');
+      if (!container || typeof generateDailyDigest !== 'function') return;
+      const items = generateDailyDigest();
+      container.innerHTML = items.map(item => `
+        <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex items-start gap-3">
+          <div class="px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 flex-shrink-0 ${item.badgeClass}">
+            <span class="material-symbols-outlined text-[15px]">${item.icon}</span>
+            <span>${item.title}</span>
+          </div>
+          <div class="text-xs text-on-surface-variant/90 leading-relaxed">
+            ${item.text}
+          </div>
+        </div>
+      `).join('');
+    }
 
     document.addEventListener('market:tick', () => {
       // Local fallback refresh on ticker update
+      renderDailyDigestUI();
       if (typeof getMarketBreadth === 'function') {
         renderSummaryMetricsLocal();
         renderGainersLosersLocal();
@@ -394,7 +584,7 @@
       const timeEl = document.getElementById('header-time');
       const textEl = document.getElementById('header-market-text');
       
-      setInterval(() => {
+      const updateClock = () => {
         const now = new Date();
         const istTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
         let h = istTime.getHours();
@@ -415,7 +605,10 @@
             statusEl.innerHTML = buildNav('dashboard').statusDot;
           }
         }
-      }, 1000);
+      };
+
+      updateClock();
+      setInterval(updateClock, 1000);
     }
 
     function setupVisibilityListener() {
@@ -669,7 +862,7 @@
                 <span class="material-symbols-outlined text-[10px]">schedule</span> ${item.publishedAt || item.time || 'Recent'}
               </span>
             </div>
-            <a href="${item.url || '#'}" target="_blank" class="text-sm font-medium text-on-surface hover:text-primary transition-colors line-clamp-2 leading-snug">
+            <a href="${item.url || ('https://www.google.com/finance/quote/' + (item.ticker ? item.ticker + ':NSE' : 'NIFTY_50:INDEXNSE'))}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-on-surface hover:text-primary transition-colors line-clamp-2 leading-snug">
               ${item.headline}
             </a>
           </div>

@@ -192,6 +192,10 @@
         <span class="material-symbols-outlined text-[18px]">psychology</span>
         <span class="font-label-sm text-label-sm">Risk Quiz</span>
       </button>
+      <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all" href="support.html">
+        <span class="material-symbols-outlined text-[18px]">help</span>
+        <span class="font-label-sm text-label-sm">Support</span>
+      </a>
       <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/80 hover:bg-white/5 hover:text-on-surface transition-all" href="login.html">
         <span class="material-symbols-outlined text-[18px]">logout</span>
         <span class="font-label-sm text-label-sm">Log Out</span>
@@ -204,14 +208,19 @@
 
     <!-- Top Bar Header -->
     <header class="hidden md:flex justify-between items-center h-16 px-gutter bg-surface-dim/80 backdrop-blur-md border-b border-white/10 sticky top-0 z-40 w-full">
-      <nav class="flex items-center gap-6">
-        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="dashboard.html">Dashboard</a>
-        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="portfolio.html">Portfolio</a>
-        <a class="font-label-md text-label-md text-primary font-bold border-b-2 border-primary pb-1" href="mutual-funds.html" aria-current="page">Mutual Funds</a>
-        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="stock-doctor.html">Stock Doctor</a>
-        <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="ai-insights.html">AI Insights</a>
+      <nav class="flex items-center gap-6" id="mf-header-nav">
+        <!-- populated dynamically by buildNav -->
       </nav>
       <div class="flex items-center gap-4">
+        <!-- Language Selector -->
+        <div id="mf-lang-container"></div>
+
+        <!-- Compliance Pill -->
+        <button onclick="typeof window.openComplianceModal === 'function' && window.openComplianceModal()" class="compliance-pill" title="SEBI Compliance Information">
+          <span class="material-symbols-outlined text-[14px]">gavel</span>
+          <span>Compliance</span>
+        </button>
+
         <div class="flex items-center gap-4 text-mono-data font-mono-data border-r border-white/10 pr-4">
           <span class="flex items-center gap-1">
             <span class="text-on-surface-variant/60 text-[11px]">SENSEX</span>
@@ -221,10 +230,6 @@
             <span class="text-on-surface-variant/60 text-[11px]">NIFTY</span>
             <span id="hdr-nifty" class="text-on-surface"></span>
           </span>
-        </div>
-        <div class="relative">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
-          <input class="glass-input pl-8 pr-4 py-1.5 rounded-full text-body-sm w-44 focus:w-60 transition-all duration-300" placeholder="Search Mutual Funds..." type="text"/>
         </div>
         <button class="text-on-surface-variant hover:text-primary p-2 rounded-full hover:bg-white/5 relative">
           <span class="material-symbols-outlined">notifications</span>
@@ -797,10 +802,23 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof buildNav === 'function') {
-        const { navLinks, mobileLinks, statusDot } = buildNav('mutual-funds');
+        const { navLinks, mobileLinks, headerNavLinks, statusDot } = buildNav('mutual-funds');
         setSafeHtml('nav-links', navLinks);
         setSafeHtml('mobile-nav', mobileLinks);
+        setSafeHtml('mf-header-nav', headerNavLinks);
         setSafeHtml('market-status', statusDot);
+      }
+
+      if (window.SaarthiI18n) {
+        window.SaarthiI18n.renderLanguageSelector('mf-lang-container');
+        window.SaarthiI18n.applyTranslations();
+        window.addEventListener('saarthix_lang_change', () => {
+          const { navLinks, mobileLinks, headerNavLinks } = buildNav('mutual-funds');
+          setSafeHtml('nav-links', navLinks);
+          setSafeHtml('mobile-nav', mobileLinks);
+          setSafeHtml('mf-header-nav', headerNavLinks);
+          window.SaarthiI18n.applyTranslations();
+        });
       }
 
       updateClock();
@@ -813,7 +831,15 @@
       }
 
       const saved = localStorage.getItem('saarthix_mf_holdings');
-      const initialList = saved ? JSON.parse(saved) : DEFAULT_MF_HOLDINGS;
+      let initialList = DEFAULT_MF_HOLDINGS;
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) initialList = parsed;
+        } catch (e) {
+          console.warn('Corrupt saved MF holdings:', e);
+        }
+      }
       const container = document.getElementById('mf-inputs-container');
       if (container) {
         container.innerHTML = '';
@@ -1699,7 +1725,7 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
         <div class="w-8 h-8 rounded-full bg-primary-container/20 border border-primary-container/40 flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined text-primary text-sm animate-spin">sync</span>
         </div>
-        <div class="bg-white/[0.04] p-3 rounded-xl border border-white/5 text-xs text-on-surface animate-pulse">
+        <div class="mf-chat-text bg-white/[0.04] p-3 rounded-xl border border-white/5 text-xs text-on-surface animate-pulse">
           Thinking...
         </div>
       `;
@@ -1712,18 +1738,22 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ question: q, portfolioData: currentPortfolioData })
         });
+        if (!res.ok) throw new Error('API returned ' + res.status);
         const json = await res.json();
         const reply = json.reply || 'Analysis completed.';
 
-        botDiv.querySelector('.material-symbols-outlined').className = 'material-symbols-outlined text-primary text-sm';
-        botDiv.querySelector('.material-symbols-outlined').textContent = 'smart_toy';
-        const msgBox = botDiv.querySelector('.bg-white\/\\[0\\.04\\]');
+        const icon = botDiv.querySelector('.material-symbols-outlined');
+        if (icon) {
+          icon.className = 'material-symbols-outlined text-primary text-sm';
+          icon.textContent = 'smart_toy';
+        }
+        const msgBox = botDiv.querySelector('.mf-chat-text');
         if (msgBox) {
-          msgBox.className = 'bg-white/[0.04] p-3 rounded-xl border border-white/5 text-xs text-on-surface max-w-[85%]';
+          msgBox.className = 'mf-chat-text bg-white/[0.04] p-3 rounded-xl border border-white/5 text-xs text-on-surface max-w-[85%]';
           msgBox.innerHTML = reply.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
       } catch (err) {
-        const msgBox = botDiv.querySelector('.bg-white\/\\[0\\.04\\]');
+        const msgBox = botDiv.querySelector('.mf-chat-text');
         if (msgBox) msgBox.textContent = 'Analysis could not be generated. Please try again.';
       }
       container.scrollTop = container.scrollHeight;

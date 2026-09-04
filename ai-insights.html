@@ -118,7 +118,7 @@
       <a href="portfolio.html" class="block w-full bg-primary-container hover:bg-primary-container/90 text-white font-medium py-3 px-4 rounded-xl text-center pulse-button transition-colors">Analyze Portfolio</a>
     </div>
     <div class="px-gutter flex flex-col gap-1 pt-4 border-t border-white/10">
-      <a href="#" class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-white rounded-lg transition-colors">
+      <a href="support.html" class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-white rounded-lg transition-colors">
         <span class="material-symbols-outlined text-[20px]">help</span>
         <span class="font-medium text-sm">Support</span>
       </a>
@@ -425,7 +425,8 @@
       document.getElementById('mobile-nav').innerHTML = mobileLinks;
       
       const statWeb = document.getElementById('market-status');
-      if(statWeb) statWeb.innerHTML = statusDot + (isMarketOpen() ? ' Market Open' : ' Market Closed');
+      const openText = typeof isMarketOpen === 'function' ? (isMarketOpen() ? ' Market Open' : ' Market Closed') : '';
+      if(statWeb) statWeb.innerHTML = statusDot + (openText ? `<span class="text-xs text-on-surface-variant font-medium ml-1.5">${openText}</span>` : '');
       const statMob = document.getElementById('market-status-mobile');
       if(statMob) statMob.innerHTML = statusDot;
 
@@ -441,7 +442,6 @@
       }
       
       initPage();
-      updatePortfolioFitScore();
     });
 
     let isFetching = false;
@@ -572,8 +572,6 @@
       await Promise.allSettled([
         checkHealth(),
         fetchMarketSentiment(),
-        fetchSectorMomentum(),
-        fetchTechnicalSignals(),
         fetchFiiDii()
       ]);
       renderAIPicks();
@@ -598,30 +596,6 @@
           </div>
         `).join('');
       }
-      
-      // 3. Sector Momentum skeleton
-      const sectorContainer = document.getElementById('sector-momentum-list');
-      if (sectorContainer) {
-        sectorContainer.innerHTML = Array(4).fill(0).map(() => `
-          <div class="flex items-center py-3 animate-pulse">
-            <div class="w-1/3 h-4 bg-white/10 rounded"></div>
-            <div class="w-1/4 h-4 bg-white/10 rounded ml-4"></div>
-            <div class="w-1/4 h-2 bg-white/5 rounded-full ml-4"></div>
-          </div>
-        `).join('');
-      }
-      
-      // 4. Technical Signals skeleton
-      const techContainer = document.getElementById('tech-signals-list');
-      if (techContainer) {
-        techContainer.innerHTML = Array(4).fill(0).map(() => `
-          <div class="flex items-center justify-between py-3 px-4 mb-2 rounded-lg bg-white/5 border border-white/5 animate-pulse">
-            <div class="w-1/4 h-4 bg-white/10 rounded"></div>
-            <div class="w-1/4 h-4 bg-white/10 rounded"></div>
-            <div class="w-1/4 h-4 bg-white/10 rounded"></div>
-          </div>
-        `).join('');
-      }
     }
 
     async function initPage() {
@@ -629,15 +603,11 @@
       await Promise.allSettled([
         checkHealth(),
         fetchMarketSentiment(),
-        fetchSectorMomentum(),
-        fetchTechnicalSignals(),
         fetchFiiDii()
       ]);
       renderAIPicks();
       setInterval(checkHealth, 30000);
       setInterval(fetchMarketSentiment, 30000);
-      setInterval(fetchSectorMomentum, 60000);
-      setInterval(fetchTechnicalSignals, 60000);
     }
 
     function updateTimestamps() {
@@ -703,170 +673,7 @@
       }
     }
 
-    // ── 2. Sector Momentum Widget ──────────────────────────────
-    async function fetchSectorMomentum() {
-      const container = document.getElementById('sector-momentum-list');
-      if (!container) return;
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      try {
-        const res = await fetch('/api/sector-momentum', { signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-        const data = await res.json();
-
-        if (data.status === 'SUCCESS' && Array.isArray(data.sectors)) {
-          renderSectorMomentum(data.sectors);
-        } else {
-          throw new Error(data.error || 'Failed to parse sector data.');
-        }
-      } catch (err) {
-        clearTimeout(timeoutId);
-        console.warn('Sector momentum fetch warning:', err.message);
-        container.innerHTML = `
-          <div class="p-6 text-center text-xs text-error flex flex-col items-center gap-2">
-            <span>${err.name === 'AbortError' ? 'Sector data timed out (10s)' : (err.message || 'Sector data unavailable')}</span>
-            <button onclick="fetchSectorMomentum()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-primary font-medium flex items-center gap-1 transition-colors">
-              <span class="material-symbols-outlined text-[14px]">refresh</span> Retry
-            </button>
-          </div>
-        `;
-      }
-    }
-
-    function renderSectorMomentum(sectors) {
-      const container = document.getElementById('sector-momentum-list');
-      if (!container) return;
-
-      if (!sectors || !Array.isArray(sectors) || sectors.length === 0) {
-        container.innerHTML = `<div class="p-6 text-center text-xs text-on-surface-variant/60">No sector data available right now</div>`;
-        return;
-      }
-
-      container.innerHTML = sectors.map(s => {
-        const cls = s.avgChange >= 0 ? 'text-up' : 'text-down';
-        let momBadgeCls = 'bg-white/10 text-on-surface-variant';
-        if (s.momentum === 'Strong Up') momBadgeCls = 'bg-secondary/20 text-secondary border border-secondary/30';
-        else if (s.momentum === 'Up') momBadgeCls = 'bg-secondary/10 text-secondary';
-        else if (s.momentum === 'Strong Down') momBadgeCls = 'bg-error/20 text-error border border-error/30';
-        else if (s.momentum === 'Down') momBadgeCls = 'bg-error/10 text-error';
-
-        return `
-          <div class="flex items-center py-2.5 border-b border-white/5 last:border-0 hover:bg-white/5 px-2 rounded-lg transition-colors text-xs">
-            <div class="w-1/3 font-medium text-white truncate pr-2">${s.sector}</div>
-            <div class="w-1/4 font-bold ${cls}">${s.avgChange > 0 ? '+' : ''}${s.avgChange.toFixed(2)}%</div>
-            <div class="w-1/4 px-1">
-              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${momBadgeCls}">${s.momentum}</span>
-            </div>
-            <div class="w-1/12 text-right font-mono text-on-surface-variant">${s.count}</div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // ── 3. Technical Signals Widget ─────────────────────────────
-    async function fetchTechnicalSignals() {
-      const container = document.getElementById('tech-signals-list');
-      if (!container) return;
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      try {
-        const res = await fetch('/api/technical-signals', { signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-        const data = await res.json();
-
-        if (data.status === 'SUCCESS' && data.techSignals) {
-          renderTechSignals(data.techSignals);
-        } else {
-          throw new Error(data.error || 'Technical signals unavailable.');
-        }
-      } catch (err) {
-        clearTimeout(timeoutId);
-        console.warn('Technical signals fetch warning:', err.message);
-        container.innerHTML = `
-          <div class="p-6 text-center text-xs text-error flex flex-col items-center gap-2">
-            <span>${err.name === 'AbortError' ? 'Technical signals timed out (10s)' : (err.message || 'Technical signals unavailable')}</span>
-            <button onclick="fetchTechnicalSignals()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-primary font-medium flex items-center gap-1 transition-colors">
-              <span class="material-symbols-outlined text-[14px]">refresh</span> Retry
-            </button>
-          </div>
-        `;
-      }
-    }
-
-    function renderTechSignals(tech) {
-      const container = document.getElementById('tech-signals-list');
-      if (!container) return;
-
-      if (!tech || typeof tech !== 'object') {
-        container.innerHTML = `<div class="p-6 text-center text-xs text-on-surface-variant/60">No technical signals data available</div>`;
-        return;
-      }
-
-      const { niftyVs50DMA, niftyVs200DMA, stocksAbove50DMA, stocksAbove200DMA, highs52W, lows52W } = tech;
-
-      container.innerHTML = `
-        <div class="space-y-3 text-xs">
-          <!-- NIFTY 50 Positions -->
-          <div class="p-3 rounded-lg bg-white/5 border border-white/5 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="text-on-surface-variant font-medium">NIFTY 50 vs 50 DMA</span>
-              <span class="font-mono font-bold text-secondary flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">trending_up</span> ${niftyVs50DMA || 'Above 50 DMA'}
-              </span>
-            </div>
-            <div class="flex justify-between items-center border-t border-white/5 pt-2">
-              <span class="text-on-surface-variant font-medium">NIFTY 50 vs 200 DMA</span>
-              <span class="font-mono font-bold text-secondary flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">trending_up</span> ${niftyVs200DMA || 'Above 200 DMA'}
-              </span>
-            </div>
-          </div>
-
-          <!-- Stocks > 50 DMA Bar -->
-          <div class="p-3 rounded-lg bg-white/5 border border-white/5 space-y-1.5">
-            <div class="flex justify-between items-center">
-              <span class="text-on-surface-variant font-medium">NSE Stocks > 50 DMA</span>
-              <span class="font-mono font-bold text-white">${stocksAbove50DMA || 68}%</span>
-            </div>
-            <div class="w-full bg-surface-container-low rounded-full h-2 overflow-hidden">
-              <div class="h-full bg-primary" style="width: ${stocksAbove50DMA || 68}%"></div>
-            </div>
-          </div>
-
-          <!-- Stocks > 200 DMA Bar -->
-          <div class="p-3 rounded-lg bg-white/5 border border-white/5 space-y-1.5">
-            <div class="flex justify-between items-center">
-              <span class="text-on-surface-variant font-medium">NSE Stocks > 200 DMA</span>
-              <span class="font-mono font-bold text-white">${stocksAbove200DMA || 74}%</span>
-            </div>
-            <div class="w-full bg-surface-container-low rounded-full h-2 overflow-hidden">
-              <div class="h-full bg-secondary" style="width: ${stocksAbove200DMA || 74}%"></div>
-            </div>
-          </div>
-
-          <!-- 52W Highs vs Lows -->
-          <div class="p-3 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between">
-            <div>
-              <span class="text-on-surface-variant text-[10px] uppercase tracking-wider block">52W Highs Today</span>
-              <span class="font-mono font-bold text-secondary text-base">${highs52W || 28} stocks</span>
-            </div>
-            <div class="h-8 border-r border-white/10"></div>
-            <div class="text-right">
-              <span class="text-on-surface-variant text-[10px] uppercase tracking-wider block">52W Lows Today</span>
-              <span class="font-mono font-bold text-error text-base">${lows52W || 4} stocks</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }
 
     // ── 4. FII / DII Widget ─────────────────────────────────────
     async function fetchFiiDii() {
@@ -1172,7 +979,7 @@
       let verdictHtml = '';
       if (verdict) {
         const recBadge = verdict.recommendation === 'BUY_MORE' ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-secondary-container/20 text-secondary border border-secondary-container/40 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>🟢 BUY MORE</span>` :
-                         verdict.recommendation === 'SELL' ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-tertiary-container/20 text-tertiary border border-tertiary-container/40 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>🔴 SELL</span>` :
+                         verdict.recommendation === 'SELL' ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-error/20 text-error border border-error/40 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>🔴 SELL</span>` :
                          `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>🟡 HOLD</span>`;
 
         const riskBadge = verdict.risk === 'High' ? 'bg-error/20 text-error border border-error/30' :
@@ -1222,7 +1029,7 @@
               </div>
               <div>
                 <span class="text-on-surface-variant/70 text-[10px] block">Stop Loss</span>
-                <span class="font-mono font-bold text-tertiary text-base">₹${verdict.stopLoss}</span>
+                <span class="font-mono font-bold text-error text-base">₹${verdict.stopLoss}</span>
               </div>
               <div>
                 <span class="text-on-surface-variant/70 text-[10px] block">Target (12M)</span>
@@ -1250,7 +1057,7 @@
       html = verdictHtml + html;
 
       // Append standard SEBI disclaimer
-      html += `<div class="text-[11px] text-on-surface-variant/50 border-t border-white/5 pt-3 mt-4 font-mono-data">
+      html += `<div class="text-[11px] text-on-surface-variant/50 border-t border-white/5 pt-3 mt-4 font-mono">
         * AI-generated analysis for informational purposes only. Not investment advice. Consult a SEBI-registered financial advisor before trading.
       </div>`;
 
@@ -1277,52 +1084,7 @@
         </div>`;
     }
 
-    function updatePortfolioFitScore() {
-      const container = document.getElementById('portfolio-fit-container');
-      if (!container) return;
 
-      const cachedDataStr = localStorage.getItem('saarthix_insights_cache');
-      const holdingsStr = localStorage.getItem('saarthix_holdings');
-
-      if (cachedDataStr && holdingsStr) {
-        try {
-          const data = JSON.parse(cachedDataStr);
-          const score = data.healthScore || 0;
-          const risks = data.riskFlags || [];
-          
-          let healthLabel = 'Moderate';
-          let healthCls = 'text-yellow-400';
-          if (score >= 75) { healthLabel = 'Healthy'; healthCls = 'text-up'; }
-          else if (score < 55) { healthLabel = 'High Risk'; healthCls = 'text-down'; }
-
-          let risksHtml = '';
-          if (risks.length > 0) {
-            risksHtml = `<div class="text-left text-[11px] bg-white/5 border border-white/5 p-2 rounded w-full mb-4">
-              <span class="font-semibold text-orange-400 flex items-center gap-1 mb-1">
-                <span class="material-symbols-outlined text-[12px]">warning</span> Risk Alert
-              </span>
-              <p class="text-on-surface-variant line-clamp-2">${esc(risks[0])}</p>
-            </div>`;
-          } else {
-            risksHtml = `<p class="text-[11px] text-secondary mb-4 flex items-center gap-1 justify-center"><span class="material-symbols-outlined text-[12px]">check_circle</span> No major risk alerts</p>`;
-          }
-
-          container.innerHTML = `
-            <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
-            <span class="material-symbols-outlined text-3xl text-secondary mb-1">auto_awesome</span>
-            <h3 class="font-heading font-bold text-xs text-on-surface-variant mb-1">AI Health Score</h3>
-            <div class="text-4xl font-heading font-bold ${healthCls} mb-1">${score}%</div>
-            <p class="text-xs font-semibold text-on-surface mb-3">${healthLabel} Diversification</p>
-            ${risksHtml}
-            <a href="portfolio.html" class="w-full bg-white/10 hover:bg-white/20 text-white font-medium py-2 px-3 rounded-lg transition-colors border border-white/10 flex items-center justify-center gap-1 text-xs">
-              Manage Portfolio <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </a>
-          `;
-        } catch (e) {
-          console.error('Failed to parse portfolio cache:', e);
-        }
-      }
-    }
   </script>
 </body>
 </html>

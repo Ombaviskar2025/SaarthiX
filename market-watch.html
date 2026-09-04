@@ -94,10 +94,10 @@
     
     <!-- Bottom links -->
     <div class="px-gutter flex flex-col gap-1 pt-4 border-t border-white/10">
-      <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-white/5 hover:text-white transition-colors">
+      <a href="support.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-white/5 hover:text-white transition-colors">
         <span class="material-symbols-outlined text-[20px]">help</span> Support
       </a>
-      <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-error hover:bg-error/10 transition-colors">
+      <a href="login.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-error hover:bg-error/10 transition-colors">
         <span class="material-symbols-outlined text-[20px]">logout</span> Log Out
       </a>
     </div>
@@ -110,14 +110,25 @@
     <header class="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-white/10 flex flex-col">
       <div class="flex items-center justify-between px-4 md:px-container-padding h-16">
         <div class="flex items-center gap-4">
-          <h2 class="text-xl font-semibold hidden md:block">Market Watch</h2>
+          <h2 class="text-xl font-semibold hidden md:block" data-i18n="nav_market_watch">Market Watch</h2>
           <div id="market-status" class="flex items-center gap-2 text-sm bg-surface-container-low px-3 py-1 rounded-full border border-white/5"></div>
           <span class="live-timestamp text-xs text-on-surface-variant/60 ml-2 font-mono"></span>
         </div>
         
-        <!-- Live Indices Snapshot -->
-        <div class="flex gap-4 md:gap-8 items-center text-sm" id="indices-snapshot">
-          <!-- Injected via JS -->
+        <div class="flex items-center gap-4">
+          <!-- Language Selector -->
+          <div id="mw-lang-container"></div>
+
+          <!-- Compliance Pill -->
+          <button onclick="window.openComplianceModal()" class="compliance-pill" title="SEBI Compliance Information">
+            <span class="material-symbols-outlined text-[14px]">gavel</span>
+            <span>Compliance</span>
+          </button>
+
+          <!-- Live Indices Snapshot -->
+          <div class="flex gap-4 md:gap-8 items-center text-sm" id="indices-snapshot">
+            <!-- Injected via JS -->
+          </div>
         </div>
       </div>
     </header>
@@ -130,7 +141,7 @@
         <!-- Search & Add -->
         <div class="relative w-full xl:w-96 z-30">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-          <input type="text" id="stock-search" placeholder="Search stocks to add (e.g. RELIANCE, TCS)..." autocomplete="off" class="w-full glass-input rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium">
+          <input type="text" id="stock-search" maxlength="20" placeholder="Search stocks to add (e.g. RELIANCE, TCS)..." autocomplete="off" class="w-full glass-input rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium">
           <!-- Dropdown -->
           <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-2 glass-panel rounded-xl border border-white/10 shadow-2xl z-50 flex flex-col gap-1 p-2">
             <!-- Results injected here -->
@@ -226,6 +237,17 @@
         document.getElementById('mobile-nav').innerHTML = mobileLinks;
         document.getElementById('market-status').innerHTML = statusDot;
       }
+
+      if (window.SaarthiI18n) {
+        window.SaarthiI18n.renderLanguageSelector('mw-lang-container');
+        window.SaarthiI18n.applyTranslations();
+        window.addEventListener('saarthix_lang_change', () => {
+          const { navLinks, mobileLinks } = buildNav('market-watch');
+          document.getElementById('nav-links').innerHTML = navLinks;
+          document.getElementById('mobile-nav').innerHTML = mobileLinks;
+          window.SaarthiI18n.applyTranslations();
+        });
+      }
       
       initPage();
     });
@@ -282,7 +304,10 @@
           case 'name': valA = a.name; valB = b.name; break;
           case 'price': valA = a.price; valB = b.price; break;
           case 'change': valA = a.change; valB = b.change; break;
-          case 'pChange': valA = a.pChange; valB = b.pChange; break;
+          case 'pChange': 
+            valA = a.pChange !== undefined ? a.pChange : (a.changePct !== undefined ? a.changePct : 0);
+            valB = b.pChange !== undefined ? b.pChange : (b.changePct !== undefined ? b.changePct : 0);
+            break;
           case 'vol': valA = a.volume; valB = b.volume; break;
           default: valA = a.ticker; valB = b.ticker;
         }
@@ -333,8 +358,8 @@
           : '<span class="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded text-[10px] font-bold">BSE</span>';
 
         // 52W Range calculation
-        const low = stock.yearLow || stock.fiftyTwoWeekLow || stock.high52 || (stock.price * 0.7);
-        const high = stock.yearHigh || stock.fiftyTwoWeekHigh || stock.low52 || (stock.price * 1.3);
+        const low = stock.yearLow || stock.fiftyTwoWeekLow || stock.low52 || (stock.price * 0.7);
+        const high = stock.yearHigh || stock.fiftyTwoWeekHigh || stock.high52 || (stock.price * 1.3);
         let rangePercent = ((stock.price - low) / (high - low)) * 100;
         rangePercent = Math.max(0, Math.min(100, rangePercent)); // clamp
         
@@ -436,12 +461,13 @@
           cCell.textContent = `${sign}${changeStr}`;
           cCell.className = `py-3 px-4 text-right change-cell ${colorCls}`;
           
-          pcCell.textContent = `${sign}${stockData.pChange.toFixed(2)}%`;
+          const pVal = stockData.pChange !== undefined ? stockData.pChange : (stockData.changePct !== undefined ? stockData.changePct : 0);
+          pcCell.textContent = `${sign}${pVal.toFixed(2)}%`;
           pcCell.className = `py-3 px-4 text-right pchange-cell ${colorCls}`;
 
           // Update 52W Range Bar
-          const low = stockData.yearLow || (stockData.price * 0.7);
-          const high = stockData.yearHigh || (stockData.price * 1.3);
+          const low = stockData.yearLow || stockData.fiftyTwoWeekLow || stockData.low52 || (stockData.price * 0.7);
+          const high = stockData.yearHigh || stockData.fiftyTwoWeekHigh || stockData.high52 || (stockData.price * 1.3);
           let rangePercent = ((stockData.price - low) / (high - low)) * 100;
           rangePercent = Math.max(0, Math.min(100, rangePercent));
           const fill = row.querySelector('.range-fill');
