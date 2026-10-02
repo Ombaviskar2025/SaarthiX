@@ -507,7 +507,7 @@ app.get('/api/ltp', async (req, res) => {
       }
     }
 
-    // 2. If Dhan is not configured, or Dhan fetch failed, fall back to Google Finance
+    // 2. If Dhan is not configured, or Dhan fetch failed, resolve via Google Finance or Yahoo Finance
     if (!dhanSuccess) {
       const googlePromises = tickers.map(async (ticker) => {
         const mapping = DHAN_SYMBOL_MAP[ticker];
@@ -528,8 +528,27 @@ app.get('/api/ltp', async (req, res) => {
             return;
           }
         }
+
+        // Try Yahoo Finance for any stock (including ZENSARTECH, DIXON, etc.)
+        try {
+          const ySym = (ticker.endsWith('.BO') || ticker.endsWith('.NS')) ? ticker : `${ticker}.NS`;
+          let yQuote = await fetchYahooQuote(ySym);
+          if (!yQuote) {
+            yQuote = await fetchYahooQuote(`${ticker}.BO`);
+          }
+          if (yQuote && yQuote.price) {
+            prices[ticker] = {
+              price: parseFloat(yQuote.price.toFixed(2)),
+              change: parseFloat((yQuote.change || 0).toFixed(2)),
+              changePct: parseFloat((yQuote.changePct || 0).toFixed(2))
+            };
+            return;
+          }
+        } catch (yErr) {
+          // ignore
+        }
         
-        // 3. Layer 3 Fallback: Simulated random walk on the server if Google Finance also fails
+        // 3. Layer 3 Fallback: Simulated random walk on the server if others fail
         const mappingFallback = DHAN_SYMBOL_MAP[ticker];
         if (mappingFallback) {
           const drift = (Math.random() * 0.004 - 0.002); // Small random walk (-0.2% to +0.2%)
@@ -564,6 +583,74 @@ app.get('/api/ltp', async (req, res) => {
   }
 });
 
+// ── Universal Stock Search (NSE & BSE Auto-Detection) ─────────
+const STOCK_SEARCH_CACHE = new Map();
+const SEARCH_CACHE_TTL_MS = 10 * 60 * 1000;
+
+app.get('/api/stocks/search', async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (!q) {
+      return res.json({ status: 'SUCCESS', results: [] });
+    }
+
+    const cacheKey = q.toLowerCase();
+    const now = Date.now();
+    if (STOCK_SEARCH_CACHE.has(cacheKey)) {
+      const cached = STOCK_SEARCH_CACHE.get(cacheKey);
+      if (now - cached.timestamp < SEARCH_CACHE_TTL_MS) {
+        return res.json({ status: 'SUCCESS', results: cached.results });
+      }
+    }
+
+    const searchUrl = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q)}&quotesCount=15&newsCount=0`;
+    let yahooQuotes = [];
+    try {
+      const resp = await fetch(searchUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        yahooQuotes = data.quotes || [];
+      }
+    } catch (e) {
+      console.warn('[StockSearch] Yahoo search fetch failed:', e.message);
+    }
+
+    const results = [];
+    const seen = new Set();
+
+    yahooQuotes.forEach(item => {
+      const sym = item.symbol || '';
+      const isNSE = sym.endsWith('.NS') || item.exchDisp === 'NSE' || item.exchange === 'NSI';
+      const isBSE = sym.endsWith('.BO') || item.exchDisp === 'BSE' || item.exchDisp === 'Bombay' || item.exchange === 'BSE';
+
+      if ((isNSE || isBSE) && (item.quoteType === 'EQUITY' || item.quoteType === 'ETF')) {
+        const cleanTicker = sym.replace(/\.(NS|BO)$/i, '').toUpperCase();
+        const dedupeKey = cleanTicker;
+        if (!seen.has(dedupeKey)) {
+          seen.add(dedupeKey);
+          results.push({
+            ticker: cleanTicker,
+            symbol: sym,
+            name: item.longname || item.shortname || cleanTicker,
+            exchange: isNSE ? 'NSE' : 'BSE',
+            sector: item.sector || item.sectorDisp || item.industry || item.industryDisp || 'Equities',
+            industry: item.industry || item.industryDisp || '',
+            score: item.score || 0
+          });
+        }
+      }
+    });
+
+    STOCK_SEARCH_CACHE.set(cacheKey, { timestamp: now, results });
+    res.json({ status: 'SUCCESS', results });
+  } catch (error) {
+    console.error('Stock Search API Error:', error);
+    res.status(500).json({ status: 'FAILURE', error: error.message });
+  }
+});
+
 // ── Single Stock Quote Proxy Route ──────────────────────────
 app.get('/api/quote', async (req, res) => {
   try {
@@ -572,18 +659,17 @@ app.get('/api/quote', async (req, res) => {
       return res.status(400).json({ error: 'Missing required query parameter: symbol' });
     }
 
-    const symKey = symbol.toUpperCase();
+    const symKey = symbol.toUpperCase().replace(/\.(NS|BO)$/i, '');
     const mapping = DHAN_SYMBOL_MAP[symKey];
     
-    if (!mapping) {
-      return res.status(404).json({ error: `Symbol ${symbol} is not supported in the current watchlists.` });
-    }
-
     let quotePrice = null;
     let quoteSuccess = false;
+    let quoteChange = 0;
+    let quoteChangePct = 0;
+    let companyName = symKey;
 
     // 1. Try Dhan
-    if (isDhanConfigured()) {
+    if (mapping && isDhanConfigured()) {
       try {
         const body = {
           [mapping.exchangeSegment]: [parseInt(mapping.securityId)]
@@ -599,8 +685,8 @@ app.get('/api/quote', async (req, res) => {
       }
     }
 
-    // 2. Try Google Finance
-    if (!quoteSuccess) {
+    // 2. Try Google Finance if mapping exists
+    if (!quoteSuccess && mapping) {
       const exchange = mapping.exchangeSegment.includes('BSE') ? 'BSE' : 'NSE';
       const livePrice = await getLivePriceWithCache(symKey, exchange);
       if (livePrice !== null) {
@@ -609,19 +695,43 @@ app.get('/api/quote', async (req, res) => {
       }
     }
 
-    // 3. Fallback to basePrice if both fail
-    if (quotePrice === null) {
+    // 3. Fallback to Yahoo Finance (Supports ANY stock: ZENSARTECH, DIXON, SUZLON, etc.)
+    if (!quoteSuccess) {
+      try {
+        let yQuote = await fetchYahooQuote(`${symKey}.NS`);
+        if (!yQuote) {
+          yQuote = await fetchYahooQuote(`${symKey}.BO`);
+        }
+        if (yQuote && yQuote.price) {
+          quotePrice = yQuote.price;
+          quoteChange = yQuote.change || 0;
+          quoteChangePct = yQuote.changePct || 0;
+          companyName = yQuote.companyName || symKey;
+          quoteSuccess = true;
+        }
+      } catch (err) {
+        console.warn('Yahoo quote lookup failed for', symKey, err.message);
+      }
+    }
+
+    // 4. Fallback to basePrice if mapping exists
+    if (quotePrice === null && mapping) {
       quotePrice = mapping.basePrice;
     }
 
-    const basePrice = mapping.basePrice;
-    const change = quotePrice - basePrice;
-    const changePct = basePrice > 0 ? (change / basePrice) * 100 : 0;
+    if (quotePrice === null) {
+      return res.status(404).json({ error: `Symbol ${symbol} could not be resolved from live exchanges.` });
+    }
+
+    const basePrice = mapping ? mapping.basePrice : (quotePrice - quoteChange);
+    const change = quoteChange !== 0 ? quoteChange : (quotePrice - basePrice);
+    const changePct = quoteChangePct !== 0 ? quoteChangePct : (basePrice > 0 ? (change / basePrice) * 100 : 0);
 
     res.json({
       status: 'SUCCESS',
       symbol: symKey,
-      price: quotePrice,
+      name: companyName,
+      price: parseFloat(quotePrice.toFixed(2)),
       change: parseFloat(change.toFixed(2)),
       changePct: parseFloat(changePct.toFixed(2)),
       lastTradeTime: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true }),

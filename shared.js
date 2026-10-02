@@ -29,12 +29,15 @@ const STOCKS_DB = [
   { ticker:'WIPRO',      name:'Wipro Ltd.',                    exchange:'NSE', sector:'IT',            price:175.90,   change:-3.45,   changePct:-0.64, volume:3892456,  mktCap:'2.8L Cr',  pe:22.1, high52:648.80,   low52:424.15  },
   { ticker:'HCLTECH',    name:'HCL Technologies Ltd.',         exchange:'NSE', sector:'IT',            price:1203.90,  change:22.10,   changePct:1.30,  volume:2345678,  mktCap:'4.7L Cr',  pe:25.8, high52:1980.70,  low52:1244.60 },
   { ticker:'TECHM',      name:'Tech Mahindra Ltd.',            exchange:'NSE', sector:'IT',            price:1572.90,  change:15.30,   changePct:1.01,  volume:1234567,  mktCap:'1.5L Cr',  pe:38.5, high52:1765.90,  low52:1097.45 },
+  { ticker:'ZENSARTECH', name:'Zensar Technologies Limited',   exchange:'NSE', sector:'IT',            price:435.00,   change:12.90,   changePct:3.06,  volume:1425000,  mktCap:'0.98L Cr', pe:21.8, high52:822.00,   low52:416.15  },
   { ticker:'LTIM',       name:'LTIMindtree Ltd.',              exchange:'NSE', sector:'IT',            price:5890.00,  change:45.00,   changePct:0.77,  volume:876543,   mktCap:'1.7L Cr',  pe:36.4, high52:6750.00,  low52:4500.00 },
   { ticker:'PERSISTENT', name:'Persistent Systems Ltd.',       exchange:'NSE', sector:'IT',            price:5210.00,  change:68.00,   changePct:1.32,  volume:654321,   mktCap:'0.8L Cr',  pe:48.2, high52:5900.00,  low52:3200.00 },
   { ticker:'COFORGE',    name:'Coforge Ltd.',                  exchange:'NSE', sector:'IT',            price:7850.00,  change:-34.00,  changePct:-0.43, volume:432109,   mktCap:'0.5L Cr',  pe:42.1, high52:8400.00,  low52:4800.00 },
   { ticker:'MPHASIS',    name:'Mphasis Ltd.',                  exchange:'NSE', sector:'IT',            price:2940.00,  change:24.00,   changePct:0.82,  volume:543210,   mktCap:'0.5L Cr',  pe:32.6, high52:3300.00,  low52:2100.00 },
   { ticker:'TATAELXSI',  name:'Tata Elxsi Ltd.',               exchange:'NSE', sector:'IT',            price:6820.00,  change:-45.00,  changePct:-0.65, volume:321098,   mktCap:'0.4L Cr',  pe:52.4, high52:8900.00,  low52:6200.00 },
   { ticker:'KPITTECH',   name:'KPIT Technologies Ltd.',        exchange:'NSE', sector:'IT',            price:1640.00,  change:18.50,   changePct:1.14,  volume:1234567,  mktCap:'0.4L Cr',  pe:58.2, high52:1900.00,  low52:1100.00 },
+  { ticker:'DIXON',      name:'Dixon Technologies (India) Ltd',exchange:'NSE', sector:'Tech',          price:14850.00, change:185.00,  changePct:1.26,  volume:845000,   mktCap:'0.89L Cr', pe:85.4, high52:16200.00, low52:8500.00 },
+  { ticker:'IRCTC',      name:'IRCTC Ltd.',                    exchange:'NSE', sector:'Logistics',     price:835.50,   change:8.20,    changePct:0.99,  volume:2890000,  mktCap:'0.67L Cr', pe:52.4, high52:1138.00,  low52:680.00  },
 
   // Banking & Financials
   { ticker:'HDFCBANK',   name:'HDFC Bank Ltd.',                exchange:'NSE', sector:'Banking',       price:820.80,   change:-12.40,  changePct:-0.69, volume:9876543,  mktCap:'13.6L Cr', pe:21.3, high52:1979.90,  low52:1363.55 },
@@ -141,15 +144,65 @@ const STOCKS_DB = [
   { ticker:'UPL',        name:'UPL Ltd.',                      exchange:'NSE', sector:'Agro Chem',     price:614.20,   change:-4.20,   changePct:-0.80, volume:3456789,  mktCap:'0.4L Cr',  pe:28.4, high52:660.15,   low52:378.85  }
 ];
 
-// Search helper across all stocks
+// Search helper across all stocks with priority sorting (exact ticker matches first)
 function searchStocksDB(query) {
   if (!query) return STOCKS_DB.slice(0, 15);
   const q = query.trim().toLowerCase();
-  return STOCKS_DB.filter(s => 
+  const qUpper = q.toUpperCase();
+  const matches = STOCKS_DB.filter(s => 
     s.ticker.toLowerCase().includes(q) || 
-    s.name.toLowerCase().includes(q) ||
-    s.sector.toLowerCase().includes(q)
+    (s.name && s.name.toLowerCase().includes(q)) ||
+    (s.sector && s.sector.toLowerCase().includes(q))
   );
+
+  return matches.sort((a, b) => {
+    if (a.ticker === qUpper) return -1;
+    if (b.ticker === qUpper) return 1;
+    if (a.ticker.startsWith(qUpper) && !b.ticker.startsWith(qUpper)) return -1;
+    if (!a.ticker.startsWith(qUpper) && b.ticker.startsWith(qUpper)) return 1;
+    return 0;
+  });
+}
+
+// Universal search that seamlessly queries backend live market resolver
+async function searchUniversalStocks(query) {
+  const localResults = searchStocksDB(query);
+  if (!query || query.trim().length < 2) return localResults;
+
+  try {
+    const res = await fetch(`/api/stocks/search?q=${encodeURIComponent(query.trim())}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.results && Array.isArray(data.results)) {
+        data.results.forEach(apiStock => {
+          // If not in STOCKS_DB, insert it dynamically
+          const exists = STOCKS_DB.find(s => s.ticker === apiStock.ticker);
+          if (!exists) {
+            const newStock = {
+              ticker: apiStock.ticker,
+              name: apiStock.name || apiStock.ticker,
+              exchange: apiStock.exchange || 'NSE',
+              sector: apiStock.sector || 'Equities',
+              price: apiStock.price || 100,
+              change: apiStock.change || 0,
+              changePct: apiStock.changePct || 0,
+              volume: 1000000,
+              mktCap: '1.0L Cr',
+              pe: 25.0,
+              high52: (apiStock.price || 100) * 1.25,
+              low52: (apiStock.price || 100) * 0.75
+            };
+            STOCKS_DB.push(newStock);
+            LIVE_STOCKS.push(JSON.parse(JSON.stringify(newStock)));
+          }
+        });
+        return searchStocksDB(query);
+      }
+    }
+  } catch (err) {
+    console.warn('[searchUniversalStocks] Universal search API fallback to local DB:', err.message);
+  }
+  return localResults;
 }
 
 // Global live copies
@@ -159,6 +212,7 @@ window.LIVE_STOCKS = LIVE_STOCKS;
 window.LIVE_INDICES = LIVE_INDICES;
 window.STOCKS_DB = STOCKS_DB;
 window.searchStocksDB = searchStocksDB;
+window.searchUniversalStocks = searchUniversalStocks;
 
 // Simulation disabled — app runs purely on real Yahoo Finance market data
 window.stopSimulation = function() {};
