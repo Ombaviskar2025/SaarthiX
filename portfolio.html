@@ -217,21 +217,6 @@
       </button>
     </div>
 
-    <!-- Smart X-Ray AI Widget (from reference UI) -->
-    <div class="px-4 mb-4">
-      <div class="p-3.5 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 flex flex-col gap-2">
-        <div class="flex items-center gap-2 text-primary font-semibold text-xs">
-          <span class="material-symbols-outlined text-[17px]">psychology</span>
-          <span>Smart X-Ray AI</span>
-        </div>
-        <p class="text-[11px] text-on-surface-variant leading-relaxed">Diagnose concentration risks, hidden fees &amp; tax liabilities automatically.</p>
-        <button onclick="runAnalysis()" class="mt-1 w-full bg-primary-container text-on-primary-container text-xs font-semibold py-2 rounded-lg hover:bg-primary transition-all flex items-center justify-center gap-1.5 shadow-md">
-          <span class="material-symbols-outlined text-[15px]">rocket_launch</span>
-          <span>Analyse Portfolio</span>
-        </button>
-      </div>
-    </div>
-
     <!-- Bottom System Strip -->
     <div class="px-5 flex flex-col gap-1 pt-3 border-t border-white/10 text-xs">
       <div class="flex items-center gap-2 py-1.5 text-on-surface-variant/70">
@@ -407,6 +392,10 @@
               <span class="material-symbols-outlined text-[18px]">add</span>
               <span>Add Position</span>
             </button>
+            <button onclick="runAnalysis()" class="px-5 py-2.5 rounded-xl bg-primary text-on-primary hover:bg-primary-container text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/20 pulse-blue">
+              <span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+              <span>Analyze Portfolio</span>
+            </button>
           </div>
         </div>
 
@@ -454,98 +443,7 @@
           <!-- Dynamically populated holding cards -->
         </div>
 
-        <!-- Quick Add Strip (Trending Nifty 50) -->
-        <div class="glass-panel rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border border-white/5 bg-[#101420]/60 text-xs">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="font-semibold text-primary flex items-center gap-1">
-              <span class="material-symbols-outlined text-[15px]">bolt</span>
-              <span>Quick Add: Trending Nifty 50:</span>
-            </span>
-            <button onclick="quickAddStock('RELIANCE', 'Reliance Industries Ltd', 'Energy', 2940)" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-on-surface hover:text-white font-mono transition-all">
-              + RELIANCE ₹2,940
-            </button>
-            <button onclick="quickAddStock('INFY', 'Infosys Ltd', 'IT', 1620)" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-on-surface hover:text-white font-mono transition-all">
-              + INFY ₹1,620
-            </button>
-            <button onclick="quickAddStock('ITC', 'ITC Ltd', 'FMCG', 435)" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-on-surface hover:text-white font-mono transition-all">
-              + ITC ₹435
-            </button>
-            <button onclick="quickAddStock('LT', 'Larsen & Toubro Ltd', 'Infrastructure', 3540)" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-on-surface hover:text-white font-mono transition-all">
-              + LT ₹3,540
-            </button>
-            <button onclick="quickAddStock('ZENSARTECH', 'Zensar Technologies Ltd', 'IT SERVICES', 435)" class="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary font-mono font-semibold transition-all">
-              + ZENSARTECH ₹435
-            </button>
-          </div>
-          <span class="text-on-surface-variant/50 font-mono text-[11px]">Alt + N to add custom</span>
-        </div>
       </section>
-
-      <!-- AI Health & Diversification Score Banner (Image 3) -->
-      <section class="glass-panel rounded-2xl p-5 border border-white/10 bg-gradient-to-r from-emerald-500/10 via-surface-container/80 to-primary/10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-        <div class="flex items-center gap-4">
-          <!-- Green Score Box -->
-          <div class="w-16 h-16 rounded-2xl bg-secondary/20 border border-secondary/40 flex items-center justify-center text-secondary font-mono font-extrabold text-2xl shadow-lg shadow-secondary/15 flex-shrink-0" id="banner-score-box">
-            92
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h4 class="font-bold text-white text-base md:text-lg">AI HEALTH &amp; DIVERSIFICATION SCORE</h4>
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-secondary/20 text-secondary border border-secondary/30" id="banner-score-verdict">Optimal</span>
-            </div>
-            <p class="text-xs md:text-sm text-on-surface-variant mt-1" id="banner-score-desc">
-              High Sharpe Ratio (1.84), balanced sector spread, 0 tax penalties detected under FY24-25 slabs.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3 self-end md:self-auto flex-wrap">
-          <button onclick="triggerPortfolioDiagnosisAction()" class="px-5 py-2.5 rounded-xl bg-surface-container-high border border-primary/40 text-primary hover:bg-primary/10 text-xs md:text-sm font-semibold flex items-center gap-2 transition-all shadow-md">
-            <span class="material-symbols-outlined text-[18px]">monitor_heart</span>
-            <span>Run Smart X-Ray</span>
-          </button>
-          <button onclick="runAnalysis()" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary hover:bg-primary-container text-xs md:text-sm font-bold flex items-center gap-2 transition-all pulse-blue shadow-lg shadow-primary/25">
-            <span class="material-symbols-outlined text-[18px]">rocket_launch</span>
-            <span>Analyze Portfolio</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- Bottom Feature Cards (3 Pillars from Reference UI) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- Card 1 -->
-        <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-start gap-3.5">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400 flex-shrink-0 mt-0.5">
-            <span class="material-symbols-outlined text-[18px]">check_circle</span>
-          </div>
-          <div>
-            <h5 class="font-bold text-white text-sm">Dual-Exchange Auto Search</h5>
-            <p class="text-xs text-on-surface-variant/80 mt-1 leading-relaxed">No need to manually pick BSE or NSE. Prices and corporate actions map seamlessly from both exchanges.</p>
-          </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-start gap-3.5">
-          <div class="w-9 h-9 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center text-primary flex-shrink-0 mt-0.5">
-            <span class="material-symbols-outlined text-[18px]">memory</span>
-          </div>
-          <div>
-            <h5 class="font-bold text-white text-sm">AI Health &amp; Beta Scoring</h5>
-            <p class="text-xs text-on-surface-variant/80 mt-1 leading-relaxed">Analyses asset correlation, volatility, Sharpe ratio, and detects stock-specific red flags instantly.</p>
-          </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-start gap-3.5">
-          <div class="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center text-cyan-400 flex-shrink-0 mt-0.5">
-            <span class="material-symbols-outlined text-[18px]">shield</span>
-          </div>
-          <div>
-            <h5 class="font-bold text-white text-sm">LTCG / STCG Tax Insights</h5>
-            <p class="text-xs text-on-surface-variant/80 mt-1 leading-relaxed">Tax harvesting recommendations to offset capital gains legally under the latest Union Budget slabs.</p>
-          </div>
-        </div>
-      </div>
 
       <!-- Deep Analysis Results Section (Expands when Run Analysis is triggered) -->
       <section id="results-section" class="flex-col gap-6 pt-4">
