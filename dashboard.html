@@ -134,42 +134,78 @@
 </head>
 <body class="bg-background text-on-surface min-h-screen flex font-sans">
   
-  <!-- Sidebar nav: id="sidebar-nav" -->
-  <nav id="sidebar-nav" class="hidden md:flex flex-col h-full py-container-padding fixed left-0 top-0 w-[280px] border-r border-white/10 bg-surface-container/80 backdrop-blur-xl shadow-2xl z-50">
-    <div class="px-gutter mb-8 flex items-center gap-3">
-      <img src="logo.png" class="w-14 h-14 object-contain flex-shrink-0" alt="SaarthiX Logo"/>
-      <div>
-        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#FFF6D6] via-[#E5C158] to-[#BA923E]">SaarthiX</h1>
-        <p class="text-xs text-on-surface-variant">Intelligent Trading</p>
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
+  <!-- Sidebar nav: id="sidebar-nav" (Exact format as reference UI Image 2) -->
+  <nav id="sidebar-nav" class="flex flex-col h-full py-6 fixed left-0 top-0 w-[280px] border-r border-white/10 bg-[#101420]/95 backdrop-blur-xl shadow-2xl z-50 transition-transform duration-300 ease-in-out">
+    <div class="px-6 mb-7 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="logo.png" class="w-11 h-11 object-contain flex-shrink-0" alt="SaarthiX Logo"/>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold text-white tracking-tight leading-none">SaarthiX</h1>
+            <span class="px-1.5 py-0.5 rounded bg-primary/15 text-primary text-[10px] font-mono font-bold border border-primary/25">AI 2.4</span>
+          </div>
+          <p class="text-[11px] font-medium text-on-surface-variant/70 tracking-wider uppercase mt-1">NSE · BSE · INDIA ANALYTICS</p>
+        </div>
+      </div>
+      <!-- Hide Sidebar toggle button -->
+      <button onclick="toggleSidebar()" class="p-1.5 rounded-lg text-on-surface-variant hover:text-white hover:bg-white/10 transition-colors" title="Hide Sidebar">
+        <span class="material-symbols-outlined text-[20px]">left_panel_close</span>
+      </button>
+    </div>
+
+    <!-- Nav Links (Dynamic) -->
+    <div class="flex flex-col gap-1.5 px-4 flex-1 overflow-y-auto" id="nav-links"></div>
+
+    <!-- Smart X-Ray AI Widget (from Image 2) -->
+    <div class="px-4 mb-4">
+      <div class="p-3.5 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 flex flex-col gap-2">
+        <div class="flex items-center gap-2 text-primary font-semibold text-xs">
+          <span class="material-symbols-outlined text-[17px]">psychology</span>
+          <span>Smart X-Ray AI</span>
+        </div>
+        <p class="text-[11px] text-on-surface-variant leading-relaxed">Diagnose concentration risks, hidden fees &amp; tax liabilities automatically.</p>
+        <a href="portfolio.html" class="mt-1 w-full bg-primary-container text-on-primary-container text-xs font-semibold py-2 rounded-lg hover:bg-primary transition-all flex items-center justify-center gap-1.5 shadow-md">
+          <span class="material-symbols-outlined text-[15px]">rocket_launch</span>
+          <span>Analyse Portfolio</span>
+        </a>
       </div>
     </div>
-    <div class="flex flex-col gap-1 px-gutter flex-1" id="nav-links"></div>
-    <div class="px-gutter mt-auto mb-6">
-      <a href="portfolio.html" class="block w-full bg-primary-container text-on-primary-container pulse-button">Analyze Portfolio</a>
-    </div>
-    <div class="px-gutter flex flex-col gap-1 pt-4 border-t border-white/10">
-      <a href="support.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors">
-        <span class="material-symbols-outlined">help</span>
-        Support
+
+    <div class="px-5 flex flex-col gap-1 pt-3 border-t border-white/10 text-xs">
+      <div class="flex items-center gap-2 py-1.5 text-on-surface-variant/70">
+        <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+        <span class="text-secondary font-medium text-[11px]">NSE/BSE Live</span>
+        <span class="ml-auto font-mono text-[11px]" id="ist-time"></span>
+      </div>
+      <a href="support.html" class="flex items-center gap-2.5 py-1.5 text-on-surface-variant hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-[16px]">help</span>
+        <span>Support &amp; Helpdesk</span>
       </a>
-      <a href="login.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-error hover:bg-error/10 transition-colors">
-        <span class="material-symbols-outlined">logout</span>
-        Log Out
+      <a href="login.html" class="flex items-center gap-2.5 py-1.5 text-on-surface-variant hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-[16px]">logout</span>
+        <span>Log Out</span>
       </a>
     </div>
   </nav>
 
   <!-- Main content -->
-  <main class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col min-w-0 overflow-x-hidden">
+  <main id="main-content" class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col min-w-0 overflow-x-hidden transition-[margin] duration-300 ease-in-out">
     <!-- Top Bar -->
-    <header class="hidden md:flex items-center justify-between px-container-padding py-4 border-b border-white/10 bg-surface-container-low/50 backdrop-blur-md sticky top-0 z-40">
+    <header class="flex items-center justify-between px-4 md:px-container-padding py-4 border-b border-white/10 bg-surface-container-low/50 backdrop-blur-md sticky top-0 z-40">
       <div class="flex items-center gap-4">
-        <div class="relative">
+        <!-- Sidebar Toggle Button -->
+        <button onclick="toggleSidebar()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-white border border-white/10 transition-colors flex items-center justify-center" title="Toggle Sidebar">
+          <span class="material-symbols-outlined text-[20px]">menu</span>
+        </button>
+        <div class="relative hidden sm:block">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
           <input id="dashboard-stock-search" type="text" placeholder="Search stocks, indices..." class="glass-input pl-10 w-64 text-sm" autocomplete="off" />
           <div id="dashboard-search-results" class="hidden absolute left-0 top-full mt-2 w-80 max-h-72 overflow-y-auto bg-surface-container-high/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl z-50 p-1"></div>
         </div>
-        <div class="px-3 py-1 text-xs font-semibold rounded bg-white/10 border border-white/10 text-on-surface">NSE | BSE</div>
+        <div class="px-3 py-1 text-xs font-semibold rounded bg-white/10 border border-white/10 text-on-surface hidden md:block">NSE | BSE</div>
       </div>
       
       <div class="flex items-center gap-5">

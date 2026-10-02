@@ -526,7 +526,7 @@ function buildNav(activePageId) {
     { id:'stock-doctor', key:'nav_stock_doctor', label:'Stock Doctor', icon:'monitor_heart',          href:'stock-doctor.html' },
     { id:'mutual-funds', key:'nav_mutual_funds', label:'Mutual Funds', icon:'pie_chart',              href:'mutual-funds.html' },
     { id:'market-watch', key:'nav_market_watch', label:'Market Watch', icon:'candlestick_chart',      href:'market-watch.html' },
-    { id:'news',         key:'nav_news',         label:'News',         icon:'newspaper',              href:'news.html' },
+    { id:'news',         key:'nav_news',         label:'News & Reports',icon:'newspaper',             href:'news.html' },
     { id:'ai-insights',  key:'nav_ai_insights',  label:'AI Insights',  icon:'auto_awesome',           href:'ai-insights.html' }
   ];
 
@@ -539,13 +539,20 @@ function buildNav(activePageId) {
     const label = i18n ? i18n.t(p.key, p.label) : p.label;
     
     const activeCls = isActive 
-      ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm' 
-      : 'text-on-surface-variant hover:text-on-surface hover:bg-white/5';
+      ? 'bg-primary/15 text-primary font-semibold border border-primary/25 shadow-sm' 
+      : 'text-on-surface-variant hover:text-white hover:bg-white/5';
     
+    const activeBadge = isActive ? '<span class="px-2 py-0.5 rounded-full text-[10px] bg-primary/20 text-primary font-bold">Active</span>' : '';
+    const proBadge = p.id === 'ai-insights' ? '<span class="px-1.5 py-0.5 rounded text-[10px] bg-secondary/15 text-secondary font-bold font-mono">Pro</span>' : '';
+    const rightBadge = activeBadge || proBadge;
+
     navLinks += `
-      <a href="${p.href}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all ${activeCls}">
-        <span class="material-symbols-outlined text-[20px]">${p.icon}</span>
-        <span>${label}</span>
+      <a href="${p.href}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all ${activeCls}">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[20px]">${p.icon}</span>
+          <span>${label}</span>
+        </div>
+        ${rightBadge}
       </a>
     `;
 
@@ -572,6 +579,38 @@ function buildNav(activePageId) {
 
   return { navLinks, mobileLinks, headerNavLinks, statusDot };
 }
+
+// ── Global Sidebar Toggle Function ───────────────────────────
+function toggleSidebar() {
+  const sidebar = document.getElementById('main-sidebar') || document.getElementById('sidebar-nav');
+  const main = document.getElementById('main-content') || document.querySelector('main');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+
+  const isHidden = sidebar.classList.contains('-translate-x-full') || sidebar.classList.contains('sidebar-hidden');
+  if (isHidden) {
+    // Open Sidebar
+    sidebar.classList.remove('-translate-x-full', 'sidebar-hidden', 'hidden');
+    sidebar.classList.add('flex', 'translate-x-0');
+    if (main) {
+      main.classList.remove('md:ml-0', 'ml-0');
+      main.classList.add('md:ml-[280px]');
+    }
+    if (backdrop) backdrop.classList.remove('hidden');
+    try { localStorage.setItem('saarthix_sidebar_state', 'open'); } catch(e){}
+  } else {
+    // Hide Sidebar
+    sidebar.classList.add('-translate-x-full', 'sidebar-hidden');
+    sidebar.classList.remove('translate-x-0');
+    if (main) {
+      main.classList.remove('md:ml-[280px]');
+      main.classList.add('md:ml-0');
+    }
+    if (backdrop) backdrop.classList.add('hidden');
+    try { localStorage.setItem('saarthix_sidebar_state', 'closed'); } catch(e){}
+  }
+}
+window.toggleSidebar = toggleSidebar;
 
 // ── 4. Explainable AI Score Breakdown Component ───────────────
 function renderScoreBreakdown({ fundamental = 75, technical = 70, sentiment = 65, macro = 70, overallScore = null, showHeader = true, id = null }) {

@@ -151,10 +151,13 @@
     <p class="text-on-surface-variant text-sm mt-1">Resolving live NSE/BSE quotes &amp; calculating Sharpe Beta metrics</p>
   </div>
 
-  <!-- Sidebar -->
-  <nav class="hidden md:flex flex-col h-full py-6 fixed left-0 top-0 w-[280px] border-r border-white/10 bg-[#101420]/90 backdrop-blur-xl shadow-2xl z-50">
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
+  <!-- Sidebar (Exact format as reference UI Image 2) -->
+  <nav id="main-sidebar" class="flex flex-col h-full py-6 fixed left-0 top-0 w-[280px] border-r border-white/10 bg-[#101420]/95 backdrop-blur-xl shadow-2xl z-50 transition-transform duration-300 ease-in-out">
     <!-- Brand Header -->
-    <div class="px-6 mb-7">
+    <div class="px-6 mb-7 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <img src="logo.png" class="w-11 h-11 object-contain flex-shrink-0" alt="SaarthiX Logo"/>
         <div>
@@ -165,10 +168,14 @@
           <p class="text-[11px] font-medium text-on-surface-variant/70 tracking-wider uppercase mt-1">NSE · BSE · INDIA ANALYTICS</p>
         </div>
       </div>
+      <!-- Hide Sidebar toggle button -->
+      <button onclick="toggleSidebar()" class="p-1.5 rounded-lg text-on-surface-variant hover:text-white hover:bg-white/10 transition-colors" title="Hide Sidebar">
+        <span class="material-symbols-outlined text-[20px]">left_panel_close</span>
+      </button>
     </div>
 
-    <!-- Nav Links (Dynamic) -->
-    <div class="flex flex-col gap-1.5 px-4 flex-1" id="nav-links">
+    <!-- Nav Links (Dynamic from Image 2) -->
+    <div class="flex flex-col gap-1.5 px-4 flex-1 overflow-y-auto" id="nav-links">
       <a href="dashboard.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-on-surface-variant hover:text-white hover:bg-white/5 transition-all">
         <span class="material-symbols-outlined text-[20px]">dashboard</span>
         <span>Dashboard</span>
@@ -203,6 +210,11 @@
         </div>
         <span class="px-1.5 py-0.5 rounded text-[10px] bg-secondary/15 text-secondary font-bold font-mono">Pro</span>
       </a>
+      <!-- Clickable option to hide sidebar -->
+      <button onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-on-surface-variant/80 hover:text-white hover:bg-white/5 transition-all text-left w-full mt-1">
+        <span class="material-symbols-outlined text-[18px]">dock_to_right</span>
+        <span>Hide Sidebar</span>
+      </button>
     </div>
 
     <!-- Smart X-Ray AI Widget (from reference UI) -->
@@ -239,19 +251,25 @@
   </nav>
 
   <!-- Main Workspace -->
-  <main class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col min-w-0 overflow-x-hidden pb-20 md:pb-12">
+  <main id="main-content" class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col min-w-0 overflow-x-hidden pb-20 md:pb-12 transition-[margin] duration-300 ease-in-out">
 
     <!-- Top Header Bar -->
-    <header class="hidden md:flex justify-between items-center h-16 px-8 bg-[#0b0f19]/90 backdrop-blur-md border-b border-white/10 sticky top-0 z-40 w-full">
-      <nav class="flex items-center gap-6" id="portfolio-header-nav">
-        <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="dashboard.html">Dashboard</a>
-        <a class="text-xs text-primary font-bold border-b-2 border-primary pb-1" href="portfolio.html">Portfolio</a>
-        <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="stock-doctor.html">Stock Doctor</a>
-        <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="mutual-funds.html">Mutual Funds</a>
-        <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="market-watch.html">Market Watch</a>
-        <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="news.html">News</a>
-        <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="ai-insights.html">AI Insights</a>
-      </nav>
+    <header class="flex justify-between items-center h-16 px-4 md:px-8 bg-[#0b0f19]/90 backdrop-blur-md border-b border-white/10 sticky top-0 z-40 w-full">
+      <div class="flex items-center gap-3">
+        <!-- Sidebar Toggle Hamburger Button -->
+        <button onclick="toggleSidebar()" id="sidebar-toggle-btn" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-white border border-white/10 transition-colors flex items-center justify-center" title="Toggle Sidebar">
+          <span class="material-symbols-outlined text-[20px]">menu</span>
+        </button>
+        <nav class="hidden lg:flex items-center gap-6" id="portfolio-header-nav">
+          <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="dashboard.html">Dashboard</a>
+          <a class="text-xs text-primary font-bold border-b-2 border-primary pb-1" href="portfolio.html">Portfolio</a>
+          <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="stock-doctor.html">Stock Doctor</a>
+          <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="mutual-funds.html">Mutual Funds</a>
+          <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="market-watch.html">Market Watch</a>
+          <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="news.html">News &amp; Reports</a>
+          <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="ai-insights.html">AI Insights</a>
+        </nav>
+      </div>
 
       <div class="flex items-center gap-3">
         <!-- Live Sync Status Banner Pill -->
@@ -664,19 +682,9 @@
         <div id="modal-suggest-dropdown" class="suggest-dropdown hidden absolute top-full left-0 right-0 mt-1 rounded-xl max-h-56 overflow-y-auto p-1.5 flex flex-col gap-1 z-50"></div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-xs font-semibold text-on-surface-variant block mb-1">Exchange</label>
-          <select id="modal-exchange-input" class="w-full glass-input rounded-xl px-3 py-2 text-sm font-mono">
-            <option value="NSE" selected>NSE</option>
-            <option value="BSE">BSE</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-on-surface-variant block mb-1">Sector (Auto-Resolved)</label>
-          <input id="modal-sector-input" class="w-full glass-input rounded-xl px-3 py-2 text-sm font-mono" placeholder="e.g. IT SERVICES" value="IT SERVICES"/>
-        </div>
-      </div>
+      <!-- Exchange & Sector are auto-resolved in background -->
+      <input type="hidden" id="modal-exchange-input" value="NSE"/>
+      <input type="hidden" id="modal-sector-input" value="EQUITIES"/>
 
       <div class="grid grid-cols-2 gap-3">
         <div>
