@@ -95,40 +95,252 @@ html[data-theme="light"] body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-/* ── Sidebar ── */
+/* ── Sidebar (Slim Vertical Nav - Reference UI) ── */
 #sidebar-nav,
-html[data-theme="dark"] #sidebar-nav,
-html[data-theme="light"] #sidebar-nav {
+#main-sidebar,
+aside[class*="fixed"],
+nav[class*="fixed"][class*="left-0"] {
+  width: 78px !important;
+  min-width: 78px !important;
+  max-width: 78px !important;
+  padding: 16px 0 14px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  z-index: 50 !important;
   background: var(--c-sidebar) !important;
   border-right: 1px solid var(--c-border) !important;
   box-shadow: none !important;
+  overflow: visible !important;
 }
-#sidebar-nav a {
+
+/* Hide desktop headers and non-slim elements */
+#sidebar-nav .px-6,
+#main-sidebar .px-6,
+#sidebar-nav h1,
+#main-sidebar h1,
+#sidebar-nav p,
+#main-sidebar p,
+#sidebar-nav button[title="Hide Sidebar"],
+#main-sidebar button[title="Hide Sidebar"],
+#sidebar-nav [title="Hide Sidebar"],
+#sidebar-nav #ist-time,
+#main-sidebar #ist-time,
+header button[title="Toggle Sidebar"],
+header button[onclick*="toggleSidebar"] {
+  display: none !important;
+}
+
+/* Top logo circular emblem */
+#sidebar-nav img,
+#main-sidebar img,
+aside[class*="fixed"] img {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  margin: 0 auto 14px auto !important;
+  display: block !important;
+  object-fit: contain !important;
+}
+
+/* Links Container */
+#nav-links {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 0 !important;
+  gap: 3px !important;
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+}
+
+/* Nav Item Base */
+.sx-nav-item,
+#sidebar-nav #nav-links a,
+#main-sidebar #nav-links a,
+aside[class*="fixed"] #nav-links a {
+  width: 66px !important;
+  min-height: 52px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 6px 2px !important;
+  margin: 1px auto !important;
+  border-radius: 14px !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  border: 1px solid transparent !important;
+}
+.sx-nav-item .material-symbols-outlined,
+#sidebar-nav #nav-links a .material-symbols-outlined,
+#main-sidebar #nav-links a .material-symbols-outlined {
+  font-size: 22px !important;
+  margin-bottom: 2px !important;
+}
+.sx-nav-item span:not(.material-symbols-outlined):not(.sx-pro-pill),
+#sidebar-nav #nav-links a span:not(.material-symbols-outlined):not(.sx-pro-pill),
+#main-sidebar #nav-links a span:not(.material-symbols-outlined):not(.sx-pro-pill) {
+  font-size: 9.5px !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+  line-height: 1.15 !important;
+  max-width: 64px !important;
+  display: block !important;
+  white-space: normal !important;
+}
+
+/* Hide active pill badge on right if any */
+#sidebar-nav #nav-links a span.px-2,
+#main-sidebar #nav-links a span.px-2 {
+  display: none !important;
+}
+
+/* Active Nav Item - Dark Mode */
+html[data-theme="dark"] .sx-nav-item.active,
+html[data-theme="dark"] #sidebar-nav #nav-links a.active,
+html[data-theme="dark"] #main-sidebar #nav-links a.active,
+html[data-theme="dark"] #sidebar-nav #nav-links a[class*="bg-primary"],
+html[data-theme="dark"] #main-sidebar #nav-links a[class*="bg-primary"] {
+  background: rgba(77, 142, 255, 0.16) !important;
+  border: 1px solid rgba(77, 142, 255, 0.45) !important;
+  color: #adc6ff !important;
+  box-shadow: 0 0 16px rgba(77, 142, 255, 0.15) !important;
+}
+
+/* Inactive Nav Item - Dark Mode */
+html[data-theme="dark"] .sx-nav-item:not(.active),
+html[data-theme="dark"] #sidebar-nav #nav-links a:not(.active),
+html[data-theme="dark"] #main-sidebar #nav-links a:not(.active) {
+  color: #8b94a5 !important;
+  border: 1px solid transparent !important;
+}
+html[data-theme="dark"] .sx-nav-item:not(.active):hover,
+html[data-theme="dark"] #sidebar-nav #nav-links a:not(.active):hover,
+html[data-theme="dark"] #main-sidebar #nav-links a:not(.active):hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Active Nav Item - Light Mode */
+html[data-theme="light"] .sx-nav-item.active,
+html[data-theme="light"] #sidebar-nav #nav-links a.active,
+html[data-theme="light"] #main-sidebar #nav-links a.active,
+html[data-theme="light"] #sidebar-nav #nav-links a[class*="bg-primary"],
+html[data-theme="light"] #main-sidebar #nav-links a[class*="bg-primary"] {
+  background: #EEF2FF !important;
+  border: 1px solid rgba(79, 70, 229, 0.35) !important;
+  color: #4F46E5 !important;
+}
+
+/* Inactive Nav Item - Light Mode */
+html[data-theme="light"] .sx-nav-item:not(.active),
+html[data-theme="light"] #sidebar-nav #nav-links a:not(.active),
+html[data-theme="light"] #main-sidebar #nav-links a:not(.active) {
+  color: #6b7280 !important;
+  border: 1px solid transparent !important;
+}
+html[data-theme="light"] .sx-nav-item:not(.active):hover,
+html[data-theme="light"] #sidebar-nav #nav-links a:not(.active):hover,
+html[data-theme="light"] #main-sidebar #nav-links a:not(.active):hover {
+  color: #12141c !important;
+  background: #f3f4f8 !important;
+}
+
+/* Pro Pill Badge */
+.sx-pro-pill {
+  font-size: 8.5px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  padding: 1.5px 5.5px !important;
+  border-radius: 9999px !important;
+  background: rgba(16, 201, 144, 0.20) !important;
+  color: #10c990 !important;
+  border: 1px solid rgba(16, 201, 144, 0.35) !important;
+  margin-top: 2px !important;
+}
+
+/* Bottom Strip of Sidebar */
+#sidebar-nav > div:last-child,
+#main-sidebar > div:last-child,
+aside[class*="fixed"] > div:last-child {
+  width: 100% !important;
+  padding: 10px 0 4px 0 !important;
+  border-top: 1px solid var(--c-border) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  margin-top: auto !important;
+}
+#sidebar-nav > div:last-child a,
+#main-sidebar > div:last-child a,
+aside[class*="fixed"] > div:last-child a {
+  width: 66px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 6px 2px !important;
+  border-radius: 12px !important;
+  text-decoration: none !important;
   color: var(--c-text-muted) !important;
-  transition: background-color 0.15s ease, color 0.15s ease !important;
 }
-#sidebar-nav a:hover {
+#sidebar-nav > div:last-child a .material-symbols-outlined,
+#main-sidebar > div:last-child a .material-symbols-outlined {
+  font-size: 20px !important;
+  margin-bottom: 2px !important;
+}
+#sidebar-nav > div:last-child a span:not(.material-symbols-outlined),
+#main-sidebar > div:last-child a span:not(.material-symbols-outlined) {
+  font-size: 9px !important;
+  text-align: center !important;
+  line-height: 1.15 !important;
+}
+#sidebar-nav > div:last-child a:hover,
+#main-sidebar > div:last-child a:hover {
   background: var(--c-hover) !important;
   color: var(--c-text) !important;
 }
-#sidebar-nav h1 { color: var(--c-text) !important; }
-#sidebar-nav p { color: var(--c-text-muted) !important; }
-
-/* Active sidebar item */
-#sidebar-nav .bg-primary\/15,
-#sidebar-nav a[class*="bg-primary"],
-html[data-theme="dark"] #sidebar-nav .bg-primary\/15,
-html[data-theme="light"] #sidebar-nav .bg-primary\/15 {
-  background: var(--c-primary-lt) !important;
-  color: var(--c-primary-text) !important;
-}
-#sidebar-nav a .material-symbols-outlined {
-  color: inherit !important;
+#sidebar-nav > div:last-child span.text-secondary,
+#main-sidebar > div:last-child span.text-secondary {
+  display: none !important;
 }
 
-/* Bottom area of sidebar */
-#sidebar-nav > div:last-child {
-  border-top: 1px solid var(--c-border) !important;
+/* Content Left Margin to prevent overlap */
+#main-content,
+main {
+  margin-left: 78px !important;
+  transition: margin-left 0.2s ease !important;
+}
+@media (min-width: 768px) {
+  .md\:ml-\[280px\] {
+    margin-left: 78px !important;
+  }
+}
+@media (max-width: 767px) {
+  #sidebar-nav,
+  #main-sidebar,
+  aside[class*="fixed"] {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  #sidebar-nav.translate-x-0,
+  #main-sidebar.translate-x-0,
+  aside[class*="fixed"].translate-x-0 {
+    transform: translateX(0);
+  }
+  #main-content,
+  main {
+    margin-left: 0 !important;
+  }
 }
 
 /* ── Topbar / Header ── */

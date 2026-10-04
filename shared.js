@@ -521,13 +521,13 @@ if (typeof window !== 'undefined') {
 function buildNav(activePageId) {
   const i18n = window.SaarthiI18n;
   const pages = [
-    { id:'dashboard',    key:'nav_dashboard',    label:'Dashboard',    icon:'dashboard',              href:'dashboard.html' },
+    { id:'dashboard',    key:'nav_dashboard',    label:'Dashboard',    icon:'space_dashboard',        href:'dashboard.html' },
     { id:'portfolio',    key:'nav_portfolio',    label:'Portfolio',    icon:'account_balance_wallet', href:'portfolio.html' },
     { id:'stock-doctor', key:'nav_stock_doctor', label:'Stock Doctor', icon:'monitor_heart',          href:'stock-doctor.html' },
     { id:'mutual-funds', key:'nav_mutual_funds', label:'Mutual Funds', icon:'pie_chart',              href:'mutual-funds.html' },
     { id:'market-watch', key:'nav_market_watch', label:'Market Watch', icon:'candlestick_chart',      href:'market-watch.html' },
-    { id:'news',         key:'nav_news',         label:'News & Reports',icon:'newspaper',             href:'news.html' },
-    { id:'ai-insights',  key:'nav_ai_insights',  label:'AI Insights',  icon:'auto_awesome',           href:'ai-insights.html' }
+    { id:'news',         key:'nav_news',         label:'News',          icon:'newspaper',              href:'news.html' },
+    { id:'ai-insights',  key:'nav_ai_insights',  label:'AI Insights',  icon:'auto_awesome',           href:'ai-insights.html', pro:true }
   ];
 
   let navLinks = '';
@@ -538,21 +538,14 @@ function buildNav(activePageId) {
     const isActive = p.id === activePageId;
     const label = i18n ? i18n.t(p.key, p.label) : p.label;
     
-    const activeCls = isActive 
-      ? 'bg-primary/15 text-primary font-semibold border border-primary/25 shadow-sm' 
-      : 'text-on-surface-variant hover:text-white hover:bg-white/5';
-    
-    const activeBadge = isActive ? '<span class="px-2 py-0.5 rounded-full text-[10px] bg-primary/20 text-primary font-bold">Active</span>' : '';
-    const proBadge = p.id === 'ai-insights' ? '<span class="px-1.5 py-0.5 rounded text-[10px] bg-secondary/15 text-secondary font-bold font-mono">Pro</span>' : '';
-    const rightBadge = activeBadge || proBadge;
+    const activeCls = isActive ? 'sx-nav-item active' : 'sx-nav-item';
+    const proBadge = p.pro ? '<span class="sx-pro-pill">Pro</span>' : '';
 
     navLinks += `
-      <a href="${p.href}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all ${activeCls}">
-        <div class="flex items-center gap-3">
-          <span class="material-symbols-outlined text-[20px]">${p.icon}</span>
-          <span>${label}</span>
-        </div>
-        ${rightBadge}
+      <a href="${p.href}" class="${activeCls}" title="${label}">
+        <span class="material-symbols-outlined">${p.icon}</span>
+        <span>${label}</span>
+        ${proBadge}
       </a>
     `;
 
