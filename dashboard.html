@@ -6,7 +6,7 @@
   <title>SaarthiX - Dashboard</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script>
     tailwind.config = {
@@ -14,7 +14,7 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Geist', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
             mono: ['Inter', 'monospace'],
           },
           colors: {
@@ -50,31 +50,96 @@
     }
   </script>
   <style>
-    @media (min-width: 768px) {
-      .md\:ml-\[280px\] {
-        margin-left: 280px !important;
-      }
+    :root {
+      --c-primary: #4F46E5;
+      --c-primary-lt: #EEF2FF;
+      --c-gain: #12A150;
+      --c-gain-bg: #F0FDF4;
+      --c-loss: #E5484D;
+      --c-loss-bg: #FFF1F1;
+      --c-caution: #D97706;
+      --c-caution-bg: #FFFBEB;
+      --c-text: #12141C;
+      --c-muted: #6B7280;
+      --c-border: #E7E8F0;
+      --c-canvas: #F5F6FA;
+      --c-card: #FFFFFF;
     }
-    /* Glass panel styles */
-    .glass-panel {
-      background: rgba(28, 31, 41, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 1rem;
+
+    /* Light theme overrides */
+    body { background: var(--c-canvas) !important; color: var(--c-text) !important; font-family: 'Inter', sans-serif !important; }
+    
+    #sidebar-nav { background: white !important; border-right: 1px solid var(--c-border) !important; box-shadow: none !important; }
+    #sidebar-nav a, #sidebar-nav .text-on-surface-variant { color: var(--c-muted) !important; }
+    #sidebar-nav h1, #sidebar-nav .text-white { color: var(--c-text) !important; }
+    #sidebar-nav .bg-primary\/15, #sidebar-nav .active, #sidebar-nav .active-nav-item { background: var(--c-primary-lt) !important; color: var(--c-primary) !important; border-radius: 10px; }
+    #sidebar-nav .text-primary { color: var(--c-primary) !important; }
+    
+    header { background: white !important; border-bottom: 1px solid var(--c-border) !important; }
+    header .text-white, header .text-on-surface { color: var(--c-text) !important; }
+    header .text-on-surface-variant { color: var(--c-muted) !important; }
+
+    .glass-panel, #dashboard-search-results, #dash-notif-menu, #dash-user-menu { 
+      background: white !important; 
+      border: 1px solid var(--c-border) !important; 
+      border-radius: 14px !important; 
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; 
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
     }
+    #dashboard-search-results, #dash-notif-menu, #dash-user-menu {
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+    }
+    
     .glass-input {
-      background: rgba(0, 0, 0, 0.2) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #dfe2ef !important;
+      background: var(--c-canvas) !important; 
+      border: 1px solid var(--c-border) !important; 
+      color: var(--c-text) !important;
       border-radius: 0.5rem;
       padding: 0.5rem 1rem;
       outline: none;
       transition: all 0.2s;
     }
     .glass-input:focus {
-      border-color: #adc6ff !important;
-      background: rgba(0, 0, 0, 0.3) !important;
+      border-color: var(--c-primary) !important;
+      background: white !important;
+    }
+
+    .ticker-wrap, .border-b.border-white\/5.bg-surface-container-high\/50 {
+      background: var(--c-canvas) !important;
+      border-bottom: 1px solid var(--c-border) !important;
+      color: var(--c-text) !important;
+    }
+
+    .text-secondary, .text-up, .text-secondary\/80 { color: var(--c-gain) !important; }
+    .bg-up { background-color: var(--c-gain-bg) !important; border-color: var(--c-gain) !important; }
+    .text-error, .text-down, .text-error\/80 { color: var(--c-loss) !important; }
+    .bg-down { background-color: var(--c-loss-bg) !important; border-color: var(--c-loss) !important; }
+    
+    .bg-primary-container, .bg-primary { background: var(--c-primary) !important; color: white !important; border: none !important; }
+    .text-primary, .text-primary-container { color: var(--c-primary) !important; }
+    
+    #market-status span:not(.w-2) { color: var(--c-text) !important; } 
+    
+    /* Section titles */
+    h2, h3, h1, .text-white, .font-bold, .font-bold.text-on-surface, th, td.text-white { color: var(--c-text) !important; }
+    h2, h3, .font-bold { font-weight: 700 !important; }
+    
+    /* Colored borders */
+    .border-white\/10, .border-white\/5, .border-white\/15, .border-l-primary { border-color: var(--c-border) !important; }
+    .divide-white\/5 > :not([hidden]) ~ :not([hidden]) { border-color: var(--c-border) !important; }
+    
+    /* Mobile backdrop */
+    #sidebar-backdrop { background: rgba(0,0,0,0.4) !important; backdrop-filter: none !important; }
+    
+    /* Other fixes */
+    .bg-white\/5, .bg-white\/10, .bg-surface-container-high { background: var(--c-canvas) !important; }
+    .hover\:bg-white\/10:hover, .hover\:bg-white\/5:hover { background: var(--c-border) !important; }
+
+    @media (min-width: 768px) {
+      .md\:ml-\[280px\] {
+        margin-left: 280px !important;
+      }
     }
     .pulse-button {
       animation: pulse-border 2s infinite;
@@ -85,9 +150,9 @@
       transition: all 0.3s;
     }
     @keyframes pulse-border {
-      0% { box-shadow: 0 0 0 0 rgba(77, 142, 255, 0.4); }
-      70% { box-shadow: 0 0 0 8px rgba(77, 142, 255, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(77, 142, 255, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(79, 70, 229, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
     }
     /* Scrollbar */
     ::-webkit-scrollbar {
@@ -95,19 +160,15 @@
       height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: rgba(0,0,0,0.1);
+      background: var(--c-canvas);
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.1);
+      background: #D1D5DB;
       border-radius: 3px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255,255,255,0.2);
+      background: #9CA3AF;
     }
-    .text-up { color: #4edea3; }
-    .text-down { color: #ffb4ab; }
-    .bg-up { background-color: rgba(78, 222, 163, 0.1); border-color: rgba(78, 222, 163, 0.2); }
-    .bg-down { background-color: rgba(255, 180, 171, 0.1); border-color: rgba(255, 180, 171, 0.2); }
     
     .ticker-wrap {
       width: 100%;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html class="light" lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -64,6 +64,96 @@
     }
   </script>
   <style>
+    /* --- LIGHT THEME FINTECH OVERRIDES --- */
+    :root {
+      --c-primary: #4F46E5;
+      --c-gain: #12A150;
+      --c-loss: #E5484D;
+      --c-caution: #D97706;
+      --c-text: #12141C;
+      --c-muted: #6B7280;
+      --c-border: #E7E8F0;
+      --c-canvas: #F5F6FA;
+      --c-card: #FFFFFF;
+    }
+    
+    body { background: var(--c-canvas) !important; color: var(--c-text) !important; }
+    
+    /* Panels & Inputs */
+    .glass-panel { background: var(--c-card) !important; border: 1px solid var(--c-border) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; color: var(--c-text) !important; }
+    .glass-input { background: var(--c-canvas) !important; border: 1px solid var(--c-border) !important; color: var(--c-text) !important; box-shadow: none !important; }
+    .glass-input:focus { border-color: var(--c-primary) !important; box-shadow: 0 0 0 3px rgba(79,70,229,0.12) !important; }
+    
+    /* Layout */
+    #main-sidebar { background: var(--c-card) !important; border-right: 1px solid var(--c-border) !important; box-shadow: none !important; }
+    header { background: var(--c-card) !important; border-bottom: 1px solid var(--c-border) !important; box-shadow: none !important; backdrop-filter: none !important; }
+    
+    /* Sidebar Navigation */
+    #main-sidebar .text-white { color: var(--c-text) !important; }
+    #main-sidebar .text-on-surface-variant { color: var(--c-muted) !important; }
+    #main-sidebar a:hover { background: var(--c-canvas) !important; color: var(--c-text) !important; }
+    #main-sidebar a.bg-primary\/15 { background: #EEF2FF !important; color: var(--c-primary) !important; border-color: transparent !important; }
+    #main-sidebar .border-t { border-color: var(--c-border) !important; }
+    
+    /* Typography & Utility Colors */
+    .text-white { color: var(--c-text) !important; }
+    .text-on-surface-variant { color: var(--c-muted) !important; }
+    .text-secondary { color: var(--c-primary) !important; }
+    .text-primary { color: var(--c-primary) !important; }
+    .bg-primary { background: var(--c-primary) !important; }
+    .text-on-primary { color: white !important; }
+    .text-error { color: var(--c-loss) !important; }
+    
+    /* Stat Values */
+    .stat-val-positive, .text-emerald-400 { color: var(--c-gain) !important; }
+    .stat-val-negative { color: var(--c-loss) !important; }
+    .bg-emerald-500\/15 { background: #F0FDF4 !important; }
+    .border-emerald-500\/30 { border-color: #BBF7D0 !important; }
+    
+    /* Buttons in Header & Main Content */
+    button.bg-white\\/\\[0\\.04\\], button.bg-white\\/5 { background: var(--c-canvas) !important; border-color: var(--c-border) !important; color: var(--c-text) !important; }
+    button.bg-white\\/\\[0\\.04\\]:hover, button.bg-white\\/5:hover { background: #E5E7EB !important; }
+    .bg-primary-container { background: #EEF2FF !important; border: 1px solid #E0E7FF !important; }
+    .text-on-primary-container { color: var(--c-primary) !important; }
+    .compliance-pill { background: #EEF2FF !important; border-color: #E0E7FF !important; color: var(--c-primary) !important; }
+    #deck-pnl-badge { background: #EEF2FF !important; color: var(--c-primary) !important; border-color: transparent !important; }
+    
+    /* Cards & Holding Decks */
+    .holding-card { background: var(--c-card) !important; border: 1px solid var(--c-border) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; color: var(--c-text) !important; }
+    .holding-card:hover { border-color: var(--c-primary) !important; background: var(--c-canvas) !important; transform: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; }
+    #deck-badge-counter { background: var(--c-canvas) !important; color: var(--c-text) !important; border: 1px solid var(--c-border) !important; }
+    
+    /* Table styling */
+    table thead tr { border-bottom: 1px solid var(--c-border) !important; }
+    table th { color: var(--c-muted) !important; font-size: 12px !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 0.04em !important; }
+    table tr { background: var(--c-card) !important; border-color: var(--c-border) !important; }
+    table tr:hover { background: var(--c-canvas) !important; }
+    table td { color: var(--c-text) !important; border-color: var(--c-border) !important; }
+    
+    /* Results Section Specifics */
+    #portfolio-doctor-card { background: var(--c-card) !important; border: 1px solid var(--c-border) !important; border-left: 4px solid var(--c-primary) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; }
+    #portfolio-doctor-card .text-on-surface { color: var(--c-text) !important; }
+    .border-white\\/10 { border-color: var(--c-border) !important; }
+    .bg-white\\/10 { background: var(--c-border) !important; }
+    .divide-white\\/5 > :not([hidden]) ~ :not([hidden]) { border-color: var(--c-border) !important; }
+    
+    /* Labels */
+    label { color: var(--c-muted) !important; font-size: 12px !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 0.04em !important; }
+
+    /* Modals (Excluding Add Stock Modal) */
+    #quick-paste-modal > div, #broker-modal > div { background: var(--c-card) !important; border: 1px solid var(--c-border) !important; }
+
+    /* Signal Badges */
+    .badge-buy { background: #F0FDF4 !important; color: #12A150 !important; border: 1px solid #BBF7D0 !important; border-radius: 6px !important; padding: 2px 8px !important; font-size: 11px !important; font-weight: 600 !important; }
+    .badge-hold { background: #FFFBEB !important; color: #D97706 !important; border: 1px solid #FDE68A !important; border-radius: 6px !important; padding: 2px 8px !important; font-size: 11px !important; font-weight: 600 !important; }
+    .badge-reduce { background: #FFF1F1 !important; color: #E5484D !important; border: 1px solid #FECDD3 !important; border-radius: 6px !important; padding: 2px 8px !important; font-size: 11px !important; font-weight: 600 !important; }
+    .badge-ai { background: #EEF2FF !important; color: #4F46E5 !important; border: 1px solid #E0E7FF !important; border-radius: 6px !important; padding: 2px 8px !important; font-size: 11px !important; font-weight: 600 !important; }
+    
+    /* EXCEPTIONS FOR ADD STOCK MODAL (Keeps dark theme) */
+    #add-stock-modal .text-white { color: #edf0f8 !important; }
+    #add-stock-modal label { color: rgba(180,195,230,0.65) !important; }
+    /* --- END LIGHT THEME OVERRIDES --- */
+
     @media (min-width: 768px) {
       .md\:ml-\[280px\] { margin-left: 280px !important; }
     }
@@ -140,7 +230,7 @@
     @keyframes accentSlide { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
   </style>
 </head>
-<body class="bg-[#0b0f19] text-[#dfe2ef] min-h-screen flex font-sans selection:bg-primary-container selection:text-on-primary-container">
+<body class="bg-[#F5F6FA] text-[#12141C] min-h-screen flex font-sans selection:bg-primary-container selection:text-on-primary-container">
 
   <!-- Loading Overlay -->
   <div class="fixed inset-0 z-[100] hidden flex-col items-center justify-center bg-black/80 backdrop-blur-md" id="loading-overlay">

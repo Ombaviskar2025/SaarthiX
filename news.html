@@ -42,6 +42,89 @@
     }
   </script>
   <style>
+/* ═══ SAARTHIX LIGHT THEME OVERRIDE ═══ */
+* { box-sizing: border-box; }
+body { background: #F5F6FA !important; color: #12141C !important; font-family: 'Inter', sans-serif !important; }
+
+/* Sidebar */
+#sidebar-nav, nav[id*="sidebar"] { background: white !important; border-right: 1px solid #E7E8F0 !important; box-shadow: none !important; }
+#sidebar-nav *, nav[id*="sidebar"] * { border-color: #E7E8F0 !important; }
+#sidebar-nav a, nav[id*="sidebar"] a { color: #6B7280 !important; }
+#sidebar-nav a:hover, nav[id*="sidebar"] a:hover { background: #F5F6FA !important; color: #12141C !important; }
+#sidebar-nav h1 { color: #12141C !important; }
+#sidebar-nav p, #sidebar-nav span.text-on-surface-variant { color: #6B7280 !important; }
+
+/* Active nav item */
+.bg-primary\/15, [class*="bg-primary/15"] { background: #EEF2FF !important; }
+.text-primary { color: #4F46E5 !important; }
+.border-primary\/25 { border-color: rgba(79,70,229,0.25) !important; }
+
+/* Top bar / header */
+header, #main-topbar { background: white !important; border-bottom: 1px solid #E7E8F0 !important; backdrop-filter: none !important; }
+header *, #main-topbar * { color: #12141C; }
+
+/* Cards */
+.glass-panel, [class*="rounded-2xl"], [class*="rounded-xl"] {
+  background: white !important;
+}
+
+/* Inputs */
+.glass-input, input, textarea, select {
+  background: #F5F6FA !important;
+  border: 1px solid #E7E8F0 !important;
+  color: #12141C !important;
+}
+.glass-input:focus, input:focus { border-color: #4F46E5 !important; box-shadow: 0 0 0 3px rgba(79,70,229,0.10) !important; }
+
+/* Overrides for dark backgrounds */
+[class*="bg-\["] { background-color: transparent; }
+.bg-surface-container-low\/50, .bg-surface-container-high\/95, [class*="bg-surface"] { background: white !important; }
+
+/* Borders */
+[class*="border-white"] { border-color: #E7E8F0 !important; }
+
+/* Text overrides */
+.text-white, .text-on-surface { color: #12141C !important; }
+.text-on-surface-variant { color: #6B7280 !important; }
+
+/* Gain/Loss colors — keep these */
+.text-secondary, [class*="text-secondary"] { color: #12A150 !important; }
+.text-error, [class*="text-error"] { color: #E5484D !important; }
+
+/* Primary button */
+.bg-primary, [class*="bg-primary"]:not([class*="bg-primary/"]):not([class*="bg-primary-"]) { background: #4F46E5 !important; color: white !important; }
+
+/* Dropdown menus */
+[id*="-menu"], [id*="dropdown"], [id*="-results"], .suggest-dropdown {
+  background: white !important;
+  border: 1px solid #E7E8F0 !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10) !important;
+  backdrop-filter: none !important;
+}
+
+/* Mobile backdrop */
+#sidebar-backdrop { background: rgba(0,0,0,0.4) !important; backdrop-filter: none !important; }
+
+/* Ticker / scrolling bar */
+.ticker-wrap, [class*="ticker"] { background: #F5F6FA !important; border-color: #E7E8F0 !important; }
+
+/* Section headings */
+h1, h2, h3, h4 { color: #12141C !important; }
+
+/* AI verdict badges */
+.verdict-buy, [class*="verdict-buy"] { background: #F0FDF4; color: #12A150; border: 1px solid #BBF7D0; border-radius: 6px; }
+.verdict-hold, [class*="verdict-hold"] { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px; }
+.verdict-reduce, [class*="verdict-reduce"] { background: #FFF1F1; color: #E5484D; border: 1px solid #FECDD3; border-radius: 6px; }
+
+/* Score bars */
+.score-breakdown-card { background: white !important; border: 1px solid #E7E8F0 !important; }
+.score-factor-bar { background: #F5F6FA !important; }
+
+/* Skeleton loaders — make light */
+.skeleton, .skeleton-pulse {
+  background: linear-gradient(90deg, #F0F0F0 25%, #E0E0E0 50%, #F0F0F0 75%) !important;
+  background-size: 200% 100% !important;
+}
     @media (min-width: 768px) {
       .md\:ml-\[280px\] {
         margin-left: 280px !important;
@@ -103,7 +186,7 @@
     }
   </style>
 </head>
-<body class="bg-background text-on-surface min-h-screen flex font-sans">
+<body class="min-h-screen flex font-sans" style="background:#F5F6FA;">
   
   <!-- Sidebar nav -->
   <nav id="sidebar-nav" class="hidden md:flex flex-col h-full py-container-padding fixed left-0 top-0 w-[280px] border-r border-white/10 bg-surface-container/80 backdrop-blur-xl shadow-2xl z-50">
