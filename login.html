@@ -3,339 +3,353 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>SaarthiX - Login - NSE and BSE India</title>
-  <meta name="description" content="Login to your SaarthiX account. Smart portfolio decisions start here."/>
+  <title>SaarthiX - Login</title>
+  <meta name="description" content="Login to your SaarthiX account."/>
   <link rel="icon" type="image/x-icon" href="favicon.ico"/>
-  <link href="https://fonts.googleapis.com" rel="preconnect"/>
-  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --gold:#E5C158;--gold-light:#FFF0A0;--gold-dark:#BA923E;
-      --emerald:#10c990;--emerald-dk:#0aa578;
-      --bg-card:rgba(5,10,22,0.20);
-      --panel-left:rgba(4,8,18,0.35);--panel-right:rgba(6,11,24,0.28);
-      --border-gold:rgba(229,193,88,0.30);
-      --text-muted:rgba(200,210,230,0.80);--text-dim:rgba(200,210,230,0.55);
-      --input-bg:rgba(255,255,255,0.08);--input-border:rgba(255,255,255,0.20);
-    }
-    html,body{height:100%;min-height:100vh}
-    body{
-      font-family:'Inter',sans-serif;
-      background:url('space_bg.jpg') no-repeat center center fixed;
-      background-size:cover;
-      display:flex;align-items:center;justify-content:center;
-      padding:20px;position:relative;overflow:hidden;color:#dde4f0;
-    }
-    body::before{content:'';position:fixed;inset:0;background:rgba(4,8,18,0.10);z-index:0}
+    html,body{height:100%;font-family:'Inter',sans-serif;}
+    body{display:flex;min-height:100vh;background:#F5F6FA;}
 
-    .card-glow{
-      position:fixed;z-index:9;pointer-events:none;
-      width:900px;max-width:calc(100vw - 40px);
-      height:calc(100% - 40px);max-height:620px;
-      border-radius:23px;
-      background:linear-gradient(135deg,rgba(229,193,88,0.18),rgba(16,201,144,0.12),rgba(229,193,88,0.18));
-      filter:blur(10px);opacity:0.5;
-      animation:glow-pulse 4s ease-in-out infinite;
+    /* ── LEFT PANEL ── */
+    .left-panel{
+      width:42%;flex-shrink:0;
+      background:#4F46E5;
+      display:flex;flex-direction:column;
+      padding:28px 32px;
+      position:relative;overflow:hidden;
     }
-    @keyframes glow-pulse{0%,100%{opacity:0.35}50%{opacity:0.65}}
-    .login-card{
-      position:relative;z-index:10;
-      display:flex;width:100%;max-width:900px;min-height:570px;
-      border-radius:20px;overflow:hidden;
-      background:var(--bg-card);
-      border:1px solid var(--border-gold);
-      box-shadow:0 0 60px rgba(229,193,88,0.10),0 0 30px rgba(16,201,144,0.05),0 20px 60px rgba(0,0,0,0.35),inset 0 0 20px rgba(255,255,255,0.03);
-      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    .left-panel::before{
+      content:'';position:absolute;top:-80px;right:-80px;
+      width:300px;height:300px;border-radius:50%;
+      background:rgba(255,255,255,0.06);pointer-events:none;
     }
-    .panel-left{
-      flex:0 0 42%;background:var(--panel-left);
-      border-right:1px solid var(--border-gold);
+    .left-panel::after{
+      content:'';position:absolute;bottom:-60px;left:-60px;
+      width:240px;height:240px;border-radius:50%;
+      background:rgba(255,255,255,0.04);pointer-events:none;
+    }
+    .brand-row{display:flex;align-items:center;gap:10px;}
+    .brand-logo{
+      width:36px;height:36px;border-radius:8px;
+      background:white;display:flex;align-items:center;justify-content:center;
+      font-size:16px;font-weight:800;color:#4F46E5;flex-shrink:0;
+    }
+    .brand-name{color:white;font-size:18px;font-weight:700;letter-spacing:-0.02em;}
+    .left-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 8px;}
+    .left-headline{
+      font-size:2.3rem;font-weight:800;color:white;
+      line-height:1.15;letter-spacing:-0.03em;margin-bottom:12px;
+    }
+    .left-sub{font-size:1rem;color:rgba(255,255,255,0.7);margin-bottom:44px;}
+    .features{display:flex;flex-direction:column;gap:22px;}
+    .feature{display:flex;align-items:flex-start;gap:14px;}
+    .feature-icon{
+      width:38px;height:38px;border-radius:50%;flex-shrink:0;
+      background:rgba(255,255,255,0.15);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .feature-icon .material-symbols-outlined{font-size:18px;color:white;}
+    .feature-text{}
+    .feature-title{font-size:14px;font-weight:600;color:white;margin-bottom:2px;}
+    .feature-desc{font-size:12px;color:rgba(255,255,255,0.6);line-height:1.4;}
+
+    /* ── RIGHT PANEL ── */
+    .right-panel{
+      flex:1;background:#F5F6FA;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
-      padding:40px 30px;position:relative;overflow:hidden;
+      padding:40px 24px;
     }
-    .panel-left::before{content:'';position:absolute;top:-60px;left:-60px;width:280px;height:280px;background:radial-gradient(circle,rgba(229,193,88,0.11) 0%,transparent 70%);pointer-events:none}
-    .panel-left::after{content:'';position:absolute;bottom:-40px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(16,201,144,0.09) 0%,transparent 70%);pointer-events:none}
-    .logo-wrap{position:relative;margin-bottom:18px}
-    .logo-ring{position:absolute;border-radius:50%;border:1px dashed rgba(229,193,88,0.35);animation:spin-slow 28s linear infinite}
-    .logo-ring.outer{inset:-14px}
-    .logo-ring.inner{inset:-24px;border-color:rgba(16,201,144,0.22);border-style:dotted;animation-direction:reverse;animation-duration:20s}
-    @keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    .logo-img{width:152px;height:152px;object-fit:contain;border-radius:50%;display:block;position:relative;z-index:2;filter:drop-shadow(0 0 20px rgba(229,193,88,0.35))}
-    .left-title{font-family:'Playfair Display',serif;font-size:1.65rem;font-weight:700;text-align:center;line-height:1.25;margin-bottom:6px;color:#d4c3a3}
-    .left-title .brand{background:linear-gradient(135deg,#FFF6D6 0%,#F5C869 40%,#E5C158 70%,#BA923E 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    .gold-divider{display:flex;align-items:center;gap:8px;margin:10px 0;width:100%;justify-content:center}
-    .gold-divider::before,.gold-divider::after{content:'';flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(229,193,88,0.5))}
-    .gold-divider::after{background:linear-gradient(90deg,rgba(229,193,88,0.5),transparent)}
-    .gold-diamond{width:7px;height:7px;background:#E5C158;transform:rotate(45deg);flex-shrink:0;display:inline-block}
-    .left-tagline{font-size:0.82rem;color:var(--text-muted);text-align:center;line-height:1.65;margin-bottom:16px}
-    .mini-chart{width:100%;max-width:220px;height:68px;margin:0 auto 20px;position:relative}
-    .features{display:flex;justify-content:center;gap:12px;width:100%;margin-top:4px}
-    .feature-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1}
-    .feature-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:#E5C158}
-    .feature-icon svg{width:22px;height:22px}
-    .feature-label{font-size:0.67rem;color:var(--text-muted);text-align:center;line-height:1.3;font-weight:500}
-    .panel-right{flex:1;background:var(--panel-right);display:flex;flex-direction:column;justify-content:center;padding:44px 42px}
-    .right-title{font-size:1.55rem;font-weight:700;color:#edf0f8;text-align:center;margin-bottom:5px;letter-spacing:-0.02em}
-    .right-subtitle{font-size:0.82rem;color:var(--text-muted);text-align:center;margin-bottom:4px}
-    .right-divider{margin:10px auto 20px;display:flex;align-items:center;justify-content:center;gap:8px}
-    .right-divider::before,.right-divider::after{content:'';width:50px;height:1px;background:rgba(229,193,88,0.35)}
-    .form-group{margin-bottom:14px}
-    .form-label{display:block;font-size:0.77rem;font-weight:600;color:#b8c4d8;margin-bottom:6px;letter-spacing:0.02em}
-    .input-row{display:flex;gap:8px}
+    .login-card{
+      background:white;border-radius:16px;
+      padding:36px 36px 32px;width:100%;max-width:420px;
+      box-shadow:0 2px 16px rgba(0,0,0,0.07);
+    }
+    .card-title{font-size:22px;font-weight:700;color:#12141C;margin-bottom:5px;}
+    .card-sub{font-size:14px;color:#6B7280;margin-bottom:24px;}
+
+    /* Tabs */
+    .mode-tabs{
+      background:#F5F6FA;border-radius:999px;padding:4px;
+      display:flex;margin-bottom:24px;
+    }
+    .mode-tab{
+      flex:1;padding:9px;border-radius:999px;border:none;
+      font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;
+      font-family:'Inter',sans-serif;
+    }
+    .mode-tab.active{background:white;color:#12141C;box-shadow:0 1px 4px rgba(0,0,0,0.12);}
+    .mode-tab:not(.active){background:transparent;color:#9CA3AF;}
+
+    /* Form elements */
+    .form-label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;}
+    .phone-row{
+      display:flex;border:1.5px solid #E7E8F0;border-radius:10px;
+      overflow:hidden;background:white;transition:border-color 0.2s;
+    }
+    .phone-row:focus-within{border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,0.10);}
+    .phone-prefix{
+      padding:11px 14px;color:#6B7280;font-size:14px;
+      background:#F9FAFB;border-right:1px solid #E7E8F0;
+      white-space:nowrap;flex-shrink:0;
+    }
+    .phone-input{
+      flex:1;border:none;padding:11px 14px;font-size:14px;
+      outline:none;color:#12141C;background:white;font-family:'Inter',sans-serif;
+    }
+    .pwd-header{display:flex;justify-content:space-between;align-items:center;margin-top:16px;margin-bottom:6px;}
+    .forgot-link{color:#4F46E5;font-size:13px;text-decoration:none;font-weight:500;}
+    .forgot-link:hover{opacity:0.8;}
+    .pwd-wrap{
+      position:relative;border:1.5px solid #E7E8F0;border-radius:10px;
+      overflow:hidden;transition:border-color 0.2s;
+    }
+    .pwd-wrap:focus-within{border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,0.10);}
+    .pwd-icon{
+      position:absolute;left:13px;top:50%;transform:translateY(-50%);
+      color:#9CA3AF;font-size:17px;pointer-events:none;
+    }
+    .pwd-input{
+      width:100%;border:none;padding:11px 40px 11px 38px;
+      font-size:14px;outline:none;color:#12141C;
+      background:white;font-family:'Inter',sans-serif;
+    }
+    .eye-toggle{
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      background:none;border:none;cursor:pointer;color:#9CA3AF;
+      padding:3px;display:flex;align-items:center;transition:color 0.2s;
+    }
+    .eye-toggle:hover{color:#6B7280;}
+    .eye-toggle .material-symbols-outlined{font-size:18px;}
+    .error-msg{font-size:12px;color:#E5484D;margin-top:5px;display:none;}
+    .btn-primary{
+      width:100%;padding:13px;background:#4F46E5;color:white;
+      border:none;border-radius:10px;font-size:15px;font-weight:700;
+      margin-top:20px;cursor:pointer;transition:all 0.2s;
+      font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .btn-primary:hover{background:#4338CA;transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,70,229,0.30);}
+    .btn-primary:active{transform:translateY(0);}
+    .or-divider{
+      display:flex;align-items:center;gap:12px;
+      margin:18px 0;color:#9CA3AF;font-size:13px;
+    }
+    .or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:#E7E8F0;}
+    .btn-outline{
+      width:100%;padding:12px;border:1.5px solid #E7E8F0;
+      background:white;border-radius:10px;font-size:14px;
+      font-weight:600;color:#12141C;cursor:pointer;
+      transition:all 0.2s;font-family:'Inter',sans-serif;
+    }
+    .btn-outline:hover{background:#F5F6FA;border-color:#D1D5DB;}
+    .create-row{text-align:center;margin-top:20px;font-size:14px;color:#6B7280;}
+    .create-row a{color:#4F46E5;font-weight:600;text-decoration:none;cursor:pointer;}
+    .create-row a:hover{opacity:0.8;}
+
+    /* OTP digits */
+    .otp-inputs{display:flex;gap:8px;justify-content:center;margin:14px 0;}
+    .otp-digit{
+      width:46px;height:50px;border:1.5px solid #E7E8F0;border-radius:10px;
+      background:white;color:#12141C;font-size:1.25rem;font-weight:700;
+      text-align:center;font-family:inherit;outline:none;transition:border-color 0.2s;
+    }
+    .otp-digit:focus{border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,0.10);}
+    .timer-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B7280;margin-bottom:12px;}
+    .timer-val{color:#4F46E5;font-weight:600;}
+    .resend-btn{background:none;border:none;color:#9CA3AF;font-size:12px;font-family:inherit;cursor:not-allowed;transition:color 0.2s;}
+    .resend-btn.active{color:#4F46E5;cursor:pointer;}
+
+    /* Country select */
     .country-select{
-      width:76px;flex-shrink:0;background:var(--input-bg);border:1px solid var(--input-border);
-      border-radius:10px;color:#dde4f0;font-family:inherit;font-size:0.87rem;
-      padding:0 8px;cursor:pointer;appearance:none;text-align:center;
-      transition:border-color .25s,box-shadow .25s;
+      background:#F9FAFB;border:none;border-right:1px solid #E7E8F0;
+      color:#6B7280;font-size:14px;padding:11px 10px;cursor:pointer;
+      outline:none;font-family:'Inter',sans-serif;
     }
-    .country-select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(229,193,88,0.12)}
-    .field-wrap{position:relative;flex:1}
-    .field-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:rgba(180,190,210,0.42);display:flex;align-items:center}
-    .field-icon svg{width:15px;height:15px}
-    .form-input{
-      width:100%;background:var(--input-bg);border:1px solid var(--input-border);
-      border-radius:10px;color:#dde4f0;font-family:inherit;font-size:0.9rem;
-      padding:12px 40px 12px 40px;transition:border-color .25s,box-shadow .25s;
-    }
-    .form-input.no-li{padding-left:14px}
-    .form-input::placeholder{color:rgba(180,190,210,0.3)}
-    .form-input:focus{outline:none;border-color:rgba(229,193,88,0.55);box-shadow:0 0 0 3px rgba(229,193,88,0.10),0 0 14px rgba(229,193,88,0.11)}
-    .eye-btn{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(180,190,210,0.42);cursor:pointer;padding:4px;display:flex;align-items:center;transition:color .2s}
-    .eye-btn:hover{color:#dde4f0}
-    .eye-btn svg{width:17px;height:17px}
-    .forgot-link{display:block;text-align:right;font-size:0.77rem;color:#E5C158;text-decoration:none;margin-top:7px;font-weight:500;transition:opacity .2s}
-    .forgot-link:hover{opacity:0.72}
-    .btn-login{
-      width:100%;margin-top:16px;padding:13px 20px;border-radius:10px;border:none;
-      background:linear-gradient(135deg,#10c990 0%,#0aa578 100%);
-      color:#fff;font-family:inherit;font-size:1rem;font-weight:700;
-      letter-spacing:0.02em;cursor:pointer;
-      display:flex;align-items:center;justify-content:center;gap:10px;
-      transition:all .3s ease;box-shadow:0 4px 20px rgba(16,201,144,0.25);
-    }
-    .btn-login:hover{background:linear-gradient(135deg,#12dca0 0%,#0bb882 100%);box-shadow:0 6px 30px rgba(16,201,144,0.40);transform:translateY(-1px)}
-    .btn-login:active{transform:translateY(0)}
-    .arrow-icon{transition:transform .25s}
-    .btn-login:hover .arrow-icon{transform:translateX(4px)}
-    .or-divider{display:flex;align-items:center;gap:12px;margin:15px 0;color:var(--text-dim);font-size:0.78rem;font-weight:500}
-    .or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08)}
-    .btn-otp{
-      width:100%;padding:12px 20px;border-radius:10px;
-      border:1px solid rgba(255,255,255,0.11);background:rgba(255,255,255,0.03);
-      color:#dde4f0;font-family:inherit;font-size:0.9rem;font-weight:600;cursor:pointer;
-      display:flex;align-items:center;justify-content:center;gap:9px;transition:all .25s;
-    }
-    .btn-otp:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.2)}
-    .btn-otp svg{width:16px;height:16px;color:#10c990}
-    .signup-row{text-align:center;margin-top:15px;font-size:0.81rem;color:var(--text-muted)}
-    .signup-row a{color:#10c990;font-weight:600;text-decoration:none;transition:opacity .2s}
-    .signup-row a:hover{opacity:0.72}
-    .security-note{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:13px;font-size:0.73rem;color:var(--text-dim)}
-    .security-note svg{width:13px;height:13px;flex-shrink:0}
-    #otp-panel{display:none}
-    .otp-inputs{display:flex;gap:9px;justify-content:center;margin:13px 0}
-    .otp-digit{width:46px;height:50px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;color:#edf0f8;font-size:1.3rem;font-weight:700;text-align:center;font-family:inherit;transition:border-color .25s,box-shadow .25s}
-    .otp-digit:focus{outline:none;border-color:#10c990;box-shadow:0 0 0 3px rgba(16,201,144,0.15)}
-    .timer-row{display:flex;justify-content:space-between;align-items:center;font-size:0.77rem;color:var(--text-muted);margin-bottom:13px}
-    .timer-val{color:#10c990;font-weight:600}
-    .resend-btn{background:none;border:none;color:var(--text-dim);font-family:inherit;font-size:0.77rem;cursor:not-allowed;transition:color .2s}
-    .resend-btn.active{color:#10c990;cursor:pointer}
-    @media(max-width:700px){
-      .login-card{flex-direction:column;max-width:430px;min-height:auto}
-      .panel-left{flex:none;width:100%;padding:28px 22px 22px;border-right:none;border-bottom:1px solid var(--border-gold)}
-      .panel-right{padding:28px 22px 26px}
-      .logo-img{width:110px;height:110px}
-      .left-title{font-size:1.3rem}
-      .features{gap:8px}
-    }
+
     @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
-    /* ── Sign Up Modal ── */
+    /* Sign Up Modal */
     .su-overlay{
       position:fixed;inset:0;z-index:100;
-      background:rgba(4,8,18,0.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+      background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);
       display:flex;align-items:center;justify-content:center;padding:20px;
       opacity:0;pointer-events:none;transition:opacity .3s ease;
     }
-    .su-overlay.open{opacity:1;pointer-events:auto}
+    .su-overlay.open{opacity:1;pointer-events:auto;}
     .su-modal{
-      background:rgba(6,11,24,0.96);border:1px solid rgba(229,193,88,0.30);
-      border-radius:20px;width:100%;max-width:420px;
-      box-shadow:0 0 60px rgba(229,193,88,0.12),0 20px 60px rgba(0,0,0,0.5),inset 0 0 20px rgba(255,255,255,0.02);
-      padding:36px 36px 30px;position:relative;
-      transform:translateY(24px) scale(0.97);transition:transform .3s ease;
+      background:white;border:1px solid #E7E8F0;border-radius:20px;
+      width:100%;max-width:440px;padding:36px 36px 30px;position:relative;
+      box-shadow:0 20px 60px rgba(0,0,0,0.15);
+      transform:translateY(20px) scale(0.97);transition:transform .3s ease;
     }
-    .su-overlay.open .su-modal{transform:translateY(0) scale(1)}
+    .su-overlay.open .su-modal{transform:translateY(0) scale(1);}
     .su-close{
       position:absolute;top:14px;right:16px;background:none;border:none;
-      color:rgba(180,190,210,0.45);cursor:pointer;font-size:1.4rem;line-height:1;
-      transition:color .2s;padding:4px;
+      color:#9CA3AF;cursor:pointer;font-size:1.4rem;line-height:1;padding:4px;transition:color .2s;
     }
-    .su-close:hover{color:#dde4f0}
-    .su-title{font-size:1.35rem;font-weight:700;color:#edf0f8;text-align:center;letter-spacing:-0.02em;margin-bottom:3px}
-    .su-sub{font-size:0.78rem;color:var(--text-muted);text-align:center;margin-bottom:4px}
-    .su-divider{margin:10px auto 18px;display:flex;align-items:center;justify-content:center;gap:8px}
-    .su-divider::before,.su-divider::after{content:'';width:46px;height:1px;background:rgba(229,193,88,0.32)}
-    .su-row{display:flex;gap:12px}
-    .su-row .form-group{flex:1}
-    .su-input-wrap{position:relative}
-    .su-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:rgba(180,190,210,0.38);display:flex}
-    .su-icon svg{width:14px;height:14px}
+    .su-close:hover{color:#12141C;}
+    .su-title{font-size:1.25rem;font-weight:700;color:#12141C;text-align:center;margin-bottom:3px;}
+    .su-sub{font-size:13px;color:#6B7280;text-align:center;margin-bottom:20px;}
+    .su-row{display:flex;gap:12px;}
+    .su-row .su-group{flex:1;}
+    .su-group{margin-bottom:14px;}
+    .su-label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;}
+    .su-input-wrap{position:relative;}
+    .su-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9CA3AF;display:flex;}
+    .su-icon .material-symbols-outlined{font-size:15px;}
     .su-input{
-      width:100%;background:var(--input-bg);border:1px solid var(--input-border);
-      border-radius:10px;color:#dde4f0;font-family:inherit;font-size:0.88rem;
-      padding:11px 12px 11px 36px;transition:border-color .25s,box-shadow .25s;
+      width:100%;background:#F9FAFB;border:1.5px solid #E7E8F0;
+      border-radius:10px;color:#12141C;font-family:inherit;font-size:13px;
+      padding:10px 12px 10px 34px;outline:none;transition:border-color .2s;
     }
-    .su-input::placeholder{color:rgba(180,190,210,0.3)}
-    .su-input:focus{outline:none;border-color:rgba(229,193,88,0.55);box-shadow:0 0 0 3px rgba(229,193,88,0.10)}
-    .su-input.error{border-color:#ff7e7e}
-    .su-err{font-size:0.7rem;color:#ff7e7e;margin-top:4px;display:none}
+    .su-input:focus{border-color:#4F46E5;background:white;box-shadow:0 0 0 3px rgba(79,70,229,0.08);}
+    .su-input.error{border-color:#E5484D;}
+    .su-err{font-size:11px;color:#E5484D;margin-top:3px;display:none;}
     .su-btn{
-      width:100%;margin-top:18px;padding:13px 20px;border-radius:10px;border:none;
-      background:linear-gradient(135deg,#E5C158 0%,#BA923E 100%);
-      color:#0a0f1e;font-family:inherit;font-size:0.97rem;font-weight:700;
-      letter-spacing:0.02em;cursor:pointer;
-      display:flex;align-items:center;justify-content:center;gap:9px;
-      transition:all .3s ease;box-shadow:0 4px 20px rgba(229,193,88,0.22);
+      width:100%;margin-top:16px;padding:13px;border-radius:10px;border:none;
+      background:#4F46E5;color:white;font-family:inherit;font-size:14px;
+      font-weight:700;cursor:pointer;display:flex;align-items:center;
+      justify-content:center;gap:8px;transition:all .2s;
     }
-    .su-btn:hover{background:linear-gradient(135deg,#f5d46b 0%,#cf9f44 100%);box-shadow:0 6px 28px rgba(229,193,88,0.36);transform:translateY(-1px)}
-    .su-btn:active{transform:translateY(0)}
-    .su-login-row{text-align:center;margin-top:14px;font-size:0.8rem;color:var(--text-muted)}
-    .su-login-row a{color:#10c990;font-weight:600;text-decoration:none;cursor:pointer;transition:opacity .2s}
-    .su-login-row a:hover{opacity:.72}
-    .su-success{display:none;flex-direction:column;align-items:center;gap:14px;padding:20px 0 10px;text-align:center}
-    .su-success-icon{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,rgba(16,201,144,0.15),rgba(16,201,144,0.05));border:2px solid rgba(16,201,144,0.45);display:flex;align-items:center;justify-content:center}
-    .su-success-icon svg{width:30px;height:30px;color:#10c990}
-    .su-success-title{font-size:1.15rem;font-weight:700;color:#edf0f8}
-    .su-success-msg{font-size:0.82rem;color:var(--text-muted);line-height:1.6;max-width:280px}
-    .su-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(180,190,210,0.38);cursor:pointer;display:flex;padding:3px;transition:color .2s}
-    .su-eye:hover{color:#dde4f0}
-    .su-eye svg{width:15px;height:15px}
-    .su-terms{font-size:0.71rem;color:var(--text-dim);text-align:center;margin-top:10px;line-height:1.5}
-    .su-terms a{color:rgba(229,193,88,0.75);text-decoration:none}
-    .su-terms a:hover{color:#E5C158}
+    .su-btn:hover{background:#4338CA;}
+    .su-login-row{text-align:center;margin-top:12px;font-size:13px;color:#6B7280;}
+    .su-login-row a{color:#4F46E5;font-weight:600;cursor:pointer;text-decoration:none;}
+    .su-success{display:none;flex-direction:column;align-items:center;gap:14px;padding:20px 0 10px;text-align:center;}
+    .su-success-icon{
+      width:62px;height:62px;border-radius:50%;
+      background:#F0FDF4;border:2px solid #BBF7D0;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .su-success-icon .material-symbols-outlined{color:#12A150;font-size:30px;}
+    .su-success-title{font-size:1.1rem;font-weight:700;color:#12141C;}
+    .su-success-msg{font-size:13px;color:#6B7280;line-height:1.6;max-width:280px;}
+    .su-eye{
+      position:absolute;right:10px;top:50%;transform:translateY(-50%);
+      background:none;border:none;color:#9CA3AF;cursor:pointer;display:flex;padding:2px;
+    }
+    .su-eye .material-symbols-outlined{font-size:16px;}
+
+    @media(max-width:700px){
+      body{flex-direction:column;}
+      .left-panel{width:100%;padding:28px 24px 32px;}
+      .left-headline{font-size:1.8rem;}
+      .right-panel{padding:28px 20px;}
+      .login-card{padding:28px 24px 24px;}
+    }
   </style>
 </head>
 <body>
 
-  <div class="login-card">
-    <!-- LEFT PANEL -->
-    <div class="panel-left">
-      <div class="logo-wrap">
-        <div class="logo-ring outer"></div>
-        <div class="logo-ring inner"></div>
-        <img src="logo.png" class="logo-img" alt="SaarthiX Logo"/>
-      </div>
-      <h1 class="left-title">Welcome to <span class="brand">SaarthiX</span></h1>
-      <div class="gold-divider"><div class="gold-diamond"></div></div>
-      <p class="left-tagline">Smart portfolio decisions start here.<br/>Track. Analyze. Grow.</p>
-      <div class="mini-chart"><canvas id="chart-canvas" style="width:100%;height:100%;"></canvas></div>
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="brand-row">
+      <div class="brand-logo">S</div>
+      <span class="brand-name">SaarthiX</span>
+    </div>
+    <div class="left-body">
+      <h1 class="left-headline">Smart portfolio decisions start here.</h1>
+      <p class="left-sub">Track. Analyse. Grow.</p>
       <div class="features">
-        <div class="feature-item">
+        <div class="feature">
           <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="4" height="14" rx="1"/><rect x="9" y="7" width="4" height="10" rx="1"/><rect x="16" y="5" width="4" height="12" rx="1"/><path d="M2 21h20"/></svg>
+            <span class="material-symbols-outlined">trending_up</span>
           </div>
-          <span class="feature-label">Real-time<br/>Market Data</span>
+          <div class="feature-text">
+            <div class="feature-title">Live market data</div>
+            <div class="feature-desc">NSE and BSE prices, refreshed every 15 seconds</div>
+          </div>
         </div>
-        <div class="feature-item">
+        <div class="feature">
           <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+            <span class="material-symbols-outlined">auto_awesome</span>
           </div>
-          <span class="feature-label">Portfolio<br/>Analytics</span>
+          <div class="feature-text">
+            <div class="feature-title">AI portfolio analysis</div>
+            <div class="feature-desc">Health score, risks and tax estimate in one click</div>
+          </div>
         </div>
-        <div class="feature-item">
+        <div class="feature">
           <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            <span class="material-symbols-outlined">shield</span>
           </div>
-          <span class="feature-label">Secure &amp;<br/>Reliable</span>
+          <div class="feature-text">
+            <div class="feature-title">Private by design</div>
+            <div class="feature-desc">Your holdings stay in your account</div>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- RIGHT PANEL -->
-    <div class="panel-right">
-      <h2 class="right-title">Login to Your Account</h2>
-      <p class="right-subtitle">Access your SaarthiX dashboard</p>
-      <div class="right-divider"><div class="gold-diamond" style="width:6px;height:6px;"></div></div>
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="login-card">
+      <h2 class="card-title">Welcome back</h2>
+      <p class="card-sub">Log in to your SaarthiX account</p>
 
-      <!-- Password Login -->
-      <div id="password-panel">
-        <div class="form-group">
-          <label class="form-label" for="phone-input">Phone Number</label>
-          <div class="input-row">
-            <select class="country-select" id="country-code" aria-label="Country code">
-              <option value="+91" selected>+91</option>
-              <option value="+1">+1</option>
-              <option value="+44">+44</option>
-              <option value="+61">+61</option>
-              <option value="+81">+81</option>
-            </select>
-            <div class="field-wrap" style="flex:1;">
-              <input class="form-input no-li" id="phone-input" type="tel" placeholder="Enter your phone number" autocomplete="tel" aria-label="Phone number"/>
-            </div>
-          </div>
-          <p id="phone-error" style="display:none;color:#ff7e7e;font-size:0.73rem;margin-top:5px;">Please enter a valid phone number.</p>
-        </div>
-
-        <div class="form-group" style="margin-bottom:4px;">
-          <label class="form-label" for="password-input">Password</label>
-          <div class="field-wrap">
-            <span class="field-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </span>
-            <input class="form-input" id="password-input" type="password" placeholder="Enter your password" autocomplete="current-password" aria-label="Password"/>
-            <button class="eye-btn" id="toggle-pwd" type="button" aria-label="Toggle password visibility" onclick="togglePassword()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-          <a href="javascript:void(0)" onclick="handleForgotPassword()" class="forgot-link">Forgot Password?</a>
-        </div>
-        <p id="login-error" style="display:none;color:#ff7e7e;font-size:0.73rem;margin-top:6px;text-align:center;"></p>
-
-        <button class="btn-login" id="login-btn" onclick="handleLogin()">
-          Login
-          <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-
-        <div class="or-divider">OR</div>
-
-        <button class="btn-otp" id="otp-switch-btn" onclick="switchToOtp()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-          Login with OTP
-        </button>
-
-        <p class="signup-row">Don't have an account? <a href="javascript:void(0)" onclick="openSignup();">Sign Up</a></p>
-        <div class="security-note">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Your data is encrypted and secure with us.
-        </div>
+      <!-- Mode Tabs -->
+      <div class="mode-tabs">
+        <button class="mode-tab active" id="tab-pwd" onclick="activateTab('pwd')">Password</button>
+        <button class="mode-tab" id="tab-otp" onclick="activateTab('otp')">OTP</button>
       </div>
 
-      <!-- OTP Panel -->
-      <div id="otp-panel">
-        <div class="form-group" id="otp-phone-group">
-          <label class="form-label">Phone Number</label>
-          <div class="input-row">
-            <select class="country-select" id="otp-country-code" aria-label="OTP Country code">
-              <option value="+91" selected>+91</option>
-              <option value="+1">+1</option>
-              <option value="+44">+44</option>
-            </select>
-            <div class="field-wrap" style="flex:1;">
-              <input class="form-input no-li" id="otp-phone-input" type="tel" placeholder="Enter your phone number" autocomplete="tel"/>
-            </div>
-          </div>
+      <!-- PASSWORD PANEL -->
+      <div id="password-panel">
+        <label class="form-label">Phone number</label>
+        <div class="phone-row">
+          <select class="country-select" id="country-code" aria-label="Country code">
+            <option value="+91" selected>+91</option>
+            <option value="+1">+1</option>
+            <option value="+44">+44</option>
+            <option value="+61">+61</option>
+            <option value="+81">+81</option>
+          </select>
+          <input class="phone-input" id="phone-input" type="tel" placeholder="98765 43210" autocomplete="tel" aria-label="Phone number"/>
+        </div>
+        <p id="phone-error" class="error-msg">Please enter a valid phone number.</p>
+
+        <div class="pwd-header">
+          <label class="form-label" style="margin:0;">Password</label>
+          <a href="javascript:void(0)" onclick="handleForgotPassword()" class="forgot-link">Forgot?</a>
+        </div>
+        <div class="pwd-wrap">
+          <span class="pwd-icon material-symbols-outlined">lock</span>
+          <input class="pwd-input" id="password-input" type="password" placeholder="••••••••••" autocomplete="current-password" aria-label="Password"/>
+          <button class="eye-toggle" id="toggle-pwd" type="button" aria-label="Toggle visibility" onclick="togglePassword()">
+            <span class="material-symbols-outlined">visibility</span>
+          </button>
+        </div>
+        <p id="login-error" class="error-msg"></p>
+
+        <button class="btn-primary" id="login-btn" onclick="handleLogin()">Log in</button>
+
+        <div class="or-divider">or</div>
+
+        <button class="btn-outline" onclick="activateTab('otp')">Continue with OTP</button>
+      </div>
+
+      <!-- OTP PANEL -->
+      <div id="otp-panel" style="display:none;">
+        <label class="form-label">Phone number</label>
+        <div class="phone-row">
+          <select class="country-select" id="otp-country-code" aria-label="OTP Country code">
+            <option value="+91" selected>+91</option>
+            <option value="+1">+1</option>
+            <option value="+44">+44</option>
+          </select>
+          <input class="phone-input" id="otp-phone-input" type="tel" placeholder="98765 43210" autocomplete="tel"/>
         </div>
 
-        <button class="btn-login" id="send-otp-btn" onclick="sendOtp()">
+        <button class="btn-primary" id="send-otp-btn" onclick="sendOtp()" style="margin-top:16px;">
           Send OTP
-          <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
 
         <div id="otp-verify-block" style="display:none;margin-top:16px;">
-          <p style="font-size:0.8rem;color:var(--text-muted);text-align:center;margin-bottom:10px;">Code sent to <span id="otp-phone-display" style="color:#dde4f0;font-weight:600;"></span></p>
+          <p style="font-size:13px;color:#6B7280;text-align:center;margin-bottom:10px;">
+            Code sent to <span id="otp-phone-display" style="color:#12141C;font-weight:600;"></span>
+          </p>
           <div class="otp-inputs">
             <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" aria-label="OTP digit 1"/>
             <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" aria-label="OTP digit 2"/>
@@ -348,102 +362,88 @@
             <span>Expires in <span id="otp-timer" class="timer-val">03:00</span></span>
             <button class="resend-btn" id="resend-btn" onclick="resendOtp()" disabled>Resend OTP</button>
           </div>
-          <button class="btn-login" onclick="loginToDashboard()">
-            Verify &amp; Login
-            <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <button class="btn-primary" onclick="loginToDashboard()">
+            Verify &amp; Log in
           </button>
         </div>
 
-        <div class="or-divider" style="margin-top:14px;">OR</div>
-        <button class="btn-otp" onclick="switchToPassword()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Login with Password
-        </button>
-
-        <p class="signup-row">Don't have an account? <a href="javascript:void(0)" onclick="openSignup();">Sign Up</a></p>
-        <div class="security-note">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Your data is encrypted and secure with us.
-        </div>
+        <div class="or-divider" style="margin-top:16px;">or</div>
+        <button class="btn-outline" onclick="activateTab('pwd')">Login with Password</button>
       </div>
     </div>
+
+    <p class="create-row">New here? <a onclick="openSignup()">Create an account</a></p>
   </div>
 
-  <!-- ── Sign Up Modal ── -->
-  <div class="su-overlay" id="su-overlay" role="dialog" aria-modal="true" aria-labelledby="su-title">
+  <!-- Sign Up Modal -->
+  <div class="su-overlay" id="su-overlay" role="dialog" aria-modal="true">
     <div class="su-modal">
       <button class="su-close" id="su-close-btn" aria-label="Close signup" onclick="closeSignup()">&times;</button>
 
-      <!-- Form state -->
       <div id="su-form-state">
-        <h2 class="su-title" id="su-title">Create an Account</h2>
+        <h2 class="su-title">Create an Account</h2>
         <p class="su-sub">Join SaarthiX and start your investment journey</p>
-        <div class="su-divider"><div class="gold-diamond" style="width:6px;height:6px;"></div></div>
 
         <div class="su-row">
-          <div class="form-group">
-            <label class="form-label">First Name</label>
+          <div class="su-group">
+            <label class="su-label">First Name</label>
             <div class="su-input-wrap">
-              <span class="su-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <span class="su-icon"><span class="material-symbols-outlined">person</span></span>
               <input class="su-input" id="su-fname" type="text" placeholder="First name" autocomplete="given-name"/>
             </div>
             <p class="su-err" id="su-fname-err">Required</p>
           </div>
-          <div class="form-group">
-            <label class="form-label">Last Name</label>
+          <div class="su-group">
+            <label class="su-label">Last Name</label>
             <div class="su-input-wrap">
-              <span class="su-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <span class="su-icon"><span class="material-symbols-outlined">person</span></span>
               <input class="su-input" id="su-lname" type="text" placeholder="Last name" autocomplete="family-name"/>
             </div>
             <p class="su-err" id="su-lname-err">Required</p>
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Phone Number</label>
-          <div class="input-row">
-            <select class="country-select" id="su-country" aria-label="Signup country code">
+        <div class="su-group">
+          <label class="su-label">Phone Number</label>
+          <div style="display:flex;border:1.5px solid #E7E8F0;border-radius:10px;overflow:hidden;background:#F9FAFB;">
+            <select class="country-select" id="su-country" style="border-right:1px solid #E7E8F0;">
               <option value="+91" selected>+91</option>
               <option value="+1">+1</option>
               <option value="+44">+44</option>
-              <option value="+61">+61</option>
-              <option value="+81">+81</option>
             </select>
-            <div class="su-input-wrap" style="flex:1">
-              <input class="su-input" id="su-phone" type="tel" placeholder="Enter phone number" autocomplete="tel" style="padding-left:14px;"/>
-            </div>
+            <input class="su-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel" style="padding-left:12px;border:none;border-radius:0;background:white;"/>
           </div>
           <p class="su-err" id="su-phone-err">Enter a valid phone number</p>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Email Address</label>
+        <div class="su-group">
+          <label class="su-label">Email Address</label>
           <div class="su-input-wrap">
-            <span class="su-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+            <span class="su-icon"><span class="material-symbols-outlined">mail</span></span>
             <input class="su-input" id="su-email" type="email" placeholder="you@email.com" autocomplete="email"/>
           </div>
-          <p class="su-err" id="su-email-err">Enter a valid email address</p>
+          <p class="su-err" id="su-email-err">Enter a valid email</p>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Password</label>
+        <div class="su-group">
+          <label class="su-label">Password</label>
           <div class="su-input-wrap">
-            <span class="su-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+            <span class="su-icon"><span class="material-symbols-outlined">lock</span></span>
             <input class="su-input" id="su-pwd" type="password" placeholder="Min. 8 characters" autocomplete="new-password"/>
-            <button class="su-eye" type="button" aria-label="Toggle password" onclick="suTogglePwd('su-pwd',this)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <button class="su-eye" type="button" onclick="suTogglePwd('su-pwd',this)">
+              <span class="material-symbols-outlined">visibility</span>
             </button>
           </div>
           <p class="su-err" id="su-pwd-err">Password must be at least 8 characters</p>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Confirm Password</label>
+        <div class="su-group">
+          <label class="su-label">Confirm Password</label>
           <div class="su-input-wrap">
-            <span class="su-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+            <span class="su-icon"><span class="material-symbols-outlined">lock</span></span>
             <input class="su-input" id="su-cpwd" type="password" placeholder="Re-enter password" autocomplete="new-password"/>
-            <button class="su-eye" type="button" aria-label="Toggle confirm password" onclick="suTogglePwd('su-cpwd',this)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <button class="su-eye" type="button" onclick="suTogglePwd('su-cpwd',this)">
+              <span class="material-symbols-outlined">visibility</span>
             </button>
           </div>
           <p class="su-err" id="su-cpwd-err">Passwords do not match</p>
@@ -451,17 +451,14 @@
 
         <button class="su-btn" id="su-submit-btn" onclick="handleSignup()">
           Create Account
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <span class="material-symbols-outlined" style="font-size:17px;">arrow_forward</span>
         </button>
-
-        <p class="su-terms">By signing up you agree to our <a href="support.html">Terms of Service</a> &amp; <a href="support.html">Privacy Policy</a></p>
         <p class="su-login-row">Already have an account? <a onclick="closeSignup()">Log In</a></p>
       </div>
 
-      <!-- Success state -->
       <div class="su-success" id="su-success-state">
         <div class="su-success-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="material-symbols-outlined">check_circle</span>
         </div>
         <p class="su-success-title">Account Created!</p>
         <p class="su-success-msg">Welcome to SaarthiX. You can now log in with your credentials.</p>
@@ -470,38 +467,156 @@
   </div>
 
   <script>
-    function togglePassword(){var i=document.getElementById('password-input');i.type=i.type==='password'?'text':'password'}
+    /* ── Tab switching ── */
+    function activateTab(mode) {
+      var isPwd = mode === 'pwd';
+      var tabPwd = document.getElementById('tab-pwd');
+      var tabOtp = document.getElementById('tab-otp');
+      tabPwd.className = 'mode-tab' + (isPwd ? ' active' : '');
+      tabOtp.className = 'mode-tab' + (!isPwd ? ' active' : '');
+      document.getElementById('password-panel').style.display = isPwd ? 'block' : 'none';
+      document.getElementById('otp-panel').style.display = !isPwd ? 'block' : 'none';
+    }
+
+    /* ── Password toggle ── */
+    function togglePassword() {
+      var i = document.getElementById('password-input');
+      i.type = i.type === 'password' ? 'text' : 'password';
+    }
+
+    /* ── Login with credential validation ── */
+    function handleLogin() {
+      var phoneRaw = document.getElementById('phone-input').value.trim();
+      var code     = document.getElementById('country-code').value;
+      var password = document.getElementById('password-input').value;
+      var phoneErr = document.getElementById('phone-error');
+      var loginErr = document.getElementById('login-error');
+
+      phoneErr.style.display = 'none';
+      loginErr.style.display = 'none';
+
+      if (!phoneRaw || phoneRaw.replace(/\D/g,'').length < 7) {
+        phoneErr.style.display = 'block'; return;
+      }
+      if (!password) {
+        loginErr.textContent = 'Please enter your password.';
+        loginErr.style.display = 'block'; return;
+      }
+
+      var fullPhone = code + phoneRaw.replace(/\D/g,'');
+      var storedKey = localStorage.getItem('sx_phone_key');
+      var storedPwd = localStorage.getItem('sx_pwd_hash');
+
+      if (!storedKey || !storedPwd) {
+        loginErr.textContent = 'No account found. Please create an account first.';
+        loginErr.style.display = 'block'; return;
+      }
+      if (storedKey !== fullPhone) {
+        loginErr.textContent = 'No account found for this phone number.';
+        loginErr.style.display = 'block'; return;
+      }
+      if (storedPwd !== btoa(unescape(encodeURIComponent(password)))) {
+        loginErr.textContent = 'Incorrect password. Please try again.';
+        loginErr.style.display = 'block'; return;
+      }
+
+      var btn = document.getElementById('login-btn');
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Verifying...';
+      btn.disabled = true;
+      setTimeout(function() {
+        localStorage.setItem('sx_logged_in_phone', fullPhone);
+        window.location.href = 'dashboard.html';
+      }, 900);
+    }
+
+    /* ── Forgot password ── */
+    function handleForgotPassword() {
+      alert('Password reset: use OTP login to access your account.');
+      activateTab('otp');
+    }
+
+    /* ── OTP flow ── */
+    var timerInterval = null, secondsLeft = 180;
+    function sendOtp() {
+      var phone = document.getElementById('otp-phone-input').value.trim();
+      if (!phone || phone.replace(/\D/g,'').length < 7) { alert('Please enter a valid phone number.'); return; }
+      var code = document.getElementById('otp-country-code').value;
+      document.getElementById('otp-phone-display').textContent = code + ' ' + phone;
+      document.getElementById('send-otp-btn').style.display = 'none';
+      document.getElementById('otp-verify-block').style.display = 'block';
+      startTimer();
+      setTimeout(function() {
+        var d = document.querySelectorAll('.otp-digit');
+        '123456'.split('').forEach(function(c,i){ if(d[i]) d[i].value=c; });
+      }, 500);
+    }
+    function startTimer() {
+      secondsLeft = 180; clearInterval(timerInterval);
+      var rb = document.getElementById('resend-btn');
+      rb.disabled = true; rb.className = 'resend-btn';
+      updateTimer();
+      timerInterval = setInterval(function() {
+        secondsLeft--; updateTimer();
+        if (secondsLeft <= 0) { clearInterval(timerInterval); rb.disabled = false; rb.className = 'resend-btn active'; }
+      }, 1000);
+    }
+    function updateTimer() {
+      var m = String(Math.floor(secondsLeft/60)).padStart(2,'0');
+      var s = String(secondsLeft%60).padStart(2,'0');
+      document.getElementById('otp-timer').textContent = m+':'+s;
+    }
+    function resendOtp() {
+      document.querySelectorAll('.otp-digit').forEach(function(d){ d.value=''; });
+      document.querySelectorAll('.otp-digit')[0].focus();
+      startTimer();
+    }
+    function loginToDashboard() {
+      var otp = [].slice.call(document.querySelectorAll('.otp-digit')).map(function(d){ return d.value; }).join('');
+      if (otp.replace(/\s/g,'').length < 6) {
+        document.querySelectorAll('.otp-digit').forEach(function(d){ d.style.borderColor='#E5484D'; }); return;
+      }
+      window.location.href = 'dashboard.html';
+    }
+
+    /* ── OTP digit auto-advance ── */
+    document.addEventListener('DOMContentLoaded', function() {
+      var digits = document.querySelectorAll('.otp-digit');
+      digits.forEach(function(inp, idx) {
+        inp.addEventListener('input', function() {
+          this.value = this.value.replace(/\D/g,'');
+          this.style.borderColor = '';
+          if (this.value && idx < digits.length - 1) digits[idx+1].focus();
+        });
+        inp.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && !this.value && idx > 0) digits[idx-1].focus();
+        });
+      });
+    });
 
     /* ── Sign Up Modal ── */
-    function openSignup(){
-      var o=document.getElementById('su-overlay');
-      document.getElementById('su-form-state').style.display='block';
-      document.getElementById('su-success-state').style.display='none';
-      ['su-fname','su-lname','su-phone','su-email','su-pwd','su-cpwd'].forEach(function(id){var el=document.getElementById(id);if(el){el.value='';el.classList.remove('error');}});
-      document.querySelectorAll('.su-err').forEach(function(e){e.style.display='none'});
+    function openSignup() {
+      var o = document.getElementById('su-overlay');
+      document.getElementById('su-form-state').style.display = 'block';
+      document.getElementById('su-success-state').style.display = 'none';
+      ['su-fname','su-lname','su-phone','su-email','su-pwd','su-cpwd'].forEach(function(id) {
+        var el = document.getElementById(id); if(el){ el.value=''; el.classList.remove('error'); }
+      });
+      document.querySelectorAll('.su-err').forEach(function(e){ e.style.display='none'; });
       o.classList.add('open');
-      setTimeout(function(){var f=document.getElementById('su-fname');if(f)f.focus();},300);
+      setTimeout(function(){ var f=document.getElementById('su-fname'); if(f)f.focus(); }, 300);
     }
-    function closeSignup(){
-      document.getElementById('su-overlay').classList.remove('open');
+    function closeSignup() { document.getElementById('su-overlay').classList.remove('open'); }
+    function suTogglePwd(id, btn) { var i=document.getElementById(id); i.type=i.type==='password'?'text':'password'; }
+    function suShowErr(id, msg) {
+      var el=document.getElementById(id+'-err'); var inp=document.getElementById(id);
+      if(el){ el.textContent=msg||el.textContent; el.style.display='block'; }
+      if(inp) inp.classList.add('error');
     }
-    function suTogglePwd(id,btn){
-      var i=document.getElementById(id);
-      i.type=i.type==='password'?'text':'password';
+    function suClearErr(id) {
+      var el=document.getElementById(id+'-err'); var inp=document.getElementById(id);
+      if(el) el.style.display='none'; if(inp) inp.classList.remove('error');
     }
-    function suShowErr(id,msg){
-      var el=document.getElementById(id+'-err');
-      var inp=document.getElementById(id);
-      if(el){el.textContent=msg||el.textContent;el.style.display='block';}
-      if(inp)inp.classList.add('error');
-    }
-    function suClearErr(id){
-      var el=document.getElementById(id+'-err');
-      var inp=document.getElementById(id);
-      if(el)el.style.display='none';
-      if(inp)inp.classList.remove('error');
-    }
-    function handleSignup(){
+    function handleSignup() {
       var ok=true;
       var fname=document.getElementById('su-fname').value.trim();
       var lname=document.getElementById('su-lname').value.trim();
@@ -513,167 +628,28 @@
       if(!fname){suShowErr('su-fname','First name is required');ok=false;}
       if(!lname){suShowErr('su-lname','Last name is required');ok=false;}
       if(!phone||phone.replace(/\D/g,'').length<7){suShowErr('su-phone','Enter a valid phone number');ok=false;}
-      if(!email||!/^[^@]+@[^@]+\.[^@]+$/.test(email)){suShowErr('su-email','Enter a valid email address');ok=false;}
+      if(!email||!/^[^@]+@[^@]+\.[^@]+$/.test(email)){suShowErr('su-email','Enter a valid email');ok=false;}
       if(!pwd||pwd.length<8){suShowErr('su-pwd','Password must be at least 8 characters');ok=false;}
       if(pwd!==cpwd){suShowErr('su-cpwd','Passwords do not match');ok=false;}
-      if(!ok)return;
+      if(!ok) return;
       var btn=document.getElementById('su-submit-btn');
-      btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Creating...';
+      btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Creating...';
       btn.disabled=true;
       setTimeout(function(){
-        // Save user credentials and profile
-        var suCode = document.getElementById('su-country').value;
-        var suPhone = suCode + phone.replace(/\D/g,'');
-        localStorage.setItem('sx_user_name', fname + ' ' + lname);
+        var suCode=document.getElementById('su-country').value;
+        var suPhone=suCode+phone.replace(/\D/g,'');
+        localStorage.setItem('sx_user_name', fname+' '+lname);
         localStorage.setItem('sx_user_email', email);
         localStorage.setItem('sx_phone_key', suPhone);
         localStorage.setItem('sx_pwd_hash', btoa(unescape(encodeURIComponent(pwd))));
         document.getElementById('su-form-state').style.display='none';
         document.getElementById('su-success-state').style.display='flex';
-        btn.innerHTML='Create Account <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
-        btn.disabled=false;
-        setTimeout(closeSignup,2000);
-      },1400);
+        btn.innerHTML='Create Account'; btn.disabled=false;
+        setTimeout(closeSignup, 2000);
+      }, 1200);
     }
-    document.getElementById('su-overlay').addEventListener('click',function(e){
-      if(e.target===this)closeSignup();
-    });
-    document.addEventListener('keydown',function(e){
-      if(e.key==='Escape')closeSignup();
-    });
-    function switchToOtp(){document.getElementById('password-panel').style.display='none';document.getElementById('otp-panel').style.display='block'}
-    function switchToPassword(){document.getElementById('otp-panel').style.display='none';document.getElementById('password-panel').style.display='block'}
-    function handleForgotPassword(){
-      alert('Password reset instructions have been dispatched. Alternatively, verify instantly using Phone OTP.');
-      switchToOtp();
-    }
-
-    function handleLogin(){
-      var phoneRaw = document.getElementById('phone-input').value.trim();
-      var code     = document.getElementById('country-code').value;
-      var password = document.getElementById('password-input').value;
-      var phoneErr = document.getElementById('phone-error');
-      var loginErr = document.getElementById('login-error');
-
-      // Reset errors
-      phoneErr.style.display = 'none';
-      loginErr.style.display = 'none';
-
-      // Validate phone format
-      if(!phoneRaw || phoneRaw.replace(/\D/g,'').length < 7){
-        phoneErr.style.display = 'block';
-        return;
-      }
-
-      // Validate password is not blank
-      if(!password){
-        loginErr.textContent = 'Please enter your password.';
-        loginErr.style.display = 'block';
-        return;
-      }
-
-      // Look up stored account (keyed by full phone with country code)
-      var fullPhone = code + phoneRaw.replace(/\D/g,'');
-      var storedKey = localStorage.getItem('sx_phone_key');
-      var storedPwd = localStorage.getItem('sx_pwd_hash');
-
-      if(!storedKey || !storedPwd){
-        loginErr.textContent = 'No account found. Please sign up first.';
-        loginErr.style.display = 'block';
-        return;
-      }
-
-      if(storedKey !== fullPhone){
-        loginErr.textContent = 'No account found for this phone number.';
-        loginErr.style.display = 'block';
-        return;
-      }
-
-      if(storedPwd !== btoa(unescape(encodeURIComponent(password)))){
-        loginErr.textContent = 'Incorrect password. Please try again.';
-        loginErr.style.display = 'block';
-        return;
-      }
-
-      // Credentials match — proceed to dashboard
-      var btn = document.getElementById('login-btn');
-      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Verifying...';
-      btn.disabled = true;
-      setTimeout(function(){
-        localStorage.setItem('sx_logged_in_phone', fullPhone);
-        window.location.href = 'dashboard.html';
-      }, 1000);
-    }
-
-    var timerInterval=null,secondsLeft=180;
-    function sendOtp(){
-      var phone=document.getElementById('otp-phone-input').value.trim();
-      if(!phone||phone.replace(/\D/g,'').length<7){alert('Please enter a valid phone number.');return}
-      var code=document.getElementById('otp-country-code').value;
-      document.getElementById('otp-phone-display').textContent=code+' '+phone;
-      document.getElementById('otp-phone-group').style.display='none';
-      document.getElementById('send-otp-btn').style.display='none';
-      document.getElementById('otp-verify-block').style.display='block';
-      startTimer();
-      setTimeout(function(){var d=document.querySelectorAll('.otp-digit');'123456'.split('').forEach(function(c,i){if(d[i])d[i].value=c})},500);
-    }
-    function startTimer(){
-      secondsLeft=180;clearInterval(timerInterval);
-      var rb=document.getElementById('resend-btn');rb.disabled=true;rb.classList.remove('active');
-      updateTimer();
-      timerInterval=setInterval(function(){secondsLeft--;updateTimer();if(secondsLeft<=0){clearInterval(timerInterval);rb.disabled=false;rb.classList.add('active')}},1000);
-    }
-    function updateTimer(){var m=String(Math.floor(secondsLeft/60)).padStart(2,'0'),s=String(secondsLeft%60).padStart(2,'0');document.getElementById('otp-timer').textContent=m+':'+s}
-    function resendOtp(){document.querySelectorAll('.otp-digit').forEach(function(d){d.value=''});document.querySelectorAll('.otp-digit')[0].focus();startTimer()}
-    function loginToDashboard(){
-      var otp=[].slice.call(document.querySelectorAll('.otp-digit')).map(function(d){return d.value}).join('');
-      if(otp.replace(/\s/g,'').length<6){document.querySelectorAll('.otp-digit').forEach(function(d){d.style.borderColor='#ff7e7e'});return}
-      window.location.href = 'dashboard.html';
-    }
-
-    document.addEventListener('DOMContentLoaded',function(){
-      var digits=document.querySelectorAll('.otp-digit');
-      digits.forEach(function(inp,idx){
-        inp.addEventListener('input',function(){this.value=this.value.replace(/\D/g,'');this.style.borderColor='';if(this.value&&idx<digits.length-1)digits[idx+1].focus()});
-        inp.addEventListener('keydown',function(e){if(e.key==='Backspace'&&!this.value&&idx>0)digits[idx-1].focus()});
-      });
-
-      // Mini candlestick chart
-      var cc=document.getElementById('chart-canvas');
-      if(cc){
-        var dpr=window.devicePixelRatio||1;
-        var W=cc.offsetWidth||220,H=cc.offsetHeight||68;
-        cc.width=W*dpr;cc.height=H*dpr;
-        var ctx2=cc.getContext('2d');ctx2.scale(dpr,dpr);
-        var candles=[
-          {o:40,c:52,h:55,l:36,b:true},{o:52,c:44,h:56,l:40,b:false},
-          {o:44,c:58,h:62,l:42,b:true},{o:58,c:54,h:61,l:50,b:false},
-          {o:54,c:63,h:67,l:51,b:true},{o:63,c:55,h:65,l:52,b:false},
-          {o:55,c:60,h:63,l:53,b:true},{o:60,c:50,h:62,l:46,b:false},
-          {o:50,c:65,h:68,l:48,b:true},{o:65,c:59,h:67,l:55,b:false},
-          {o:59,c:66,h:69,l:57,b:true}
-        ];
-        var minV=34,maxV=70,rng=maxV-minV;
-        function toY(v){return H-((v-minV)/rng)*(H-4)-2}
-        var cw=10,gap=9,tw=candles.length*(cw+gap)-gap,sx=(W-tw)/2;
-        var wg=ctx2.createLinearGradient(0,0,W,0);
-        wg.addColorStop(0,'rgba(229,193,88,0)');wg.addColorStop(0.4,'rgba(229,193,88,0.55)');
-        wg.addColorStop(0.7,'rgba(16,201,144,0.55)');wg.addColorStop(1,'rgba(16,201,144,0)');
-        ctx2.strokeStyle=wg;ctx2.lineWidth=1.5;ctx2.shadowColor='rgba(229,193,88,0.5)';ctx2.shadowBlur=6;
-        ctx2.beginPath();
-        candles.forEach(function(c,i){var cx=sx+i*(cw+gap)+cw/2,cy=toY((c.o+c.c)/2);if(i===0)ctx2.moveTo(cx,cy);else ctx2.lineTo(cx,cy)});
-        ctx2.stroke();ctx2.shadowBlur=0;
-        candles.forEach(function(c,i){
-          var x=sx+i*(cw+gap),cx=x+cw/2,yO=toY(c.o),yC=toY(c.c),yH=toY(c.h),yL=toY(c.l);
-          var col=c.b?'#10c990':'#ff5266';
-          ctx2.strokeStyle=col;ctx2.lineWidth=1.2;ctx2.beginPath();ctx2.moveTo(cx,yH);ctx2.lineTo(cx,yL);ctx2.stroke();
-          ctx2.fillStyle=col+'cc';ctx2.strokeStyle=col;ctx2.lineWidth=1;
-          var top=Math.min(yO,yC),ht=Math.max(Math.abs(yO-yC),2);
-          ctx2.fillRect(x,top,cw,ht);ctx2.strokeRect(x,top,cw,ht);
-        });
-      }
-    });
-
+    document.getElementById('su-overlay').addEventListener('click', function(e){ if(e.target===this) closeSignup(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSignup(); });
   </script>
 </body>
 </html>

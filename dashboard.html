@@ -191,6 +191,24 @@
       display: inline-block;
       padding: 0 2rem;
     }
+    /* SLIM SIDEBAR */
+    #sidebar-nav { width:72px!important;min-width:72px!important;padding:16px 0!important;align-items:center!important; }
+    #sidebar-nav > div:first-child { padding:0!important;margin-bottom:20px!important;display:flex!important;justify-content:center!important;width:100%!important; }
+    #sidebar-nav h1,#sidebar-nav p { display:none!important; }
+    #sidebar-nav img { width:36px!important;height:36px!important;border-radius:8px!important; }
+    #sidebar-nav button[title="Hide Sidebar"] { display:none!important; }
+    #sidebar-nav #nav-links { padding:0!important;gap:2px!important;align-items:center!important;width:100%!important; }
+    #sidebar-nav #nav-links a { flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:8px 4px!important;gap:3px!important;border-radius:10px!important;width:56px!important;margin:0 auto!important;min-height:50px!important; }
+    #sidebar-nav #nav-links a > div { flex-direction:column!important;align-items:center!important;gap:3px!important; }
+    #sidebar-nav #nav-links a .material-symbols-outlined { font-size:20px!important; }
+    #sidebar-nav #nav-links a span:not(.material-symbols-outlined) { font-size:9px!important;font-weight:500!important;text-align:center!important;line-height:1!important;white-space:nowrap!important; }
+    #sidebar-nav #nav-links a span.px-2 { display:none!important; }
+    #sidebar-nav > div:last-child { padding:0!important;width:100%!important;align-items:center!important; }
+    #sidebar-nav > div:last-child a { flex-direction:column!important;align-items:center!important;font-size:9px!important;padding:8px 4px!important;gap:3px!important;width:56px!important;margin:0 auto!important; }
+    #sidebar-nav > div:last-child span.text-secondary { display:none!important; }
+    #sidebar-nav #ist-time { display:none!important; }
+    #main-content { margin-left:72px!important; }
+    header button[title="Toggle Sidebar"] { display:none!important; }
   </style>
 </head>
 <body class="bg-background text-on-surface min-h-screen flex font-sans">
