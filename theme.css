@@ -1,0 +1,335 @@
+/* ════════════════════════════════════════════════════════
+   SaarthiX Professional Theme System (Dark & Light Mode)
+   - Pixel-perfect theme implementation matching modern fintech design
+   - Instant switching with smooth CSS transitions
+════════════════════════════════════════════════════════ */
+
+/* ── Light Mode Variables ── */
+:root,
+html[data-theme="light"] {
+  --c-canvas:          #F5F6FA;
+  --c-card:            #FFFFFF;
+  --c-sidebar:         #FFFFFF;
+  --c-topbar:          #FFFFFF;
+  --c-input:           #F5F6FA;
+  --c-hover:           #F0F2F7;
+  --c-border:          #E7E8F0;
+  --c-border-strong:   #D1D5DB;
+  --c-text:            #12141C;
+  --c-text-muted:      #6B7280;
+  --c-text-faint:      #9CA3AF;
+  --c-primary:         #4F46E5;
+  --c-primary-lt:      #EEF2FF;
+  --c-primary-text:    #4F46E5;
+  --c-gain:            #12A150;
+  --c-gain-bg:         #F0FDF4;
+  --c-gain-border:     #BBF7D0;
+  --c-loss:            #E5484D;
+  --c-loss-bg:         #FFF1F1;
+  --c-loss-border:     #FECDD3;
+  --c-caution:         #D97706;
+  --c-caution-bg:      #FFFBEB;
+  --c-caution-border:  #FDE68A;
+  --c-shadow:          0 1px 4px rgba(0, 0, 0, 0.05);
+  --c-shadow-lg:       0 8px 24px rgba(0, 0, 0, 0.08);
+  --c-shadow-xl:       0 20px 60px rgba(0, 0, 0, 0.12);
+  --c-scrim:           rgba(0, 0, 0, 0.40);
+  --c-dropdown-bg:     #FFFFFF;
+  --c-ticker-bg:       #F5F6FA;
+  --c-skeleton-from:   #F0F0F0;
+  --c-skeleton-to:     #E0E0E0;
+  --c-tab-active:      #FFFFFF;
+  --c-tab-inactive:    #F5F6FA;
+}
+
+/* ── Dark Mode Variables (Matching high-fidelity reference UI) ── */
+html[data-theme="dark"] {
+  --c-canvas:          #0B0F19;
+  --c-card:            #131825;
+  --c-sidebar:         #101420;
+  --c-topbar:          #101420;
+  --c-input:           #0C101B;
+  --c-hover:           #1A2133;
+  --c-border:          rgba(255, 255, 255, 0.08);
+  --c-border-strong:   rgba(255, 255, 255, 0.16);
+  --c-text:            #F0F3FA;
+  --c-text-muted:      #8B94A5;
+  --c-text-faint:      #525A6C;
+  --c-primary:         #4F46E5;
+  --c-primary-lt:      rgba(79, 70, 229, 0.15);
+  --c-primary-text:    #818CF8;
+  --c-gain:            #22C55E;
+  --c-gain-bg:         rgba(34, 197, 94, 0.12);
+  --c-gain-border:     rgba(34, 197, 94, 0.28);
+  --c-loss:            #EF4444;
+  --c-loss-bg:         rgba(239, 68, 68, 0.12);
+  --c-loss-border:     rgba(239, 68, 68, 0.28);
+  --c-caution:         #F59E0B;
+  --c-caution-bg:      rgba(245, 158, 11, 0.12);
+  --c-caution-border:  rgba(245, 158, 11, 0.28);
+  --c-shadow:          0 1px 4px rgba(0, 0, 0, 0.40);
+  --c-shadow-lg:       0 8px 32px rgba(0, 0, 0, 0.55);
+  --c-shadow-xl:       0 20px 60px rgba(0, 0, 0, 0.75);
+  --c-scrim:           rgba(0, 0, 0, 0.70);
+  --c-dropdown-bg:     #171D2D;
+  --c-ticker-bg:       #0E121E;
+  --c-skeleton-from:   rgba(255, 255, 255, 0.04);
+  --c-skeleton-to:     rgba(255, 255, 255, 0.09);
+  --c-tab-active:      #1E2538;
+  --c-tab-inactive:    transparent;
+}
+
+/* ════════════════════════════════════════════════════════
+   THEME STYLES (High Specificity to override inline styles)
+════════════════════════════════════════════════════════ */
+
+html {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body,
+html[data-theme="dark"] body,
+html[data-theme="light"] body {
+  background: var(--c-canvas) !important;
+  color: var(--c-text) !important;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* ── Sidebar ── */
+#sidebar-nav,
+html[data-theme="dark"] #sidebar-nav,
+html[data-theme="light"] #sidebar-nav {
+  background: var(--c-sidebar) !important;
+  border-right: 1px solid var(--c-border) !important;
+  box-shadow: none !important;
+}
+#sidebar-nav a {
+  color: var(--c-text-muted) !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+#sidebar-nav a:hover {
+  background: var(--c-hover) !important;
+  color: var(--c-text) !important;
+}
+#sidebar-nav h1 { color: var(--c-text) !important; }
+#sidebar-nav p { color: var(--c-text-muted) !important; }
+
+/* Active sidebar item */
+#sidebar-nav .bg-primary\/15,
+#sidebar-nav a[class*="bg-primary"],
+html[data-theme="dark"] #sidebar-nav .bg-primary\/15,
+html[data-theme="light"] #sidebar-nav .bg-primary\/15 {
+  background: var(--c-primary-lt) !important;
+  color: var(--c-primary-text) !important;
+}
+#sidebar-nav a .material-symbols-outlined {
+  color: inherit !important;
+}
+
+/* Bottom area of sidebar */
+#sidebar-nav > div:last-child {
+  border-top: 1px solid var(--c-border) !important;
+}
+
+/* ── Topbar / Header ── */
+header,
+#main-topbar,
+html[data-theme="dark"] header,
+html[data-theme="light"] header {
+  background: var(--c-topbar) !important;
+  border-bottom: 1px solid var(--c-border) !important;
+}
+header *,
+#main-topbar * {
+  color: var(--c-text);
+}
+
+/* ── Cards / Glass Panels ── */
+.glass-panel,
+.glass-card,
+.score-breakdown-card,
+html[data-theme="dark"] .glass-panel,
+html[data-theme="light"] .glass-panel {
+  background: var(--c-card) !important;
+  border: 1px solid var(--c-border) !important;
+  box-shadow: var(--c-shadow) !important;
+}
+
+/* ── Input Fields ── */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+.glass-input,
+.su-input,
+.phone-input,
+.pwd-input,
+.otp-digit,
+html[data-theme="dark"] input,
+html[data-theme="light"] input {
+  background: var(--c-input) !important;
+  border: 1px solid var(--c-border) !important;
+  color: var(--c-text) !important;
+}
+input:focus,
+textarea:focus,
+select:focus,
+.glass-input:focus {
+  border-color: var(--c-primary) !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--c-text-faint) !important;
+}
+
+/* ── Dropdowns / Modals ── */
+[id*="-menu"],
+[id*="-dropdown"],
+[id*="-results"],
+.suggest-dropdown,
+.suggest-drop {
+  background: var(--c-dropdown-bg) !important;
+  border: 1px solid var(--c-border) !important;
+  box-shadow: var(--c-shadow-lg) !important;
+}
+
+/* ── Typography & Text Overrides ── */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--c-text) !important;
+}
+.text-white,
+.text-on-surface {
+  color: var(--c-text) !important;
+}
+.text-on-surface-variant,
+.text-muted,
+[class*="text-on-surface-variant"] {
+  color: var(--c-text-muted) !important;
+}
+
+/* ── Gain / Loss / Caution ── */
+.text-secondary,
+[class*="text-secondary"],
+.text-gain {
+  color: var(--c-gain) !important;
+}
+.text-error,
+[class*="text-error"],
+.text-loss {
+  color: var(--c-loss) !important;
+}
+.text-caution {
+  color: var(--c-caution) !important;
+}
+
+/* ── Borders ── */
+[class*="border-white"],
+[class*="border-white/"],
+hr {
+  border-color: var(--c-border) !important;
+}
+
+/* ── Signal / Verdict Badges ── */
+.verdict-buy,
+[class*="verdict-buy"],
+span[style*="#F0FDF4"],
+span[style*="f0fdf4"] {
+  background: var(--c-gain-bg) !important;
+  color: var(--c-gain) !important;
+  border: 1px solid var(--c-gain-border) !important;
+}
+.verdict-hold,
+[class*="verdict-hold"],
+span[style*="#FFFBEB"] {
+  background: var(--c-caution-bg) !important;
+  color: var(--c-caution) !important;
+  border: 1px solid var(--c-caution-border) !important;
+}
+.verdict-reduce,
+[class*="verdict-reduce"],
+span[style*="#FFF1F1"] {
+  background: var(--c-loss-bg) !important;
+  color: var(--c-loss) !important;
+  border: 1px solid var(--c-loss-border) !important;
+}
+
+/* ── Primary & Outline Buttons ── */
+.btn-primary,
+.bg-primary:not([class*="bg-primary/"]):not([class*="bg-primary-"]) {
+  background: var(--c-primary) !important;
+  color: #FFFFFF !important;
+}
+.btn-outline {
+  background: var(--c-card) !important;
+  border: 1px solid var(--c-border) !important;
+  color: var(--c-text) !important;
+}
+.btn-outline:hover {
+  background: var(--c-hover) !important;
+}
+
+/* ── Ticker Bar ── */
+.ticker-wrap,
+[class*="ticker-wrap"],
+#ticker-container {
+  background: var(--c-ticker-bg) !important;
+  border-color: var(--c-border) !important;
+}
+
+/* ── Skeletons ── */
+.skeleton,
+.skeleton-pulse {
+  background: linear-gradient(90deg, var(--c-skeleton-from) 25%, var(--c-skeleton-to) 50%, var(--c-skeleton-from) 75%) !important;
+  background-size: 200% 100% !important;
+}
+
+/* ── Theme Toggle Button Styling ── */
+#sx-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--c-border);
+  background: var(--c-card);
+  color: var(--c-text-muted);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+#sx-theme-toggle:hover {
+  background: var(--c-hover);
+  color: var(--c-text);
+  border-color: var(--c-border-strong);
+  transform: scale(1.05);
+}
+#sx-theme-toggle:active {
+  transform: scale(0.95);
+}
+#sx-theme-toggle .material-symbols-outlined {
+  font-size: 19px !important;
+}
+
+/* ── Sector Tiles in Dashboard (Clean Dark/Light support) ── */
+html[data-theme="dark"] .sector-gain,
+html[data-theme="dark"] [data-sector-gain="true"] {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: #4EDE72 !important;
+}
+html[data-theme="dark"] .sector-loss,
+html[data-theme="dark"] [data-sector-loss="true"] {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #F87171 !important;
+}
+html[data-theme="light"] .sector-gain,
+html[data-theme="light"] [data-sector-gain="true"] {
+  background: #E8F8F0 !important;
+  color: #12A150 !important;
+}
+html[data-theme="light"] .sector-loss,
+html[data-theme="light"] [data-sector-loss="true"] {
+  background: #FEECEE !important;
+  color: #E5484D !important;
+}

@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="theme.css"/>
+  <script src="theme.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -264,9 +266,10 @@
           <span class="material-symbols-outlined text-[20px]">menu</span>
         </button>
         <div class="relative hidden sm:block">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-          <input id="dashboard-stock-search" type="text" placeholder="Search stocks, indices..." class="glass-input pl-10 w-64 text-sm" autocomplete="off" />
-          <div id="dashboard-search-results" class="hidden absolute left-0 top-full mt-2 w-80 max-h-72 overflow-y-auto bg-surface-container-high/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl z-50 p-1"></div>
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+          <input id="dashboard-stock-search" type="text" placeholder="Search stocks, funds, news..." class="glass-input pl-9 pr-14 py-2 w-72 md:w-80 text-sm rounded-xl" autocomplete="off" />
+          <span class="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded text-[10px] font-mono border border-white/10 text-on-surface-variant/70 pointer-events-none">Ctrl K</span>
+          <div id="dashboard-search-results" class="hidden absolute left-0 top-full mt-2 w-80 max-h-72 overflow-y-auto rounded-xl z-50 p-1"></div>
         </div>
         <div class="px-3 py-1 text-xs font-semibold rounded bg-white/10 border border-white/10 text-on-surface hidden md:block">NSE | BSE</div>
       </div>
@@ -353,151 +356,225 @@
     <!-- Page Content -->
     <div class="p-4 md:p-container-padding flex-1 space-y-6">
       
+      <!-- Market Overview Header -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 class="text-2xl font-bold" data-i18n="market_intelligence">Market Intelligence Terminal</h2>
-          <div class="flex items-center gap-2 mt-1">
-            <span class="live-timestamp text-xs text-on-surface-variant/60 font-mono"></span>
-            <span class="text-[11px] text-primary/80" data-i18n="lang_notice">⚡ AI-generated dynamic market narratives are currently delivered in English.</span>
-          </div>
+          <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-on-surface">Market overview</h1>
+          <p class="text-xs text-on-surface-variant mt-1" id="market-overview-sub">
+            Showing Friday's close · Prices refresh automatically when market is open
+          </p>
         </div>
-        <div class="flex gap-3 w-full sm:w-auto">
-          <a href="portfolio.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-surface-container-high border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors" data-i18n="nav_portfolio">View Portfolio</a>
-          <a href="stock-doctor.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-primary-container text-on-primary-container text-sm font-medium hover:bg-primary-container/80 transition-colors" data-i18n="nav_stock_doctor">View Stock Doctor</a>
+        <div class="flex gap-2.5 w-full sm:w-auto">
+          <a href="portfolio.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-xl bg-surface-container-high border border-white/10 text-xs font-semibold hover:bg-white/10 transition-colors" data-i18n="nav_portfolio">Portfolio</a>
+          <a href="stock-doctor.html" class="flex-1 sm:flex-none text-center px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-colors shadow-sm" data-i18n="nav_stock_doctor">Stock Doctor</a>
         </div>
       </div>
 
-      <!-- Task 6: "What Changed Since Yesterday" AI Digest Card -->
-      <div class="glass-panel p-5 relative overflow-hidden border-l-4 border-l-primary shadow-xl">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10">
-          <div class="flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-primary text-[22px]">history_toggle_off</span>
-            <div>
-              <h3 class="font-bold text-base text-on-surface" data-i18n="what_changed_title">What Changed Since Yesterday</h3>
-              <p class="text-xs text-on-surface-variant" data-i18n="what_changed_subtitle">Overnight intelligence & key session catalyst digest</p>
+      <!-- 4 Market Index Cards with Live Sparklines (Matches reference UI) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="index-cards-row">
+        <!-- NIFTY 50 -->
+        <div class="glass-panel p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">NIFTY 50</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full verdict-buy" id="card-nifty-pct">+0.62%</span>
+          </div>
+          <div class="text-2xl font-bold tracking-tight mt-1 text-on-surface font-mono" id="card-nifty-val">24,580.35</div>
+          <div class="flex items-center justify-end mt-2">
+            <svg class="w-24 h-7 stroke-current text-secondary fill-none" viewBox="0 0 100 28">
+              <path d="M2,20 Q25,24 45,14 T75,6 T98,10" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- SENSEX -->
+        <div class="glass-panel p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">SENSEX</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full verdict-buy" id="card-sensex-pct">+0.58%</span>
+          </div>
+          <div class="text-2xl font-bold tracking-tight mt-1 text-on-surface font-mono" id="card-sensex-val">80,420.10</div>
+          <div class="flex items-center justify-end mt-2">
+            <svg class="w-24 h-7 stroke-current text-secondary fill-none" viewBox="0 0 100 28">
+              <path d="M2,22 Q20,20 50,12 T80,15 T98,5" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- BANK NIFTY -->
+        <div class="glass-panel p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">BANK NIFTY</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full verdict-reduce" id="card-banknifty-pct">-0.21%</span>
+          </div>
+          <div class="text-2xl font-bold tracking-tight mt-1 text-on-surface font-mono" id="card-banknifty-val">53,110.45</div>
+          <div class="flex items-center justify-end mt-2">
+            <svg class="w-24 h-7 stroke-current text-error fill-none" viewBox="0 0 100 28">
+              <path d="M2,8 Q25,6 50,18 T80,14 T98,22" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- INDIA VIX -->
+        <div class="glass-panel p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">INDIA VIX</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full verdict-reduce" id="card-vix-pct">-3.10%</span>
+          </div>
+          <div class="text-2xl font-bold tracking-tight mt-1 text-on-surface font-mono" id="card-vix-val">13.42</div>
+          <div class="flex items-center justify-end mt-2">
+            <svg class="w-24 h-7 stroke-current text-error fill-none" viewBox="0 0 100 28">
+              <path d="M2,6 Q30,10 60,18 T98,24" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mid Row: Today in One Line & Market Breadth -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Today in one line / AI Digest -->
+        <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[20px]">auto_awesome</span>
+                <span class="font-bold text-sm text-on-surface">Today in one line</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[11px] text-primary font-medium">AI summary</span>
+            </div>
+            
+            <div id="daily-digest-container" class="space-y-3">
+              <h3 class="text-xl font-bold tracking-tight text-on-surface" id="digest-headline">Banks and IT led a broad rally.</h3>
+              <p class="text-sm text-on-surface-variant leading-relaxed" id="digest-subline">32 of 50 Nifty stocks closed higher; volatility cooled.<br>Next up: RBI commentary and the US inflation print this week.</p>
             </div>
           </div>
-          <span class="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-[11px] text-primary font-mono self-start sm:self-auto flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
-            AI Catalyst Synthesis
-          </span>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-4 mt-4 border-t border-white/10">
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span class="px-2.5 py-1 rounded-full verdict-buy font-semibold text-[11px]">Breadth +14</span>
+              <span class="px-2.5 py-1 rounded-full verdict-buy font-semibold text-[11px]">FII +₹2,345 Cr</span>
+              <span class="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary font-semibold text-[11px]">VIX falling</span>
+              <span class="px-2.5 py-1 rounded-full bg-surface-container-high border border-white/10 text-on-surface-variant font-medium text-[11px]">Crude steady</span>
+            </div>
+            <button onclick="if(typeof refreshDailyDigest==='function')refreshDailyDigest();" class="p-1 rounded-lg text-on-surface-variant hover:text-white transition-colors" title="Refresh Summary">
+              <span class="material-symbols-outlined text-[18px]">sync</span>
+            </button>
+          </div>
         </div>
 
-        <div id="daily-digest-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <!-- Filled dynamically by generateDailyDigest -->
-        </div>
-      </div>
+        <!-- Market Breadth Card -->
+        <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+              <span class="font-bold text-sm text-on-surface">Market breadth</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-mono border border-white/10 text-on-surface-variant">NSE</span>
+            </div>
 
-      <!-- Summary Metrics Row -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="glass-panel p-5 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-on-surface-variant mb-2">
-            <span class="text-sm font-medium" data-i18n="advances">Nifty 50 Advances</span>
-            <span class="material-symbols-outlined text-secondary">trending_up</span>
-          </div>
-          <div class="text-3xl font-bold text-secondary" id="advances-count">
-            <span class="skeleton skeleton-num"></span>
-          </div>
-        </div>
-        <div class="glass-panel p-5 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-on-surface-variant mb-2">
-            <span class="text-sm font-medium" data-i18n="declines">Nifty 50 Declines</span>
-            <span class="material-symbols-outlined text-error">trending_down</span>
-          </div>
-          <div class="text-3xl font-bold text-error" id="declines-count">
-            <span class="skeleton skeleton-num"></span>
-          </div>
-        </div>
-        <div class="glass-panel p-5 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-on-surface-variant mb-2">
-            <span class="text-sm font-medium" data-i18n="breadth">Market Breadth</span>
-            <span class="material-symbols-outlined text-primary">analytics</span>
-          </div>
-          <div class="w-full h-3 rounded-full overflow-hidden flex bg-white/10 mt-2" id="breadth-bar">
-            <div class="skeleton w-full h-full"></div>
-          </div>
-          <div class="flex justify-between text-xs mt-2 text-on-surface-variant" id="breadth-text">
-            <span>Adv <span class="skeleton skeleton-text w-8 inline-block"></span></span>
-            <span>Dec <span class="skeleton skeleton-text w-8 inline-block"></span></span>
-          </div>
-        </div>
-      </div>
+            <div class="flex items-baseline justify-between mt-2">
+              <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-secondary font-mono" id="advances-count">32</span>
+                <span class="text-xs text-on-surface-variant">advancing</span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-error font-mono" id="declines-count">18</span>
+                <span class="text-xs text-on-surface-variant">declining</span>
+              </div>
+            </div>
 
-      <!-- Gainers & Losers -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Top Gainers -->
-        <div class="glass-panel p-5 overflow-hidden">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold flex items-center gap-2 text-secondary">
-              <span class="material-symbols-outlined">rocket_launch</span> Top Gainers
-            </h3>
-            <button class="text-xs text-on-surface-variant hover:text-white">View All</button>
+            <!-- Segmented Progress Bar -->
+            <div class="w-full h-3 rounded-full overflow-hidden flex bg-white/10 mt-4" id="breadth-bar">
+              <div style="width: 64%" class="bg-secondary h-full transition-all duration-500"></div>
+              <div style="width: 36%" class="bg-error h-full transition-all duration-500"></div>
+            </div>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-              <thead class="text-xs text-on-surface-variant border-b border-white/10">
-                <tr>
-                  <th class="pb-2 font-medium">Ticker</th>
-                  <th class="pb-2 font-medium text-right">LTP (₹)</th>
-                  <th class="pb-2 font-medium text-right">Change</th>
-                  <th class="pb-2 font-medium text-right">% Change</th>
-                </tr>
-              </thead>
-              <tbody id="top-gainers-body" class="divide-y divide-white/5">
-                <!-- js -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <!-- Top Losers -->
-        <div class="glass-panel p-5 overflow-hidden">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold flex items-center gap-2 text-error">
-              <span class="material-symbols-outlined">trending_down</span> Top Losers
-            </h3>
-            <button class="text-xs text-on-surface-variant hover:text-white">View All</button>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-              <thead class="text-xs text-on-surface-variant border-b border-white/10">
-                <tr>
-                  <th class="pb-2 font-medium">Ticker</th>
-                  <th class="pb-2 font-medium text-right">LTP (₹)</th>
-                  <th class="pb-2 font-medium text-right">Change</th>
-                  <th class="pb-2 font-medium text-right">% Change</th>
-                </tr>
-              </thead>
-              <tbody id="top-losers-body" class="divide-y divide-white/5">
-                <!-- js -->
-              </tbody>
-            </table>
+
+          <div class="grid grid-cols-4 gap-2 pt-4 mt-4 border-t border-white/10 text-center" id="breadth-text">
+            <div>
+              <div class="text-[10px] text-on-surface-variant uppercase font-medium">52W highs</div>
+              <div class="text-sm font-bold text-on-surface mt-0.5">41</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-on-surface-variant uppercase font-medium">52W lows</div>
+              <div class="text-sm font-bold text-on-surface mt-0.5">7</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-on-surface-variant uppercase font-medium">Unchanged</div>
+              <div class="text-sm font-bold text-on-surface mt-0.5">3</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-on-surface-variant uppercase font-medium">Volume</div>
+              <div class="text-sm font-bold text-secondary mt-0.5">+8% vs avg</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Sector Heatmap & Mini News -->
+      <!-- Bottom 3-Column Grid (Top Movers | Sectors Today | Latest News) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Sector Heatmap -->
-        <div class="glass-panel p-5 lg:col-span-2">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold flex items-center gap-2">
-              <span class="material-symbols-outlined">grid_view</span> Sector Heatmap
-            </h3>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="sector-heatmap">
-            <!-- js -->
+        <!-- Col 1: Top Movers -->
+        <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+              <span class="font-bold text-sm text-on-surface">Top movers</span>
+              <a href="market-watch.html" class="text-xs text-primary hover:underline flex items-center gap-1">
+                View all <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </a>
+            </div>
+
+            <!-- Gainers / Losers Pills Switch -->
+            <div class="flex items-center gap-2 mb-3 bg-surface-container-high/60 p-1 rounded-full w-fit border border-white/5">
+              <button id="tab-btn-gainers" onclick="switchMoversTab('gainers')" class="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-on-surface shadow-sm transition-all">
+                Gainers
+              </button>
+              <button id="tab-btn-losers" onclick="switchMoversTab('losers')" class="px-3 py-1 rounded-full text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-all">
+                Losers
+              </button>
+            </div>
+
+            <!-- Gainers View -->
+            <div id="view-gainers" class="overflow-x-auto">
+              <table class="w-full text-sm text-left">
+                <tbody id="top-gainers-body" class="divide-y divide-white/5">
+                  <!-- JS populated -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Losers View -->
+            <div id="view-losers" class="hidden overflow-x-auto">
+              <table class="w-full text-sm text-left">
+                <tbody id="top-losers-body" class="divide-y divide-white/5">
+                  <!-- JS populated -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-        <!-- Mini News Feed -->
-        <div class="glass-panel p-5 flex flex-col h-[400px]">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold flex items-center gap-2">
-              <span class="material-symbols-outlined">newspaper</span> Latest News
-            </h3>
-            <a href="news.html" class="text-xs text-primary hover:underline">View All</a>
+
+        <!-- Col 2: Sectors Today -->
+        <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+              <span class="font-bold text-sm text-on-surface">Sectors today</span>
+              <span class="text-xs text-on-surface-variant">Performance</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2.5" id="sector-heatmap">
+              <!-- JS populated -->
+            </div>
           </div>
-          <div class="flex-1 overflow-y-auto pr-2 space-y-4" id="mini-news">
-            <!-- js -->
+        </div>
+
+        <!-- Col 3: Latest News -->
+        <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between h-[420px]">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+              <span class="font-bold text-sm text-on-surface">Latest news</span>
+              <a href="news.html" class="text-xs text-primary hover:underline flex items-center gap-1">
+                View all <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </a>
+            </div>
+            <div class="overflow-y-auto max-h-[330px] pr-1 space-y-3" id="mini-news">
+              <!-- JS populated -->
+            </div>
           </div>
         </div>
       </div>
@@ -767,7 +844,64 @@
       }
     }
 
+    function switchMoversTab(tab) {
+      const isGainers = tab === 'gainers';
+      const btnG = document.getElementById('tab-btn-gainers');
+      const btnL = document.getElementById('tab-btn-losers');
+      const viewG = document.getElementById('view-gainers');
+      const viewL = document.getElementById('view-losers');
+      if (btnG && btnL && viewG && viewL) {
+        if (isGainers) {
+          btnG.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-on-surface shadow-sm transition-all';
+          btnL.className = 'px-3 py-1 rounded-full text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-all';
+          viewG.classList.remove('hidden');
+          viewL.classList.add('hidden');
+        } else {
+          btnL.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-on-surface shadow-sm transition-all';
+          btnG.className = 'px-3 py-1 rounded-full text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-all';
+          viewL.classList.remove('hidden');
+          viewG.classList.add('hidden');
+        }
+      }
+    }
+
+    function updateIndexCardsUI() {
+      if (!window.LIVE_INDICES) return;
+      const nifty = window.LIVE_INDICES.nifty50;
+      const sensex = window.LIVE_INDICES.sensex;
+      const bank = window.LIVE_INDICES.niftyBank;
+
+      if (nifty) {
+        const nVal = document.getElementById('card-nifty-val');
+        const nPct = document.getElementById('card-nifty-pct');
+        if (nVal) nVal.textContent = fmtPrice(nifty.value);
+        if (nPct) {
+          nPct.textContent = (nifty.changePct >= 0 ? '+' : '') + nifty.changePct.toFixed(2) + '%';
+          nPct.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full ' + (nifty.changePct >= 0 ? 'verdict-buy' : 'verdict-reduce');
+        }
+      }
+      if (sensex) {
+        const sVal = document.getElementById('card-sensex-val');
+        const sPct = document.getElementById('card-sensex-pct');
+        if (sVal) sVal.textContent = fmtPrice(sensex.value);
+        if (sPct) {
+          sPct.textContent = (sensex.changePct >= 0 ? '+' : '') + sensex.changePct.toFixed(2) + '%';
+          sPct.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full ' + (sensex.changePct >= 0 ? 'verdict-buy' : 'verdict-reduce');
+        }
+      }
+      if (bank) {
+        const bVal = document.getElementById('card-banknifty-val');
+        const bPct = document.getElementById('card-banknifty-pct');
+        if (bVal) bVal.textContent = fmtPrice(bank.value);
+        if (bPct) {
+          bPct.textContent = (bank.changePct >= 0 ? '+' : '') + bank.changePct.toFixed(2) + '%';
+          bPct.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full ' + (bank.changePct >= 0 ? 'verdict-buy' : 'verdict-reduce');
+        }
+      }
+    }
+
     async function initLiveDashboard() {
+      updateIndexCardsUI();
       await fetchDashboardData();
       startDashboardPolling();
     }
@@ -992,6 +1126,7 @@
     }
 
     function renderTicker() {
+      updateIndexCardsUI();
       const container = document.getElementById('ticker-container');
       if(!container || !window.LIVE_INDICES) return;
       
@@ -1051,6 +1186,15 @@
         `;
       }).join('');
     }
+
+    // Ctrl / Cmd + K to focus search
+    window.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        const s = document.getElementById('dashboard-stock-search');
+        if (s) { s.focus(); s.select(); }
+      }
+    });
   </script>
 </body>
 </html>
