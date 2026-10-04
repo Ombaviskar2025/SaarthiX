@@ -136,6 +136,8 @@
     #results-section { display: none !important; }
     #results-section.show-results { display: flex !important; animation: fadeIn 0.45s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes modalScaleIn { from { opacity:0; transform:scale(0.88) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
+    @keyframes accentSlide { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
   </style>
 </head>
 <body class="bg-[#0b0f19] text-[#dfe2ef] min-h-screen flex font-sans selection:bg-primary-container selection:text-on-primary-container">
@@ -515,49 +517,115 @@
   </main>
 
   <!-- Add Stock Modal (Universal Search: ZENSARTECH, DIXON, INFY, etc.) -->
-  <div id="add-stock-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-    <div class="bg-[#141926] border border-white/15 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative animate-fadeIn flex flex-col gap-4">
-      <div class="flex items-center justify-between border-b border-white/10 pb-3">
-        <div class="flex items-center gap-2.5">
-          <span class="material-symbols-outlined text-primary text-2xl">add_chart</span>
-          <h3 class="font-bold text-white text-lg">Add Stock to Portfolio</h3>
-        </div>
-        <button onclick="closeAddStockModal()" class="text-on-surface-variant hover:text-white p-1 rounded-lg">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
+  <!-- Add Stock Modal – Premium Redesign -->
+  <div id="add-stock-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4" style="animation:none;">
+    <div class="relative w-full max-w-lg" style="animation:modalScaleIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both;">
 
-      <!-- Universal Search Field with live Auto-Suggestions -->
-      <div class="relative flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-on-surface-variant">Search Indian Stock (NSE / BSE)</label>
-        <div class="relative">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
-          <input id="modal-ticker-input" class="w-full glass-input rounded-xl pl-9 pr-4 py-2.5 font-mono text-sm uppercase placeholder:normal-case" placeholder="Type stock name or symbol (e.g. ZensarTech, Dixon, Suzlon)..." autocomplete="off"/>
-        </div>
-        <!-- Live Suggestions list -->
-        <div id="modal-suggest-dropdown" class="suggest-dropdown hidden absolute top-full left-0 right-0 mt-1 rounded-xl max-h-56 overflow-y-auto p-1.5 flex flex-col gap-1 z-50"></div>
-      </div>
+      <!-- Glow blob behind card -->
+      <div style="position:absolute;inset:-2px;border-radius:20px;background:linear-gradient(135deg,rgba(77,142,255,0.35),rgba(16,201,144,0.20),rgba(229,193,88,0.15));filter:blur(18px);z-index:0;pointer-events:none;"></div>
 
-      <!-- Exchange & Sector are auto-resolved in background -->
-      <input type="hidden" id="modal-exchange-input" value="NSE"/>
-      <input type="hidden" id="modal-sector-input" value="EQUITIES"/>
+      <!-- Card -->
+      <div style="position:relative;z-index:1;background:linear-gradient(160deg,#0f1422 0%,#141926 60%,#0d1320 100%);border:1px solid rgba(77,142,255,0.30);border-radius:20px;overflow:hidden;box-shadow:0 32px 72px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04) inset;">
 
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-xs font-semibold text-on-surface-variant block mb-1">Quantity (Shares)</label>
-          <input id="modal-qty-input" type="number" min="1" step="1" value="10" class="w-full glass-input rounded-xl px-3 py-2 text-sm font-mono"/>
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-on-surface-variant block mb-1">Avg Buy Price (₹)</label>
-          <input id="modal-price-input" type="number" min="0" step="0.05" value="200" class="w-full glass-input rounded-xl px-3 py-2 text-sm font-mono"/>
-        </div>
-      </div>
+        <!-- Animated top accent line -->
+        <div style="height:3px;background:linear-gradient(90deg,#4d8eff,#10c990,#E5C158,#4d8eff);background-size:300% 100%;animation:accentSlide 3s linear infinite;"></div>
 
-      <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-        <button onclick="closeAddStockModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-white transition-colors">Cancel</button>
-        <button onclick="confirmAddStockFromModal()" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary hover:bg-primary-container text-xs font-bold transition-all shadow-md">Add Holding</button>
-      </div>
-    </div>
+        <!-- Header -->
+        <div style="padding:22px 24px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,rgba(77,142,255,0.25),rgba(16,201,144,0.15));border:1px solid rgba(77,142,255,0.35);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(77,142,255,0.2);">
+              <span class="material-symbols-outlined" style="color:#4d8eff;font-size:20px;">add_chart</span>
+            </div>
+            <div>
+              <h3 style="font-size:1.05rem;font-weight:700;color:#edf0f8;letter-spacing:-0.01em;margin:0;">Add Stock to Portfolio</h3>
+              <p style="font-size:0.72rem;color:rgba(180,190,215,0.55);margin:2px 0 0;">NSE / BSE India — Live price lookup</p>
+            </div>
+          </div>
+          <button onclick="closeAddStockModal()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(180,190,215,0.5);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.10)';this.style.color='#fff';" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='rgba(180,190,215,0.5)';">
+            <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div style="padding:20px 24px;display:flex;flex-direction:column;gap:18px;">
+
+          <!-- Search Field -->
+          <div style="display:flex;flex-direction:column;gap:7px;position:relative;">
+            <label style="font-size:0.73rem;font-weight:600;color:rgba(180,195,230,0.65);letter-spacing:0.04em;text-transform:uppercase;">Search Indian Stock (NSE / BSE)</label>
+            <div style="position:relative;">
+              <span class="material-symbols-outlined" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#4d8eff;font-size:18px;pointer-events:none;">search</span>
+              <input id="modal-ticker-input"
+                style="width:100%;background:rgba(9,13,22,0.80);border:1px solid rgba(77,142,255,0.30);border-radius:12px;color:#dfe2ef;font-size:0.88rem;padding:12px 14px 12px 40px;font-family:inherit;text-transform:uppercase;letter-spacing:0.03em;transition:border-color 0.2s,box-shadow 0.2s;box-sizing:border-box;"
+                placeholder="Type stock name or symbol (e.g. RELIANCE, INFY, ZOMATO)…"
+                autocomplete="off"
+                onfocus="this.style.borderColor='rgba(77,142,255,0.70)';this.style.boxShadow='0 0 0 3px rgba(77,142,255,0.14),0 0 18px rgba(77,142,255,0.12)';"
+                onblur="this.style.borderColor='rgba(77,142,255,0.30)';this.style.boxShadow='none';"/>
+            </div>
+            <!-- Live Suggestions -->
+            <div id="modal-suggest-dropdown" class="suggest-dropdown hidden absolute left-0 right-0 mt-1 rounded-xl max-h-56 overflow-y-auto p-1.5 flex flex-col gap-1 z-50" style="top:100%;"></div>
+          </div>
+
+          <!-- Quantity + Price row -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <!-- Quantity -->
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <label style="font-size:0.73rem;font-weight:600;color:rgba(180,195,230,0.65);letter-spacing:0.04em;text-transform:uppercase;">Quantity (Shares)</label>
+              <div style="position:relative;">
+                <span class="material-symbols-outlined" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:rgba(77,142,255,0.55);font-size:16px;pointer-events:none;">tag</span>
+                <input id="modal-qty-input" type="number" min="1" step="1" value="10"
+                  style="width:100%;background:rgba(9,13,22,0.80);border:1px solid rgba(255,255,255,0.09);border-radius:12px;color:#dfe2ef;font-size:0.9rem;padding:11px 12px 11px 34px;font-family:monospace;transition:border-color 0.2s,box-shadow 0.2s;box-sizing:border-box;"
+                  oninput="updateEstimate()"
+                  onfocus="this.style.borderColor='rgba(77,142,255,0.55)';this.style.boxShadow='0 0 0 3px rgba(77,142,255,0.12)';"
+                  onblur="this.style.borderColor='rgba(255,255,255,0.09)';this.style.boxShadow='none';"/>
+              </div>
+            </div>
+            <!-- Price -->
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <label style="font-size:0.73rem;font-weight:600;color:rgba(180,195,230,0.65);letter-spacing:0.04em;text-transform:uppercase;">Avg Buy Price (₹)</label>
+              <div style="position:relative;">
+                <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:rgba(16,201,144,0.65);font-size:14px;font-weight:700;pointer-events:none;">₹</span>
+                <input id="modal-price-input" type="number" min="0" step="0.05" value="200"
+                  style="width:100%;background:rgba(9,13,22,0.80);border:1px solid rgba(255,255,255,0.09);border-radius:12px;color:#dfe2ef;font-size:0.9rem;padding:11px 12px 11px 28px;font-family:monospace;transition:border-color 0.2s,box-shadow 0.2s;box-sizing:border-box;"
+                  oninput="updateEstimate()"
+                  onfocus="this.style.borderColor='rgba(16,201,144,0.55)';this.style.boxShadow='0 0 0 3px rgba(16,201,144,0.12)';"
+                  onblur="this.style.borderColor='rgba(255,255,255,0.09)';this.style.boxShadow='none';"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Estimated Value pill -->
+          <div id="modal-estimate-bar" style="background:linear-gradient(135deg,rgba(16,201,144,0.08),rgba(77,142,255,0.08));border:1px solid rgba(16,201,144,0.20);border-radius:12px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="material-symbols-outlined" style="color:#10c990;font-size:16px;">calculate</span>
+              <span style="font-size:0.75rem;color:rgba(180,195,230,0.60);font-weight:500;">Estimated Investment</span>
+            </div>
+            <span id="modal-estimate-val" style="font-size:0.92rem;font-weight:700;color:#10c990;font-family:monospace;">₹2,000.00</span>
+          </div>
+
+          <!-- Hidden inputs -->
+          <input type="hidden" id="modal-exchange-input" value="NSE"/>
+          <input type="hidden" id="modal-sector-input" value="EQUITIES"/>
+        </div>
+
+        <!-- Footer -->
+        <div style="padding:16px 24px 22px;border-top:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:flex-end;gap:10px;">
+          <button onclick="closeAddStockModal()"
+            style="padding:10px 18px;border-radius:11px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:rgba(180,195,230,0.65);font-size:0.83rem;font-weight:600;cursor:pointer;transition:all 0.2s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.09)';this.style.color='#dfe2ef';"
+            onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='rgba(180,195,230,0.65)';">
+            Cancel
+          </button>
+          <button onclick="confirmAddStockFromModal()"
+            style="padding:10px 24px;border-radius:11px;background:linear-gradient(135deg,#4d8eff,#10c990);border:none;color:#fff;font-size:0.87rem;font-weight:700;cursor:pointer;transition:all 0.25s;box-shadow:0 4px 20px rgba(77,142,255,0.30);display:flex;align-items:center;gap:7px;letter-spacing:0.01em;"
+            onmouseover="this.style.boxShadow='0 6px 28px rgba(77,142,255,0.50)';this.style.transform='translateY(-1px)';"
+            onmouseout="this.style.boxShadow='0 4px 20px rgba(77,142,255,0.30)';this.style.transform='translateY(0)';">
+            <span class="material-symbols-outlined" style="font-size:16px;">add_circle</span>
+            Add Holding
+          </button>
+        </div>
+
+      </div><!-- /card -->
+    </div><!-- /max-w -->
   </div>
 
   <!-- Smart Quick Paste Modal -->
@@ -1059,16 +1127,25 @@
     }
 
     // ── Universal Add Stock Modal & Live Search Autocomplete ──────
+    function updateEstimate() {
+      const qty   = parseFloat(document.getElementById('modal-qty-input')?.value)   || 0;
+      const price = parseFloat(document.getElementById('modal-price-input')?.value) || 0;
+      const total = qty * price;
+      const el = document.getElementById('modal-estimate-val');
+      if (el) el.textContent = '₹' + total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     function openAddStockModal() {
       const modal = document.getElementById('add-stock-modal');
       if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        // Restart scale-in animation
+        const inner = modal.querySelector('[style*="modalScaleIn"]');
+        if (inner) { inner.style.animation = 'none'; void inner.offsetWidth; inner.style.animation = 'modalScaleIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both'; }
         const input = document.getElementById('modal-ticker-input');
-        if (input) {
-          input.value = '';
-          setTimeout(() => input.focus(), 100);
-        }
+        if (input) { input.value = ''; setTimeout(() => input.focus(), 100); }
+        updateEstimate();
       }
     }
 
