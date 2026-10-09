@@ -1060,15 +1060,15 @@
   <script src="js/lightweight-charts.standalone.production.js"></script>
   <script>
     if (typeof LightweightCharts === 'undefined') {
-      document.write('<script src="https://cdn.jsdelivr.net/npm/lightweight-charts/dist/lightweight-charts.standalone.production.js"><\\/script>');
+      document.write('<script src="https://unpkg.com/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.js"><\\/script>');
     }
   </script>
   <!-- SaarthiX Quant Studio Engines -->
-  <script src="js/indicators.js?v=20261010"></script>
-  <script src="js/signal.js?v=20261010"></script>
-  <script src="js/position.js?v=20261010"></script>
-  <script src="js/charts.js?v=20261010"></script>
-  <script src="js/backtest.js?v=20261010"></script>
+  <script src="js/indicators.js?v=20261010b"></script>
+  <script src="js/signal.js?v=20261010b"></script>
+  <script src="js/position.js?v=20261010b"></script>
+  <script src="js/charts.js?v=20261010b"></script>
+  <script src="js/backtest.js?v=20261010b"></script>
   <script>
     // ── Global State & Reference Holdings ─────────────────────────
     let currentHoldings = [
@@ -2390,13 +2390,17 @@
 
       // 1. Render lightweight chart & sub-panes & gauge
       if (typeof SignalStudioChart !== 'undefined') {
-        SignalStudioChart.renderSignalStudio('studio-main-chart', {
-          candles: candles,
-          indicators: technicalData.indicators,
-          signal: signal,
-          positionAdvice: advice,
-          events: technicalData.events
-        }, holding);
+        try {
+          SignalStudioChart.renderSignalStudio('studio-main-chart', {
+            candles: candles,
+            indicators: technicalData.indicators,
+            signal: signal,
+            positionAdvice: advice,
+            events: technicalData.events
+          }, holding);
+        } catch (chartErr) {
+          console.warn('SignalStudioChart render error:', chartErr);
+        }
       }
 
       // 2. Pillars Mini-Bars

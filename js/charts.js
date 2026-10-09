@@ -69,6 +69,36 @@
     if (macdChart) macdChart.timeScale().fitContent();
   }
 
+  function addCandlestick(chart, opts) {
+    if (chart && typeof chart.addCandlestickSeries === 'function') {
+      return chart.addCandlestickSeries(opts);
+    }
+    if (chart && typeof chart.addSeries === 'function' && typeof LightweightCharts !== 'undefined' && LightweightCharts.CandlestickSeries) {
+      return chart.addSeries(LightweightCharts.CandlestickSeries, opts);
+    }
+    throw new Error('Neither chart.addCandlestickSeries nor chart.addSeries(CandlestickSeries) is supported');
+  }
+
+  function addLine(chart, opts) {
+    if (chart && typeof chart.addLineSeries === 'function') {
+      return chart.addLineSeries(opts);
+    }
+    if (chart && typeof chart.addSeries === 'function' && typeof LightweightCharts !== 'undefined' && LightweightCharts.LineSeries) {
+      return chart.addSeries(LightweightCharts.LineSeries, opts);
+    }
+    throw new Error('Neither chart.addLineSeries nor chart.addSeries(LineSeries) is supported');
+  }
+
+  function addHistogram(chart, opts) {
+    if (chart && typeof chart.addHistogramSeries === 'function') {
+      return chart.addHistogramSeries(opts);
+    }
+    if (chart && typeof chart.addSeries === 'function' && typeof LightweightCharts !== 'undefined' && LightweightCharts.HistogramSeries) {
+      return chart.addSeries(LightweightCharts.HistogramSeries, opts);
+    }
+    throw new Error('Neither chart.addHistogramSeries nor chart.addSeries(HistogramSeries) is supported');
+  }
+
   function initCharts(mainContainerId) {
     const mainEl = document.getElementById(mainContainerId);
     const rsiEl = document.getElementById('studio-rsi-chart');
@@ -106,7 +136,7 @@
         horzLines: { color: 'rgba(255, 255, 255, 0.04)' }
       },
       crosshair: {
-        mode: LightweightCharts.CrosshairMode.Normal,
+        mode: (LightweightCharts.CrosshairMode && LightweightCharts.CrosshairMode.Normal) !== undefined ? LightweightCharts.CrosshairMode.Normal : 0,
         vertLine: { color: 'rgba(173, 198, 255, 0.4)', width: 1, style: 3 },
         horzLine: { color: 'rgba(173, 198, 255, 0.4)', width: 1, style: 3 }
       },
@@ -129,7 +159,7 @@
       height: chartHeight
     });
 
-    candleSeries = mainChart.addCandlestickSeries({
+    candleSeries = addCandlestick(mainChart, {
       upColor: '#4edea3',
       downColor: '#ff516a',
       borderUpColor: '#4edea3',
@@ -138,7 +168,7 @@
       wickDownColor: 'rgba(255, 81, 106, 0.7)'
     });
 
-    volumeSeries = mainChart.addHistogramSeries({
+    volumeSeries = addHistogram(mainChart, {
       priceFormat: { type: 'volume' },
       priceScaleId: 'volume_scale'
     });
@@ -147,15 +177,15 @@
     });
 
     // 2. Overlays on Main Chart
-    ema9Series = mainChart.addLineSeries({ color: '#38bdf8', lineWidth: 1.5, title: 'EMA 9' });
-    ema21Series = mainChart.addLineSeries({ color: '#fb923c', lineWidth: 1.5, title: 'EMA 21' });
-    ema50Series = mainChart.addLineSeries({ color: '#a855f7', lineWidth: 2, title: 'EMA 50' });
-    ema200Series = mainChart.addLineSeries({ color: '#eab308', lineWidth: 2, title: 'EMA 200' });
+    ema9Series = addLine(mainChart, { color: '#38bdf8', lineWidth: 1.5, title: 'EMA 9' });
+    ema21Series = addLine(mainChart, { color: '#fb923c', lineWidth: 1.5, title: 'EMA 21' });
+    ema50Series = addLine(mainChart, { color: '#a855f7', lineWidth: 2, title: 'EMA 50' });
+    ema200Series = addLine(mainChart, { color: '#eab308', lineWidth: 2, title: 'EMA 200' });
 
-    bbUpperSeries = mainChart.addLineSeries({ color: 'rgba(96, 165, 250, 0.6)', lineWidth: 1, lineStyle: 2, title: 'BB Upper' });
-    bbLowerSeries = mainChart.addLineSeries({ color: 'rgba(96, 165, 250, 0.6)', lineWidth: 1, lineStyle: 2, title: 'BB Lower' });
+    bbUpperSeries = addLine(mainChart, { color: 'rgba(96, 165, 250, 0.6)', lineWidth: 1, lineStyle: 2, title: 'BB Upper' });
+    bbLowerSeries = addLine(mainChart, { color: 'rgba(96, 165, 250, 0.6)', lineWidth: 1, lineStyle: 2, title: 'BB Lower' });
 
-    supertrendSeries = mainChart.addLineSeries({ color: '#4edea3', lineWidth: 2, title: 'Supertrend' });
+    supertrendSeries = addLine(mainChart, { color: '#4edea3', lineWidth: 2, title: 'Supertrend' });
 
     // 3. RSI Sub-Pane (110px)
     if (rsiEl) {
@@ -169,7 +199,7 @@
           scaleMargins: { top: 0.1, bottom: 0.1 }
         }
       });
-      rsiSeries = rsiChart.addLineSeries({ color: '#a855f7', lineWidth: 1.5, title: 'RSI(14)' });
+      rsiSeries = addLine(rsiChart, { color: '#a855f7', lineWidth: 1.5, title: 'RSI(14)' });
       rsiSeries.createPriceLine({ price: 70, color: '#ff516a', lineWidth: 1, lineStyle: 2, title: '70 Overbought' });
       rsiSeries.createPriceLine({ price: 30, color: '#4edea3', lineWidth: 1, lineStyle: 2, title: '30 Oversold' });
     }
@@ -186,9 +216,9 @@
           scaleMargins: { top: 0.15, bottom: 0.15 }
         }
       });
-      macdHistSeries = macdChart.addHistogramSeries({ title: 'Histogram' });
-      macdLineSeries = macdChart.addLineSeries({ color: '#4d8eff', lineWidth: 1.5, title: 'MACD' });
-      macdSigSeries = macdChart.addLineSeries({ color: '#f59e0b', lineWidth: 1.5, title: 'Signal' });
+      macdHistSeries = addHistogram(macdChart, { title: 'Histogram' });
+      macdLineSeries = addLine(macdChart, { color: '#4d8eff', lineWidth: 1.5, title: 'MACD' });
+      macdSigSeries = addLine(macdChart, { color: '#f59e0b', lineWidth: 1.5, title: 'Signal' });
     }
 
     // Sync Time Scales
@@ -350,7 +380,11 @@
       }
     });
 
-    candleSeries.setMarkers(markers);
+    if (typeof candleSeries.setMarkers === 'function') {
+      candleSeries.setMarkers(markers);
+    } else if (typeof LightweightCharts !== 'undefined' && typeof LightweightCharts.createSeriesMarkers === 'function') {
+      try { LightweightCharts.createSeriesMarkers(candleSeries, markers); } catch (e) {}
+    }
   }
 
   function populateVolume(candles) {
