@@ -9,8 +9,8 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="theme.css?v=20261009c"/>
-  <script src="theme.js?v=20261009c"></script>
+  <link rel="stylesheet" href="theme.css?v=20261009e"/>
+  <script src="theme.js?v=20261009e"></script>
   <script>
     tailwind.config = {
       darkMode:'class',
@@ -53,30 +53,16 @@
     }
   </script>
   <style>
-    @media (min-width: 768px) {
-      .md\:ml-\[280px\] {
-        margin-left: 280px !important;
-      }
-    }
-    .glass-panel{background:rgba(22,27,38,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);transition:all .25s ease}
-    .glass-panel:hover{border-color:rgba(255,255,255,.18);box-shadow:0 0 24px rgba(77,142,255,.08)}
-    .glass-input{background:#0a0e17 !important;border:1px solid rgba(255,255,255,.1) !important;color:#dfe2ef !important;transition:border-color .2s ease,box-shadow .2s ease}
-    .glass-input:focus{outline:none;border-color:#4d8eff !important;box-shadow:0 0 12px rgba(77,142,255,.22) !important}
-    .glass-input::placeholder{color:rgba(194,198,214,.35) !important}
+    * { box-sizing: border-box; }
     .ai-insight-border{position:relative}
     .ai-insight-border::before{content:'';position:absolute;inset:-1px;background:linear-gradient(135deg,#4d8eff 0%,#4edea3 100%);z-index:-1;border-radius:inherit;opacity:.55}
     .pulse-button{animation:pulse-blue 2s infinite}
     @keyframes pulse-blue{0%{box-shadow:0 0 0 0 rgba(77,142,255,.45)}70%{box-shadow:0 0 0 12px rgba(77,142,255,0)}100%{box-shadow:0 0 0 0 rgba(77,142,255,0)}}
-    ::-webkit-scrollbar{width:7px;height:7px}
-    ::-webkit-scrollbar-track{background:#0a0e17}
-    ::-webkit-scrollbar-thumb{background:#31353f;border-radius:4px}
-    ::-webkit-scrollbar-thumb:hover{background:#424754}
     #results-section{display:none !important}
     #results-section.show-results{display:flex !important;animation:fadeIn .5s ease-out}
     @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     .toast-msg{position:fixed;bottom:24px;right:24px;z-index:9999;background:#1c1f29;border:1px solid #4d8eff;color:#dfe2ef;padding:12px 20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.8);animation:slideUp .3s ease-out}
     @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .suggest-dropdown{background:#1c1f29 !important;border:1px solid rgba(255,255,255,.2) !important;box-shadow:0 10px 30px rgba(0,0,0,.9) !important;z-index:100 !important}
   </style>
 </head>
 <body class="bg-background text-on-surface min-h-screen flex font-sans selection:bg-primary-container selection:text-on-primary-container">

@@ -9,8 +9,8 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="theme.css"/>
-  <script src="theme.js"></script>
+  <link rel="stylesheet" href="theme.css?v=20261009e"/>
+  <script src="theme.js?v=20261009e"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -66,20 +66,7 @@
     }
   </script>
   <style>
-    /* --- LIGHT THEME FINTECH OVERRIDES --- */
-    :root {
-      --c-primary: #4F46E5;
-      --c-gain: #12A150;
-      --c-loss: #E5484D;
-      --c-caution: #D97706;
-      --c-text: #12141C;
-      --c-muted: #6B7280;
-      --c-border: #E7E8F0;
-      --c-canvas: #F5F6FA;
-      --c-card: #FFFFFF;
-    }
-    
-    body { background: var(--c-canvas) !important; color: var(--c-text) !important; }
+    /* --- PORTFOLIO STYLES (Powered by theme.css) --- */
     
     /* Panels & Inputs */
     .glass-panel { background: var(--c-card) !important; border: 1px solid var(--c-border) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; color: var(--c-text) !important; }
@@ -148,31 +135,7 @@
     #add-stock-modal label { color: rgba(180,195,230,0.65) !important; }
     /* --- END LIGHT THEME OVERRIDES --- */
 
-    @media (min-width: 768px) {
-      .md\:ml-\[280px\] { margin-left: 280px !important; }
-    }
-    .glass-panel {
-      background: rgba(18, 23, 34, 0.78);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.25s ease;
-    }
-    .glass-panel:hover {
-      border-color: rgba(255, 255, 255, 0.16);
-      box-shadow: 0 0 28px rgba(77, 142, 255, 0.06);
-    }
-    .glass-input {
-      background: #090d16 !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #dfe2ef !important;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .glass-input:focus {
-      outline: none;
-      border-color: #4d8eff !important;
-      box-shadow: 0 0 12px rgba(77, 142, 255, 0.25) !important;
-    }
+
     .pulse-blue {
       animation: pulse-blue-glow 2.2s infinite;
     }
@@ -896,22 +859,22 @@
               </div>
               
               <!-- Stepper Widget -->
-              <div class="flex items-center rounded-xl bg-[#090d16] border border-white/10 p-1">
-                <button onclick="decrementQty(${h.id})" class="stepper-btn w-9 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-white flex items-center justify-center font-bold font-mono text-base">
+              <div class="stepper-widget flex items-center rounded-xl p-1">
+                <button onclick="decrementQty(${h.id})" class="stepper-btn w-9 h-8 rounded-lg flex items-center justify-center font-bold font-mono text-base">
                   -
                 </button>
-                <input type="number" min="1" value="${h.qty}" onchange="updateQtyDirect(${h.id}, this.value)" class="w-full bg-transparent border-0 text-center font-mono text-white text-sm font-bold focus:ring-0 focus:outline-none"/>
-                <button onclick="incrementQty(${h.id})" class="stepper-btn w-9 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-white flex items-center justify-center font-bold font-mono text-base">
+                <input type="number" min="1" value="${h.qty}" onchange="updateQtyDirect(${h.id}, this.value)" class="stepper-input w-full bg-transparent border-0 text-center font-mono text-sm font-bold focus:ring-0 focus:outline-none"/>
+                <button onclick="incrementQty(${h.id})" class="stepper-btn w-9 h-8 rounded-lg flex items-center justify-center font-bold font-mono text-base">
                   +
                 </button>
               </div>
 
               <!-- Quick Increment Chips (+5, +25, +50, +100) -->
-              <div class="flex items-center gap-1.5 font-mono text-[10px] text-on-surface-variant">
-                <button onclick="addQtyDelta(${h.id}, 5)" class="quick-chip flex-1 py-1 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-center font-semibold">+5</button>
-                <button onclick="addQtyDelta(${h.id}, 25)" class="quick-chip flex-1 py-1 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-center font-semibold">+25</button>
-                <button onclick="addQtyDelta(${h.id}, 50)" class="quick-chip flex-1 py-1 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-center font-semibold">+50</button>
-                <button onclick="addQtyDelta(${h.id}, 100)" class="quick-chip flex-1 py-1 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-center font-semibold">+100</button>
+              <div class="flex items-center gap-1.5 font-mono text-[10px]">
+                <button onclick="addQtyDelta(${h.id}, 5)" class="quick-chip flex-1 py-1 rounded text-center font-semibold">+5</button>
+                <button onclick="addQtyDelta(${h.id}, 25)" class="quick-chip flex-1 py-1 rounded text-center font-semibold">+25</button>
+                <button onclick="addQtyDelta(${h.id}, 50)" class="quick-chip flex-1 py-1 rounded text-center font-semibold">+50</button>
+                <button onclick="addQtyDelta(${h.id}, 100)" class="quick-chip flex-1 py-1 rounded text-center font-semibold">+100</button>
               </div>
             </div>
 

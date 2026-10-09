@@ -8,8 +8,8 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="theme.css?v=20261009c"/>
-  <script src="theme.js?v=20261009c"></script>
+  <link rel="stylesheet" href="theme.css?v=20261009e"/>
+  <script src="theme.js?v=20261009e"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -44,99 +44,7 @@
     }
   </script>
   <style>
-/* ═══ SAARTHIX LIGHT THEME OVERRIDE ═══ */
-* { box-sizing: border-box; }
-body { background: #F5F6FA !important; color: #12141C !important; font-family: 'Inter', sans-serif !important; }
-
-/* Top bar / header */
-header, #main-topbar { background: white !important; border-bottom: 1px solid #E7E8F0 !important; backdrop-filter: none !important; }
-header *, #main-topbar * { color: #12141C; }
-
-/* Cards */
-.glass-panel, [class*="rounded-2xl"], [class*="rounded-xl"] {
-  background: white !important;
-}
-
-/* Inputs */
-.glass-input, input, textarea, select {
-  background: #F5F6FA !important;
-  border: 1px solid #E7E8F0 !important;
-  color: #12141C !important;
-}
-.glass-input:focus, input:focus { border-color: #4F46E5 !important; box-shadow: 0 0 0 3px rgba(79,70,229,0.10) !important; }
-
-/* Overrides for dark backgrounds */
-[class*="bg-\["] { background-color: transparent; }
-.bg-surface-container-low\/50, .bg-surface-container-high\/95, [class*="bg-surface"] { background: white !important; }
-
-/* Borders */
-[class*="border-white"] { border-color: #E7E8F0 !important; }
-
-/* Text overrides */
-.text-white, .text-on-surface { color: #12141C !important; }
-.text-on-surface-variant { color: #6B7280 !important; }
-
-/* Gain/Loss colors — keep these */
-.text-secondary, [class*="text-secondary"] { color: #12A150 !important; }
-.text-error, [class*="text-error"] { color: #E5484D !important; }
-
-/* Primary button */
-.bg-primary, [class*="bg-primary"]:not([class*="bg-primary/"]):not([class*="bg-primary-"]) { background: #4F46E5 !important; color: white !important; }
-
-/* Dropdown menus */
-[id*="-menu"], [id*="dropdown"], [id*="-results"], .suggest-dropdown {
-  background: white !important;
-  border: 1px solid #E7E8F0 !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.10) !important;
-  backdrop-filter: none !important;
-}
-
-/* Mobile backdrop */
-#sidebar-backdrop { background: rgba(0,0,0,0.4) !important; backdrop-filter: none !important; }
-
-/* Ticker / scrolling bar */
-.ticker-wrap, [class*="ticker"] { background: #F5F6FA !important; border-color: #E7E8F0 !important; }
-
-/* Section headings */
-h1, h2, h3, h4 { color: #12141C !important; }
-
-/* AI verdict badges */
-.verdict-buy, [class*="verdict-buy"] { background: #F0FDF4; color: #12A150; border: 1px solid #BBF7D0; border-radius: 6px; }
-.verdict-hold, [class*="verdict-hold"] { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 6px; }
-.verdict-reduce, [class*="verdict-reduce"] { background: #FFF1F1; color: #E5484D; border: 1px solid #FECDD3; border-radius: 6px; }
-
-/* Score bars */
-.score-breakdown-card { background: white !important; border: 1px solid #E7E8F0 !important; }
-.score-factor-bar { background: #F5F6FA !important; }
-
-/* Skeleton loaders — make light */
-.skeleton, .skeleton-pulse {
-  background: linear-gradient(90deg, #F0F0F0 25%, #E0E0E0 50%, #F0F0F0 75%) !important;
-  background-size: 200% 100% !important;
-}
-    @media (min-width: 768px) {
-      .md\:ml-\[280px\] {
-        margin-left: 280px !important;
-      }
-    }
-    .glass-panel {
-      background: rgba(28, 31, 41, 0.65);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    .glass-input {
-      background: rgba(255, 255, 255, 0.05) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #dfe2ef !important;
-    }
-    .glass-input:focus {
-      outline: none;
-      border-color: #adc6ff !important;
-      background: rgba(255, 255, 255, 0.08) !important;
-      box-shadow: 0 0 0 1px #adc6ff !important;
-    }
+    * { box-sizing: border-box; }
     .pulse-button {
       transition: all 0.2s ease;
     }

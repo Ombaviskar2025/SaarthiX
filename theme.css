@@ -17,8 +17,8 @@ html.dark {
   --c-border:          rgba(255, 255, 255, 0.08);
   --c-border-strong:   rgba(255, 255, 255, 0.16);
   --c-text:            #F0F3FA;
-  --c-text-muted:      #8B94A5;
-  --c-text-faint:      #525A6C;
+  --c-text-muted:      #9AA4B8;
+  --c-text-faint:      #606A80;
   --c-primary:         #4F46E5;
   --c-primary-lt:      rgba(79, 70, 229, 0.15);
   --c-primary-text:    #818CF8;
@@ -92,8 +92,8 @@ html[data-theme="dark"] {
   --c-border:          rgba(255, 255, 255, 0.08);
   --c-border-strong:   rgba(255, 255, 255, 0.16);
   --c-text:            #F0F3FA;
-  --c-text-muted:      #8B94A5;
-  --c-text-faint:      #525A6C;
+  --c-text-muted:      #9AA4B8;
+  --c-text-faint:      #606A80;
   --c-primary:         #4F46E5;
   --c-primary-lt:      rgba(79, 70, 229, 0.15);
   --c-primary-text:    #818CF8;
@@ -498,29 +498,159 @@ textarea::placeholder {
   color: var(--c-text-faint) !important;
 }
 
-/* ── Dropdowns / Modals ── */
+/* ── Dropdowns / Modals (Pixel-perfect contrast for user/notif menus) ── */
 [id*="-menu"],
 [id*="-dropdown"],
 [id*="-results"],
+#dash-user-menu,
+#dash-notif-menu,
+#dashboard-search-results,
 .suggest-dropdown,
 .suggest-drop {
   background: var(--c-dropdown-bg) !important;
   border: 1px solid var(--c-border) !important;
   box-shadow: var(--c-shadow-lg) !important;
+  color: var(--c-text) !important;
 }
 
-/* ── Typography & Text Overrides ── */
+[id*="-menu"] *,
+[id*="-dropdown"] *,
+#dash-user-menu *,
+#dash-notif-menu *,
+#dashboard-search-results * {
+  color: var(--c-text) !important;
+}
+
+[id*="-menu"] a,
+[id*="-dropdown"] a,
+#dash-user-menu a,
+#dash-notif-menu a {
+  color: var(--c-text) !important;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+[id*="-menu"] a:hover,
+[id*="-dropdown"] a:hover,
+#dash-user-menu a:hover,
+#dash-notif-menu a:hover {
+  background: var(--c-hover) !important;
+  color: var(--c-text) !important;
+}
+
+[id*="-menu"] .text-on-surface-variant,
+#dash-user-menu .text-on-surface-variant,
+#dash-notif-menu .text-on-surface-variant {
+  color: var(--c-text-muted) !important;
+}
+
+#dash-user-menu .text-error,
+[id*="-menu"] .text-error {
+  color: var(--c-loss) !important;
+}
+
+#dash-user-menu .border-b,
+[id*="-menu"] .border-b,
+[id*="-menu"] .border-t {
+  border-color: var(--c-border) !important;
+}
+
+/* ── Typography & Text Overrides (Guaranteed High Contrast in Both Themes) ── */
 h1, h2, h3, h4, h5, h6 {
   color: var(--c-text) !important;
 }
 .text-white,
-.text-on-surface {
+.text-on-surface,
+[class*="text-on-surface"]:not([class*="-variant"]) {
   color: var(--c-text) !important;
 }
 .text-on-surface-variant,
 .text-muted,
 [class*="text-on-surface-variant"] {
   color: var(--c-text-muted) !important;
+}
+html[data-theme="dark"] .text-on-surface-variant,
+html.dark .text-on-surface-variant {
+  color: #9AA4B8 !important;
+}
+html[data-theme="light"] .text-on-surface-variant,
+html.light .text-on-surface-variant {
+  color: #6B7280 !important;
+}
+
+/* ── Stepper Widget & Portfolio Holdings (Light & Dark Mode) ── */
+.stepper-widget,
+.holding-card .bg-\[\#090d16\] {
+  background: var(--c-input) !important;
+  border: 1px solid var(--c-border) !important;
+}
+.stepper-btn {
+  background: var(--c-card) !important;
+  color: var(--c-text) !important;
+  border: 1px solid var(--c-border) !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.stepper-btn:hover {
+  background: var(--c-hover) !important;
+  border-color: var(--c-primary) !important;
+  color: var(--c-primary) !important;
+}
+.holding-card input[type="number"] {
+  background: transparent !important;
+  color: var(--c-text) !important;
+  border: none !important;
+}
+.quick-chip {
+  background: var(--c-canvas) !important;
+  border: 1px solid var(--c-border) !important;
+  color: var(--c-text) !important;
+}
+.quick-chip:hover {
+  background: var(--c-hover) !important;
+  border-color: var(--c-primary) !important;
+  color: var(--c-primary) !important;
+}
+
+/* ── Quick Select Chips in Stock Doctor (Light & Dark Mode) ── */
+button[onclick*="quickSelect"],
+.quick-select-pill {
+  background: var(--c-card) !important;
+  border: 1px solid var(--c-border) !important;
+  color: var(--c-text) !important;
+  transition: all 0.15s ease;
+}
+button[onclick*="quickSelect"]:hover,
+.quick-select-pill:hover {
+  background: var(--c-hover) !important;
+  border-color: var(--c-primary) !important;
+  color: var(--c-primary) !important;
+}
+button[onclick*="quickSelect"] span {
+  color: var(--c-text-muted) !important;
+}
+
+/* ── Header Controls & Compliance ── */
+#saarthi-lang-picker > button,
+.compliance-pill {
+  background: var(--c-card) !important;
+  border: 1px solid var(--c-border) !important;
+  color: var(--c-text) !important;
+}
+#saarthi-lang-picker > button:hover,
+.compliance-pill:hover {
+  background: var(--c-hover) !important;
+  border-color: var(--c-border-strong) !important;
+}
+#saarthi-lang-menu {
+  background: var(--c-dropdown-bg) !important;
+  border: 1px solid var(--c-border) !important;
+  box-shadow: var(--c-shadow-lg) !important;
+}
+#saarthi-lang-menu button {
+  color: var(--c-text) !important;
+}
+#saarthi-lang-menu button:hover {
+  background: var(--c-hover) !important;
 }
 
 /* ── Gain / Loss / Caution ── */
