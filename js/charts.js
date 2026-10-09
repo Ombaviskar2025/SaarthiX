@@ -372,6 +372,20 @@
       }
     }
     rsiSeries.setData(mapped);
+
+    // Populate live RSI Badge
+    const lastRsi = mapped.length ? mapped[mapped.length - 1].value : null;
+    const rsiBadge = document.getElementById('studio-rsi-value-badge');
+    if (rsiBadge && lastRsi !== null) {
+      let state = 'Neutral';
+      let cls = 'text-purple-300';
+      if (lastRsi >= 70) { state = 'Overbought'; cls = 'text-error'; }
+      else if (lastRsi <= 30) { state = 'Oversold'; cls = 'text-secondary'; }
+      else if (lastRsi >= 50) { state = 'Bullish'; cls = 'text-sky-300'; }
+      else { state = 'Bearish'; cls = 'text-amber-300'; }
+      rsiBadge.className = `text-xs font-mono font-bold ${cls}`;
+      rsiBadge.textContent = `${lastRsi.toFixed(2)} (${state})`;
+    }
   }
 
   function populateMACD(candles, macdObj) {
@@ -398,6 +412,16 @@
     if (macdLineSeries) macdLineSeries.setData(macdMapped);
     if (macdSigSeries) macdSigSeries.setData(sigMapped);
     if (macdHistSeries) macdHistSeries.setData(histMapped);
+
+    // Populate live MACD Badge
+    const lastM = macdMapped.length ? macdMapped[macdMapped.length - 1].value : null;
+    const lastH = histMapped.length ? histMapped[histMapped.length - 1].value : null;
+    const macdBadge = document.getElementById('studio-macd-value-badge');
+    if (macdBadge && lastM !== null) {
+      const isUp = (lastH || 0) >= 0;
+      macdBadge.className = `text-xs font-mono font-bold ${isUp ? 'text-secondary' : 'text-error'}`;
+      macdBadge.textContent = `MACD: ${lastM >= 0 ? '+' : ''}${lastM.toFixed(2)} · Hist: ${(lastH || 0) >= 0 ? '+' : ''}${(lastH || 0).toFixed(2)}`;
+    }
   }
 
   function setupCrosshairLegend(candles, indicators) {
@@ -413,6 +437,26 @@
       }
       const data = param.seriesData.get(candleSeries);
       renderLegendText(data);
+
+      // Also update RSI & MACD badges dynamically if corresponding series is hovered
+      if (indicators && param.time) {
+        const idx = candles.findIndex(c => c.time === param.time);
+        if (idx !== -1) {
+          const rVal = indicators.rsi ? indicators.rsi[idx] : null;
+          const rsiBadge = document.getElementById('studio-rsi-value-badge');
+          if (rsiBadge && rVal !== null && !isNaN(rVal)) {
+            let state = rVal >= 70 ? 'Overbought' : (rVal <= 30 ? 'Oversold' : (rVal >= 50 ? 'Bullish' : 'Neutral'));
+            rsiBadge.textContent = `${rVal.toFixed(2)} (${state})`;
+          }
+
+          const mVal = indicators.macd?.macd ? indicators.macd.macd[idx] : null;
+          const hVal = indicators.macd?.histogram ? indicators.macd.histogram[idx] : null;
+          const macdBadge = document.getElementById('studio-macd-value-badge');
+          if (macdBadge && mVal !== null) {
+            macdBadge.textContent = `MACD: ${mVal >= 0 ? '+' : ''}${mVal.toFixed(2)} · Hist: ${(hVal || 0) >= 0 ? '+' : ''}${(hVal || 0).toFixed(2)}`;
+          }
+        }
+      }
     });
 
     function renderLegendText(bar) {
