@@ -573,6 +573,45 @@ function buildNav(activePageId) {
   return { navLinks, mobileLinks, headerNavLinks, statusDot };
 }
 
+// ── Canonical Sidebar Renderer (Matches Reference UI exactly) ──
+function renderCanonicalSidebar(activePageId) {
+  const sidebar = document.getElementById('sidebar-nav') || document.getElementById('main-sidebar');
+  if (!sidebar) return;
+
+  const { navLinks } = buildNav(activePageId);
+
+  sidebar.innerHTML = `
+    <!-- Top Circular Logo -->
+    <div class="mb-5 flex items-center justify-center w-full pt-1">
+      <a href="dashboard.html" title="SaarthiX Home" class="flex items-center justify-center">
+        <img src="logo.png" class="w-10 h-10 object-contain rounded-full border border-white/10" alt="SaarthiX Logo"/>
+      </a>
+    </div>
+
+    <!-- Nav Links (Dynamic) -->
+    <div class="flex flex-col gap-1 px-1 flex-1 overflow-y-auto w-full items-center" id="nav-links">
+      ${navLinks}
+    </div>
+
+    <!-- Bottom System Strip -->
+    <div class="w-full flex flex-col items-center gap-1 pt-3 pb-2 border-t border-white/10 text-xs mt-auto">
+      <div class="flex items-center justify-center py-1.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse shadow-[0_0_8px_#10b981]" title="NSE/BSE Live"></span>
+      </div>
+      <a href="support.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Support & Helpdesk">
+        <span class="material-symbols-outlined text-[20px]">help</span>
+        <span class="text-[9px] font-medium leading-tight">Support &amp; Helpdesk</span>
+      </a>
+      <a href="login.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Log Out">
+        <span class="material-symbols-outlined text-[20px]">logout</span>
+        <span class="text-[9px] font-medium leading-tight">Log Out</span>
+      </a>
+    </div>
+  `;
+}
+window.renderCanonicalSidebar = renderCanonicalSidebar;
+window.buildNav = buildNav;
+
 // ── Global Sidebar Toggle Function ───────────────────────────
 function toggleSidebar() {
   const sidebar = document.getElementById('main-sidebar') || document.getElementById('sidebar-nav');

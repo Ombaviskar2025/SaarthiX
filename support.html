@@ -92,40 +92,39 @@
 </head>
 <body class="min-h-screen flex overflow-x-hidden text-sm">
 
-  <!-- Desktop Sidebar -->
-  <aside id="sidebar-nav" class="w-[78px] h-screen fixed left-0 top-0 bg-surface-container-lowest/80 backdrop-blur-xl border-r border-white/10 hidden md:flex flex-col z-50">
-    <div class="px-6 py-5 flex items-center gap-3">
-      <img src="logo.png" alt="SaarthiX Logo" class="w-9 h-9 object-contain" />
-      <div>
-        <h1 class="font-heading font-bold text-base text-white tracking-wide">Saarthi<span class="text-primary">X</span></h1>
-        <span class="text-[10px] text-on-surface-variant block uppercase tracking-wider font-semibold">Terminal</span>
+  <!-- Sidebar nav: id="sidebar-nav" -->
+  <nav id="sidebar-nav" class="flex flex-col h-full py-6 fixed left-0 top-0 w-[78px] border-r border-white/10 bg-[#101420] shadow-2xl z-50 transition-transform duration-300 ease-in-out">
+    <!-- Top Circular Logo -->
+    <div class="mb-5 flex items-center justify-center w-full pt-1">
+      <a href="dashboard.html" title="SaarthiX Home" class="flex items-center justify-center">
+        <img src="logo.png" class="w-10 h-10 object-contain rounded-full border border-white/10" alt="SaarthiX Logo"/>
+      </a>
+    </div>
+
+    <!-- Nav Links (Dynamic from buildNav) -->
+    <div class="flex flex-col gap-1 px-1 flex-1 overflow-y-auto w-full items-center" id="nav-links"></div>
+
+    <!-- Bottom System Strip -->
+    <div class="w-full flex flex-col items-center gap-1 pt-3 pb-2 border-t border-white/10 text-xs mt-auto">
+      <div class="flex items-center justify-center py-1.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse shadow-[0_0_8px_#10b981]" title="NSE/BSE Live"></span>
       </div>
-    </div>
-
-    <!-- Navigation links container populated by buildNav -->
-    <div class="flex flex-col gap-1 px-4 flex-1 overflow-y-auto" id="nav-links"></div>
-
-    <div class="px-4 mt-auto mb-4">
-      <a href="portfolio.html" class="block w-full py-2.5 px-4 rounded-xl bg-primary text-white font-semibold text-center shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
-        Analyze Portfolio
+      <a href="support.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl active text-primary hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Support & Helpdesk">
+        <span class="material-symbols-outlined text-[20px]">help</span>
+        <span class="text-[9px] font-medium leading-tight">Support &amp; Helpdesk</span>
+      </a>
+      <a href="login.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Log Out">
+        <span class="material-symbols-outlined text-[20px]">logout</span>
+        <span class="text-[9px] font-medium leading-tight">Log Out</span>
       </a>
     </div>
-
-    <div class="px-4 py-3 border-t border-white/10 flex flex-col gap-1 text-xs">
-      <a href="support.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-primary font-semibold bg-primary/10 border border-primary/20 transition-colors">
-        <span class="material-symbols-outlined text-[18px]">help</span> Support & FAQ
-      </a>
-      <a href="login.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-error hover:bg-error/10 transition-colors">
-        <span class="material-symbols-outlined text-[18px]">logout</span> Log Out
-      </a>
-    </div>
-  </aside>
+  </nav>
 
   <!-- Mobile Nav Placeholder -->
   <div id="mobile-nav" class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-container-low/90 backdrop-blur-xl border-t border-white/10"></div>
 
   <!-- Main Container -->
-  <main class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col min-w-0 pb-20 md:pb-8">
+  <main id="main-content" class="flex-1 ml-0 md:ml-[78px] min-h-screen flex flex-col min-w-0 pb-20 md:pb-8">
 
     <!-- Top Header Bar -->
     <header class="sticky top-0 z-40 bg-surface-container-lowest/70 backdrop-blur-xl border-b border-white/10 px-6 py-3.5 flex items-center justify-between">

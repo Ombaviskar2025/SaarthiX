@@ -46,19 +46,6 @@
 * { box-sizing: border-box; }
 body { background: #F5F6FA !important; color: #12141C !important; font-family: 'Inter', sans-serif !important; }
 
-/* Sidebar */
-#sidebar-nav, nav[id*="sidebar"] { background: white !important; border-right: 1px solid #E7E8F0 !important; box-shadow: none !important; }
-#sidebar-nav *, nav[id*="sidebar"] * { border-color: #E7E8F0 !important; }
-#sidebar-nav a, nav[id*="sidebar"] a { color: #6B7280 !important; }
-#sidebar-nav a:hover, nav[id*="sidebar"] a:hover { background: #F5F6FA !important; color: #12141C !important; }
-#sidebar-nav h1 { color: #12141C !important; }
-#sidebar-nav p, #sidebar-nav span.text-on-surface-variant { color: #6B7280 !important; }
-
-/* Active nav item */
-.bg-primary\/15, [class*="bg-primary/15"] { background: #EEF2FF !important; }
-.text-primary { color: #4F46E5 !important; }
-.border-primary\/25 { border-color: rgba(79,70,229,0.25) !important; }
-
 /* Top bar / header */
 header, #main-topbar { background: white !important; border-bottom: 1px solid #E7E8F0 !important; backdrop-filter: none !important; }
 header *, #main-topbar * { color: #12141C; }
@@ -188,52 +175,40 @@ h1, h2, h3, h4 { color: #12141C !important; }
       border-radius: 50%;
       background: conic-gradient(#4d8eff 0% 55%, #00a572 55% 100%);
     }
-    /* SLIM SIDEBAR */
-    #sidebar-nav{width:72px!important;min-width:72px!important;padding:16px 0!important;align-items:center!important}
-    #sidebar-nav>div:first-child{padding:0!important;margin-bottom:20px!important;display:flex!important;justify-content:center!important;width:100%!important}
-    #sidebar-nav h1,#sidebar-nav p{display:none!important}
-    #sidebar-nav img{width:36px!important;height:36px!important;border-radius:8px!important}
-    #sidebar-nav button[title="Hide Sidebar"]{display:none!important}
-    #sidebar-nav #nav-links{padding:0!important;gap:2px!important;align-items:center!important;width:100%!important}
-    #sidebar-nav #nav-links a{flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:8px 4px!important;gap:3px!important;border-radius:10px!important;width:56px!important;margin:0 auto!important;min-height:50px!important}
-    #sidebar-nav #nav-links a>div{flex-direction:column!important;align-items:center!important;gap:3px!important}
-    #sidebar-nav #nav-links a .material-symbols-outlined{font-size:20px!important}
-    #sidebar-nav #nav-links a span:not(.material-symbols-outlined){font-size:9px!important;font-weight:500!important;text-align:center!important;line-height:1!important;white-space:nowrap!important}
-    #sidebar-nav #nav-links a span.px-2{display:none!important}
-    #sidebar-nav>div:last-child{padding:0!important;width:100%!important;align-items:center!important}
-    #sidebar-nav>div:last-child a{flex-direction:column!important;align-items:center!important;font-size:9px!important;padding:8px 4px!important;gap:3px!important;width:56px!important;margin:0 auto!important}
-    #sidebar-nav>div:last-child span.text-secondary{display:none!important}
-    #sidebar-nav #ist-time{display:none!important}
-    #main-content{margin-left:72px!important}
-    header button[title="Toggle Sidebar"]{display:none!important}
   </style>
 </head>
 <body class="min-h-screen flex font-sans" style="background:#F5F6FA;">
   
-  <!-- Sidebar Nav -->
-  <nav id="sidebar-nav" class="hidden md:flex flex-col h-full py-container-padding fixed left-0 top-0 w-[280px] border-r border-white/10 bg-surface-container/80 backdrop-blur-xl shadow-2xl z-50">
-    <div class="px-gutter mb-8 flex items-center gap-3">
-      <img src="logo.png" class="w-14 h-14 object-contain flex-shrink-0" alt="SaarthiX Logo"/>
-      <span class="font-heading font-bold text-xl tracking-tight">SaarthiX</span>
-    </div>
-    <div class="flex flex-col gap-1 px-gutter flex-1" id="nav-links"></div>
-    <div class="px-gutter mt-auto mb-6">
-      <a href="portfolio.html" class="block w-full bg-primary-container hover:bg-primary-container/90 text-white font-medium py-3 px-4 rounded-xl text-center pulse-button transition-colors">Analyze Portfolio</a>
-    </div>
-    <div class="px-gutter flex flex-col gap-1 pt-4 border-t border-white/10">
-      <a href="support.html" class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-white rounded-lg transition-colors">
-        <span class="material-symbols-outlined text-[20px]">help</span>
-        <span class="font-medium text-sm">Support</span>
+  <!-- Sidebar nav: id="sidebar-nav" -->
+  <nav id="sidebar-nav" class="flex flex-col h-full py-6 fixed left-0 top-0 w-[78px] border-r border-white/10 bg-[#101420] shadow-2xl z-50 transition-transform duration-300 ease-in-out">
+    <!-- Top Circular Logo -->
+    <div class="mb-5 flex items-center justify-center w-full pt-1">
+      <a href="dashboard.html" title="SaarthiX Home" class="flex items-center justify-center">
+        <img src="logo.png" class="w-10 h-10 object-contain rounded-full border border-white/10" alt="SaarthiX Logo"/>
       </a>
-      <a href="login.html" class="flex items-center gap-3 px-3 py-2 text-error hover:bg-error/10 rounded-lg transition-colors">
+    </div>
+
+    <!-- Nav Links (Dynamic from buildNav) -->
+    <div class="flex flex-col gap-1 px-1 flex-1 overflow-y-auto w-full items-center" id="nav-links"></div>
+
+    <!-- Bottom System Strip -->
+    <div class="w-full flex flex-col items-center gap-1 pt-3 pb-2 border-t border-white/10 text-xs mt-auto">
+      <div class="flex items-center justify-center py-1.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse shadow-[0_0_8px_#10b981]" title="NSE/BSE Live"></span>
+      </div>
+      <a href="support.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Support & Helpdesk">
+        <span class="material-symbols-outlined text-[20px]">help</span>
+        <span class="text-[9px] font-medium leading-tight">Support &amp; Helpdesk</span>
+      </a>
+      <a href="login.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Log Out">
         <span class="material-symbols-outlined text-[20px]">logout</span>
-        <span class="font-medium text-sm">Log Out</span>
+        <span class="text-[9px] font-medium leading-tight">Log Out</span>
       </a>
     </div>
   </nav>
 
   <!-- Main Content -->
-  <main class="flex-1 ml-0 md:ml-[280px] min-h-screen flex flex-col min-w-0 overflow-x-hidden">
+  <main id="main-content" class="flex-1 ml-0 md:ml-[78px] min-h-screen flex flex-col min-w-0 overflow-x-hidden">
     <!-- Top Bar -->
     <header class="hidden md:flex h-20 items-center justify-between px-container-padding border-b border-white/10 bg-background/80 backdrop-blur-md sticky top-0 z-40">
       <div>

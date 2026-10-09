@@ -4,9 +4,48 @@
    - Instant switching with smooth CSS transitions
 ════════════════════════════════════════════════════════ */
 
-/* ── Light Mode Variables ── */
+/* ── Default Theme Variables (Dark Mode matching reference UI) ── */
 :root,
-html[data-theme="light"] {
+html[data-theme="dark"],
+html.dark {
+  --c-canvas:          #0B0F19;
+  --c-card:            #131825;
+  --c-sidebar:         #101420;
+  --c-topbar:          #101420;
+  --c-input:           #0C101B;
+  --c-hover:           #1A2133;
+  --c-border:          rgba(255, 255, 255, 0.08);
+  --c-border-strong:   rgba(255, 255, 255, 0.16);
+  --c-text:            #F0F3FA;
+  --c-text-muted:      #8B94A5;
+  --c-text-faint:      #525A6C;
+  --c-primary:         #4F46E5;
+  --c-primary-lt:      rgba(79, 70, 229, 0.15);
+  --c-primary-text:    #818CF8;
+  --c-gain:            #22C55E;
+  --c-gain-bg:         rgba(34, 197, 94, 0.12);
+  --c-gain-border:     rgba(34, 197, 94, 0.28);
+  --c-loss:            #EF4444;
+  --c-loss-bg:         rgba(239, 68, 68, 0.12);
+  --c-loss-border:     rgba(239, 68, 68, 0.28);
+  --c-caution:         #F59E0B;
+  --c-caution-bg:      rgba(245, 158, 11, 0.12);
+  --c-caution-border:  rgba(245, 158, 11, 0.28);
+  --c-shadow:          0 1px 4px rgba(0, 0, 0, 0.40);
+  --c-shadow-lg:       0 8px 32px rgba(0, 0, 0, 0.55);
+  --c-shadow-xl:       0 20px 60px rgba(0, 0, 0, 0.75);
+  --c-scrim:           rgba(0, 0, 0, 0.70);
+  --c-dropdown-bg:     #171D2D;
+  --c-ticker-bg:       #0E121E;
+  --c-skeleton-from:   rgba(255, 255, 255, 0.04);
+  --c-skeleton-to:     rgba(255, 255, 255, 0.09);
+  --c-tab-active:      #1E2538;
+  --c-tab-inactive:    transparent;
+}
+
+/* ── Light Mode Variables ── */
+html[data-theme="light"],
+html.light {
   --c-canvas:          #F5F6FA;
   --c-card:            #FFFFFF;
   --c-sidebar:         #FFFFFF;
@@ -95,7 +134,7 @@ html[data-theme="light"] body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-/* ── Sidebar (Slim Vertical Nav - Reference UI) ── */
+/* ── Sidebar (Slim Vertical Nav - Reference UI Exact Match) ── */
 #sidebar-nav,
 #main-sidebar,
 aside[class*="fixed"],
@@ -103,7 +142,7 @@ nav[class*="fixed"][class*="left-0"] {
   width: 78px !important;
   min-width: 78px !important;
   max-width: 78px !important;
-  padding: 16px 0 14px 0 !important;
+  padding: 16px 0 10px 0 !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -113,13 +152,13 @@ nav[class*="fixed"][class*="left-0"] {
   bottom: 0 !important;
   height: 100vh !important;
   z-index: 50 !important;
-  background: var(--c-sidebar) !important;
-  border-right: 1px solid var(--c-border) !important;
-  box-shadow: none !important;
+  background: #101420 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
   overflow: visible !important;
 }
 
-/* Hide desktop headers and non-slim elements */
+/* Hide desktop headers, titles, hide button, and any rogue extra buttons in sidebar */
 #sidebar-nav .px-6,
 #main-sidebar .px-6,
 #sidebar-nav h1,
@@ -131,6 +170,10 @@ nav[class*="fixed"][class*="left-0"] {
 #sidebar-nav [title="Hide Sidebar"],
 #sidebar-nav #ist-time,
 #main-sidebar #ist-time,
+#sidebar-nav .pulse-button,
+#main-sidebar .pulse-button,
+#sidebar-nav .px-gutter.mt-auto,
+#main-sidebar .px-gutter.mt-auto,
 header button[title="Toggle Sidebar"],
 header button[onclick*="toggleSidebar"] {
   display: none !important;
@@ -143,9 +186,10 @@ aside[class*="fixed"] img {
   width: 40px !important;
   height: 40px !important;
   border-radius: 50% !important;
-  margin: 0 auto 14px auto !important;
+  margin: 0 auto 16px auto !important;
   display: block !important;
   object-fit: contain !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Links Container */
@@ -158,6 +202,7 @@ aside[class*="fixed"] img {
   gap: 3px !important;
   flex: 1 1 auto !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 /* Nav Item Base */
@@ -165,8 +210,8 @@ aside[class*="fixed"] img {
 #sidebar-nav #nav-links a,
 #main-sidebar #nav-links a,
 aside[class*="fixed"] #nav-links a {
-  width: 66px !important;
-  min-height: 52px !important;
+  width: 64px !important;
+  min-height: 56px !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -177,13 +222,16 @@ aside[class*="fixed"] #nav-links a {
   text-decoration: none !important;
   transition: all 0.2s ease !important;
   position: relative !important;
-  border: 1px solid transparent !important;
+  border: 1.5px solid transparent !important;
+  color: #7a88a8 !important;
+  background: transparent !important;
 }
 .sx-nav-item .material-symbols-outlined,
 #sidebar-nav #nav-links a .material-symbols-outlined,
 #main-sidebar #nav-links a .material-symbols-outlined {
   font-size: 22px !important;
   margin-bottom: 2px !important;
+  color: inherit !important;
 }
 .sx-nav-item span:not(.material-symbols-outlined):not(.sx-pro-pill),
 #sidebar-nav #nav-links a span:not(.material-symbols-outlined):not(.sx-pro-pill),
@@ -192,66 +240,88 @@ aside[class*="fixed"] #nav-links a {
   font-weight: 500 !important;
   text-align: center !important;
   line-height: 1.15 !important;
-  max-width: 64px !important;
+  max-width: 62px !important;
   display: block !important;
   white-space: normal !important;
+  color: inherit !important;
 }
 
-/* Hide active pill badge on right if any */
+/* Hide active pill badge on right if any legacy element exists */
 #sidebar-nav #nav-links a span.px-2,
 #main-sidebar #nav-links a span.px-2 {
   display: none !important;
 }
 
-/* Active Nav Item - Dark Mode */
+/* Active Nav Item - Signature Glowing Indigo Pill (Exact Match Reference UI) */
+.sx-nav-item.active,
+#sidebar-nav #nav-links a.active,
+#main-sidebar #nav-links a.active,
+#sidebar-nav #nav-links a[class*="bg-primary"],
+#main-sidebar #nav-links a[class*="bg-primary"],
 html[data-theme="dark"] .sx-nav-item.active,
 html[data-theme="dark"] #sidebar-nav #nav-links a.active,
 html[data-theme="dark"] #main-sidebar #nav-links a.active,
-html[data-theme="dark"] #sidebar-nav #nav-links a[class*="bg-primary"],
-html[data-theme="dark"] #main-sidebar #nav-links a[class*="bg-primary"] {
-  background: rgba(77, 142, 255, 0.16) !important;
-  border: 1px solid rgba(77, 142, 255, 0.45) !important;
-  color: #adc6ff !important;
-  box-shadow: 0 0 16px rgba(77, 142, 255, 0.15) !important;
-}
-
-/* Inactive Nav Item - Dark Mode */
-html[data-theme="dark"] .sx-nav-item:not(.active),
-html[data-theme="dark"] #sidebar-nav #nav-links a:not(.active),
-html[data-theme="dark"] #main-sidebar #nav-links a:not(.active) {
-  color: #8b94a5 !important;
-  border: 1px solid transparent !important;
-}
-html[data-theme="dark"] .sx-nav-item:not(.active):hover,
-html[data-theme="dark"] #sidebar-nav #nav-links a:not(.active):hover,
-html[data-theme="dark"] #main-sidebar #nav-links a:not(.active):hover {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-}
-
-/* Active Nav Item - Light Mode */
 html[data-theme="light"] .sx-nav-item.active,
 html[data-theme="light"] #sidebar-nav #nav-links a.active,
-html[data-theme="light"] #main-sidebar #nav-links a.active,
-html[data-theme="light"] #sidebar-nav #nav-links a[class*="bg-primary"],
-html[data-theme="light"] #main-sidebar #nav-links a[class*="bg-primary"] {
-  background: #EEF2FF !important;
-  border: 1px solid rgba(79, 70, 229, 0.35) !important;
-  color: #4F46E5 !important;
+html[data-theme="light"] #main-sidebar #nav-links a.active {
+  background: rgba(79, 70, 229, 0.18) !important;
+  border: 1.5px solid rgba(129, 140, 248, 0.45) !important;
+  color: #818cf8 !important;
+  box-shadow: 0 0 16px rgba(79, 70, 229, 0.22) !important;
+}
+.sx-nav-item.active .material-symbols-outlined,
+.sx-nav-item.active span,
+#sidebar-nav #nav-links a.active .material-symbols-outlined,
+#sidebar-nav #nav-links a.active span,
+#main-sidebar #nav-links a.active .material-symbols-outlined,
+#main-sidebar #nav-links a.active span {
+  color: #818cf8 !important;
+  font-weight: 600 !important;
 }
 
-/* Inactive Nav Item - Light Mode */
+/* Inactive Nav Item */
+.sx-nav-item:not(.active),
+#sidebar-nav #nav-links a:not(.active),
+#main-sidebar #nav-links a:not(.active),
+html[data-theme="dark"] .sx-nav-item:not(.active),
+html[data-theme="dark"] #sidebar-nav #nav-links a:not(.active),
+html[data-theme="dark"] #main-sidebar #nav-links a:not(.active),
 html[data-theme="light"] .sx-nav-item:not(.active),
 html[data-theme="light"] #sidebar-nav #nav-links a:not(.active),
 html[data-theme="light"] #main-sidebar #nav-links a:not(.active) {
-  color: #6b7280 !important;
-  border: 1px solid transparent !important;
+  color: #7a88a8 !important;
+  background: transparent !important;
+  border: 1.5px solid transparent !important;
 }
+.sx-nav-item:not(.active) .material-symbols-outlined,
+.sx-nav-item:not(.active) span,
+#sidebar-nav #nav-links a:not(.active) .material-symbols-outlined,
+#sidebar-nav #nav-links a:not(.active) span,
+#main-sidebar #nav-links a:not(.active) .material-symbols-outlined,
+#main-sidebar #nav-links a:not(.active) span {
+  color: #7a88a8 !important;
+}
+
+/* Hover state for inactive */
+.sx-nav-item:not(.active):hover,
+#sidebar-nav #nav-links a:not(.active):hover,
+#main-sidebar #nav-links a:not(.active):hover,
+html[data-theme="dark"] .sx-nav-item:not(.active):hover,
+html[data-theme="dark"] #sidebar-nav #nav-links a:not(.active):hover,
+html[data-theme="dark"] #main-sidebar #nav-links a:not(.active):hover,
 html[data-theme="light"] .sx-nav-item:not(.active):hover,
 html[data-theme="light"] #sidebar-nav #nav-links a:not(.active):hover,
 html[data-theme="light"] #main-sidebar #nav-links a:not(.active):hover {
-  color: #12141c !important;
-  background: #f3f4f8 !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+.sx-nav-item:not(.active):hover .material-symbols-outlined,
+.sx-nav-item:not(.active):hover span,
+#sidebar-nav #nav-links a:not(.active):hover .material-symbols-outlined,
+#sidebar-nav #nav-links a:not(.active):hover span,
+#main-sidebar #nav-links a:not(.active):hover .material-symbols-outlined,
+#main-sidebar #nav-links a:not(.active):hover span {
+  color: #ffffff !important;
 }
 
 /* Pro Pill Badge */
@@ -259,12 +329,14 @@ html[data-theme="light"] #main-sidebar #nav-links a:not(.active):hover {
   font-size: 8.5px !important;
   font-weight: 700 !important;
   line-height: 1 !important;
-  padding: 1.5px 5.5px !important;
+  padding: 1.5px 6px !important;
   border-radius: 9999px !important;
   background: rgba(16, 201, 144, 0.20) !important;
-  color: #10c990 !important;
-  border: 1px solid rgba(16, 201, 144, 0.35) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 201, 144, 0.45) !important;
   margin-top: 2px !important;
+  letter-spacing: 0.02em !important;
+  display: inline-block !important;
 }
 
 /* Bottom Strip of Sidebar */
@@ -272,17 +344,19 @@ html[data-theme="light"] #main-sidebar #nav-links a:not(.active):hover {
 #main-sidebar > div:last-child,
 aside[class*="fixed"] > div:last-child {
   width: 100% !important;
-  padding: 10px 0 4px 0 !important;
-  border-top: 1px solid var(--c-border) !important;
+  padding: 10px 0 6px 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 2px !important;
+  gap: 3px !important;
   margin-top: auto !important;
+  background: transparent !important;
 }
 #sidebar-nav > div:last-child a,
 #main-sidebar > div:last-child a,
-aside[class*="fixed"] > div:last-child a {
+aside[class*="fixed"] > div:last-child a,
+.sx-bottom-link {
   width: 66px !important;
   display: flex !important;
   flex-direction: column !important;
@@ -291,23 +365,31 @@ aside[class*="fixed"] > div:last-child a {
   padding: 6px 2px !important;
   border-radius: 12px !important;
   text-decoration: none !important;
-  color: var(--c-text-muted) !important;
+  color: #7a88a8 !important;
+  transition: all 0.2s ease !important;
+  background: transparent !important;
 }
 #sidebar-nav > div:last-child a .material-symbols-outlined,
-#main-sidebar > div:last-child a .material-symbols-outlined {
+#main-sidebar > div:last-child a .material-symbols-outlined,
+.sx-bottom-link .material-symbols-outlined {
   font-size: 20px !important;
   margin-bottom: 2px !important;
+  color: inherit !important;
 }
 #sidebar-nav > div:last-child a span:not(.material-symbols-outlined),
-#main-sidebar > div:last-child a span:not(.material-symbols-outlined) {
+#main-sidebar > div:last-child a span:not(.material-symbols-outlined),
+.sx-bottom-link span:not(.material-symbols-outlined) {
   font-size: 9px !important;
+  font-weight: 500 !important;
   text-align: center !important;
   line-height: 1.15 !important;
+  color: inherit !important;
 }
 #sidebar-nav > div:last-child a:hover,
-#main-sidebar > div:last-child a:hover {
-  background: var(--c-hover) !important;
-  color: var(--c-text) !important;
+#main-sidebar > div:last-child a:hover,
+.sx-bottom-link:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #ffffff !important;
 }
 #sidebar-nav > div:last-child span.text-secondary,
 #main-sidebar > div:last-child span.text-secondary {

@@ -87,15 +87,7 @@
     .glass-input:focus { border-color: var(--c-primary) !important; box-shadow: 0 0 0 3px rgba(79,70,229,0.12) !important; }
     
     /* Layout */
-    #main-sidebar { background: var(--c-card) !important; border-right: 1px solid var(--c-border) !important; box-shadow: none !important; }
     header { background: var(--c-card) !important; border-bottom: 1px solid var(--c-border) !important; box-shadow: none !important; backdrop-filter: none !important; }
-    
-    /* Sidebar Navigation */
-    #main-sidebar .text-white { color: var(--c-text) !important; }
-    #main-sidebar .text-on-surface-variant { color: var(--c-muted) !important; }
-    #main-sidebar a:hover { background: var(--c-canvas) !important; color: var(--c-text) !important; }
-    #main-sidebar a.bg-primary\/15 { background: #EEF2FF !important; color: var(--c-primary) !important; border-color: transparent !important; }
-    #main-sidebar .border-t { border-color: var(--c-border) !important; }
     
     /* Typography & Utility Colors */
     .text-white { color: var(--c-text) !important; }
@@ -230,24 +222,6 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes modalScaleIn { from { opacity:0; transform:scale(0.88) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
     @keyframes accentSlide { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
-    /* SLIM SIDEBAR */
-    #sidebar-nav{width:72px!important;min-width:72px!important;padding:16px 0!important;align-items:center!important}
-    #sidebar-nav>div:first-child{padding:0!important;margin-bottom:20px!important;display:flex!important;justify-content:center!important;width:100%!important}
-    #sidebar-nav h1,#sidebar-nav p{display:none!important}
-    #sidebar-nav img{width:36px!important;height:36px!important;border-radius:8px!important}
-    #sidebar-nav button[title="Hide Sidebar"]{display:none!important}
-    #sidebar-nav #nav-links{padding:0!important;gap:2px!important;align-items:center!important;width:100%!important}
-    #sidebar-nav #nav-links a{flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:8px 4px!important;gap:3px!important;border-radius:10px!important;width:56px!important;margin:0 auto!important;min-height:50px!important}
-    #sidebar-nav #nav-links a>div{flex-direction:column!important;align-items:center!important;gap:3px!important}
-    #sidebar-nav #nav-links a .material-symbols-outlined{font-size:20px!important}
-    #sidebar-nav #nav-links a span:not(.material-symbols-outlined){font-size:9px!important;font-weight:500!important;text-align:center!important;line-height:1!important;white-space:nowrap!important}
-    #sidebar-nav #nav-links a span.px-2{display:none!important}
-    #sidebar-nav>div:last-child{padding:0!important;width:100%!important;align-items:center!important}
-    #sidebar-nav>div:last-child a{flex-direction:column!important;align-items:center!important;font-size:9px!important;padding:8px 4px!important;gap:3px!important;width:56px!important;margin:0 auto!important}
-    #sidebar-nav>div:last-child span.text-secondary{display:none!important}
-    #sidebar-nav #ist-time{display:none!important}
-    #main-content{margin-left:72px!important}
-    header button[title="Toggle Sidebar"]{display:none!important}
   </style>
 </head>
 <body class="bg-[#F5F6FA] text-[#12141C] min-h-screen flex font-sans selection:bg-primary-container selection:text-on-primary-container">
@@ -268,31 +242,29 @@
 
   <!-- Sidebar (Exact format as reference UI Image 2) -->
   <!-- Sidebar nav: id="sidebar-nav" -->
-  <nav id="sidebar-nav" class="flex flex-col h-full py-6 fixed left-0 top-0 w-[78px] border-r border-white/10 bg-[#101420]/95 backdrop-blur-xl shadow-2xl z-50 transition-transform duration-300 ease-in-out">
-    <!-- Brand Header -->
-    <div class="px-6 mb-7 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <img src="logo.png" class="w-10 h-10 object-contain flex-shrink-0 rounded-full" alt="SaarthiX Logo"/>
-      </div>
+  <nav id="sidebar-nav" class="flex flex-col h-full py-6 fixed left-0 top-0 w-[78px] border-r border-white/10 bg-[#101420] shadow-2xl z-50 transition-transform duration-300 ease-in-out">
+    <!-- Top Circular Logo -->
+    <div class="mb-5 flex items-center justify-center w-full pt-1">
+      <a href="dashboard.html" title="SaarthiX Home" class="flex items-center justify-center">
+        <img src="logo.png" class="w-10 h-10 object-contain rounded-full border border-white/10" alt="SaarthiX Logo"/>
+      </a>
     </div>
 
     <!-- Nav Links (Dynamic from buildNav) -->
-    <div class="flex flex-col gap-1.5 px-1 flex-1 overflow-y-auto w-full items-center" id="nav-links"></div>
+    <div class="flex flex-col gap-1 px-1 flex-1 overflow-y-auto w-full items-center" id="nav-links"></div>
 
     <!-- Bottom System Strip -->
-    <div class="px-5 flex flex-col gap-1 pt-3 border-t border-white/10 text-xs">
-      <div class="flex items-center gap-2 py-1.5 text-on-surface-variant/70">
-        <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-        <span class="text-secondary font-medium text-[11px]">NSE/BSE Live</span>
-        <span class="ml-auto font-mono text-[11px]" id="ist-time"></span>
+    <div class="w-full flex flex-col items-center gap-1 pt-3 pb-2 border-t border-white/10 text-xs mt-auto">
+      <div class="flex items-center justify-center py-1.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse shadow-[0_0_8px_#10b981]" title="NSE/BSE Live"></span>
       </div>
-      <a class="flex items-center gap-2.5 py-1.5 text-on-surface-variant hover:text-white transition-colors" href="support.html">
-        <span class="material-symbols-outlined text-[16px]">help</span>
-        <span>Support &amp; Helpdesk</span>
+      <a href="support.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Support & Helpdesk">
+        <span class="material-symbols-outlined text-[20px]">help</span>
+        <span class="text-[9px] font-medium leading-tight">Support &amp; Helpdesk</span>
       </a>
-      <a class="flex items-center gap-2.5 py-1.5 text-on-surface-variant hover:text-white transition-colors" href="login.html">
-        <span class="material-symbols-outlined text-[16px]">logout</span>
-        <span>Log Out</span>
+      <a href="login.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Log Out">
+        <span class="material-symbols-outlined text-[20px]">logout</span>
+        <span class="text-[9px] font-medium leading-tight">Log Out</span>
       </a>
     </div>
   </nav>
