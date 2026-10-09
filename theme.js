@@ -128,12 +128,51 @@
     initSxUserAccount();
   }
 
-  // ── Unified User Account Management (Syncs session across all pages) ──
+  // ── Unified User Account Management (Syncs sneha across all pages) ──
   function initSxUserAccount() {
-    if (window.currentUser && typeof window.updateUserUI === 'function') {
-      window.updateUserUI(window.currentUser);
-      return;
-    }
+    var rawName = '';
+    var rawEmail = '';
+    try {
+      rawName = localStorage.getItem('sx_user_name') || '';
+      rawEmail = localStorage.getItem('sx_user_email') || '';
+    } catch (e) {}
+
+    // Default fallback to 'Sneha Hosadodde' matching account from login
+    var fullName = rawName.trim() || 'Sneha Hosadodde';
+    var firstName = fullName.split(' ')[0] || 'Sneha';
+    var email = rawEmail.trim() || (firstName.toLowerCase() + '@gmail.com');
+
+    // Ensure it is stored consistently so every page shares it
+    try {
+      if (!rawName) localStorage.setItem('sx_user_name', fullName);
+      if (!rawEmail) localStorage.setItem('sx_user_email', email);
+    } catch (e) {}
+
+    var avatarUrl = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fullName) + '&background=4d8eff&color=fff&bold=true';
+
+    // 1. Update all avatar images
+    var avatarImgs = document.querySelectorAll('#user-avatar-img, .sx-user-avatar-img');
+    avatarImgs.forEach(function (img) {
+      img.src = avatarUrl;
+      img.alt = fullName;
+    });
+
+    // 2. Update user name badges in header
+    var avatarNames = document.querySelectorAll('#user-avatar-name, .sx-user-avatar-name');
+    avatarNames.forEach(function (el) {
+      el.textContent = firstName;
+    });
+
+    // 3. Update dropdown menu details
+    var menuUsernames = document.querySelectorAll('#dash-menu-username, .sx-menu-username');
+    menuUsernames.forEach(function (el) {
+      el.textContent = fullName;
+    });
+
+    var menuEmails = document.querySelectorAll('#dash-menu-email, .sx-menu-email');
+    menuEmails.forEach(function (el) {
+      el.textContent = email;
+    });
   }
 
   window.initSxUserAccount = initSxUserAccount;
@@ -149,10 +188,9 @@
 
   window.logoutSxUser = function (e) {
     if (e && e.preventDefault) e.preventDefault();
-    if (typeof window.handleLogout === 'function') {
-      window.handleLogout(e);
-      return;
-    }
+    try {
+      localStorage.removeItem('sx_logged_in_phone');
+    } catch (err) {}
     window.location.href = 'login.html';
   };
 

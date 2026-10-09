@@ -19,27 +19,11 @@ if (fs.existsSync(envLocalPath)) {
   }
 }
 
-const cookieParser = require('cookie-parser');
-const connectDB = require('../lib/db');
-
 const app = express();
 
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
-app.use(cookieParser());
+app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..')));
-
-// Auto-connect MongoDB
-connectDB().catch(err => {
-  console.warn('[MongoDB] Initial connection notice:', err.message);
-});
-
-// ── Auth & Per-User Data Endpoints ────────────────────────────
-app.use('/api/auth', require('../lib/routes/auth'));
-app.use('/api/user', require('../lib/routes/user'));
 
 // ── Dhan Symbol Security ID & Baseline Price Mapping ─────────
 const DHAN_SYMBOL_MAP = {
