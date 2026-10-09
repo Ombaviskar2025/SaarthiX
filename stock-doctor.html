@@ -827,25 +827,115 @@
     });
   }
 
-  // ── Search Autocomplete ──────────────────────────────────────
+  // ── Search Autocomplete (Universal NSE & BSE Support) ─────────
   let searchIdx = -1;
+  let searchDebounceTimer = null;
+  let currentExchange = 'NSE';
+
   function onSearchInput(val) {
     const dd = document.getElementById('sd-dropdown');
-    if (!val || val.length < 1) { dd.classList.add('hidden'); return; }
-    const results = (typeof searchStocksDB === 'function' ? searchStocksDB(val) : []).slice(0, 8);
-    if (!results.length) { dd.classList.add('hidden'); return; }
-    dd.innerHTML = results.map((s, i) => `
-      <div class="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-white/[0.07] transition-colors" onclick="selectStock('${s.ticker}','${s.name.replace(/'/g,'')}')">
-        <div class="flex items-center gap-3">
-          <span class="text-label-sm text-label-sm font-bold text-on-surface">${s.ticker}</span>
-          <span class="text-body-sm text-on-surface-variant truncate max-w-[200px]">${s.name}</span>
+    clearTimeout(searchDebounceTimer);
+    const query = (val || '').trim();
+    if (!query) {
+      dd.classList.add('hidden');
+      return;
+    }
+
+    // 1. Instant local search from STOCKS_DB
+    const localMatches = (typeof searchStocksDB === 'function') ? searchStocksDB(query) : [];
+    renderStockDoctorSuggestions(localMatches, query);
+
+    // 2. Async universal search across all listed NSE/BSE stocks
+    if (query.length >= 2) {
+      searchDebounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/stocks/search?q=${encodeURIComponent(query)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.results && data.results.length > 0) {
+              const combined = [...localMatches];
+              const seen = new Set(localMatches.map(s => s.ticker));
+
+              data.results.forEach(apiStock => {
+                if (!seen.has(apiStock.ticker)) {
+                  seen.add(apiStock.ticker);
+                  combined.push(apiStock);
+
+                  // Dynamically cache in local databases
+                  if (typeof STOCKS_DB !== 'undefined' && !STOCKS_DB.some(s => s.ticker === apiStock.ticker)) {
+                    const newEntry = {
+                      ticker: apiStock.ticker,
+                      name: apiStock.name || apiStock.ticker,
+                      exchange: apiStock.exchange || 'NSE',
+                      sector: apiStock.sector || 'Equities',
+                      price: apiStock.price || 100,
+                      change: 0,
+                      changePct: apiStock.changePct != null ? apiStock.changePct : 0,
+                      volume: 1000000,
+                      mktCap: '1.0L Cr',
+                      pe: 25.0,
+                      high52: (apiStock.price || 100) * 1.25,
+                      low52: (apiStock.price || 100) * 0.75
+                    };
+                    STOCKS_DB.push(newEntry);
+                    if (window.LIVE_STOCKS) LIVE_STOCKS.push(JSON.parse(JSON.stringify(newEntry)));
+                  }
+                }
+              });
+
+              renderStockDoctorSuggestions(combined, query);
+            }
+          }
+        } catch (err) {
+          console.warn('[StockDoctor] Live search lookup failed:', err.message);
+        }
+      }, 200);
+    }
+  }
+
+  function renderStockDoctorSuggestions(stocks, query) {
+    const dd = document.getElementById('sd-dropdown');
+    if (!dd) return;
+
+    if (!stocks || stocks.length === 0) {
+      const cleanUpper = query.toUpperCase();
+      dd.innerHTML = `
+        <div class="px-3 py-2.5 rounded-lg cursor-pointer hover:bg-white/[0.08] transition-colors flex items-center justify-between" onclick="selectStock('${cleanUpper}', '${query}', 'NSE')">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[18px]">search</span>
+            <span class="text-body-sm text-on-surface">Diagnose Stock: <strong class="text-white">${cleanUpper}</strong></span>
+          </div>
+          <span class="text-[11px] px-2 py-0.5 rounded bg-primary/20 text-primary font-bold">CLICK TO SELECT</span>
         </div>
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-on-surface-variant">${s.exchange}</span>
-          <span class="text-body-sm ${(s.changePct||0)>=0?'text-secondary':'text-error'}">${(s.changePct||0)>=0?'+':''}${(s.changePct||0).toFixed(2)}%</span>
+      `;
+      dd.classList.remove('hidden');
+      searchIdx = 0;
+      return;
+    }
+
+    dd.innerHTML = stocks.slice(0, 10).map((s, idx) => {
+      const ticker = s.ticker;
+      const name = (s.name || s.ticker).replace(/'/g, "\\'");
+      const ex = s.exchange || 'NSE';
+      const chg = s.changePct != null ? s.changePct : 0;
+      const isUp = chg >= 0;
+      const priceText = s.price ? `₹${Number(s.price).toLocaleString('en-IN')}` : '';
+
+      return `
+        <div class="flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer hover:bg-white/[0.08] transition-colors ${idx === searchIdx ? 'bg-white/10' : ''}" onclick="selectStock('${ticker}', '${name}', '${ex}')">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="font-mono font-bold text-white text-sm tracking-wide">${ticker}</span>
+            <span class="text-body-sm text-on-surface-variant truncate max-w-[240px]">${s.name || ticker}</span>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold ${ex === 'BSE' ? 'bg-primary/20 text-primary' : 'bg-secondary/20 text-secondary'}">${ex}</span>
+            ${priceText ? `<span class="font-mono text-xs text-white">${priceText}</span>` : ''}
+            ${s.changePct != null ? `<span class="text-xs font-mono font-semibold ${isUp ? 'text-secondary' : 'text-error'}">${isUp ? '+' : ''}${chg.toFixed(2)}%</span>` : ''}
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+
     dd.classList.remove('hidden');
     searchIdx = -1;
   }
@@ -853,43 +943,67 @@
   function onSearchKeydown(e) {
     const dd = document.getElementById('sd-dropdown');
     const items = dd.querySelectorAll('div[onclick]');
-    if (e.key === 'ArrowDown') { searchIdx = Math.min(searchIdx + 1, items.length - 1); highlightItem(items); }
-    else if (e.key === 'ArrowUp') { searchIdx = Math.max(searchIdx - 1, 0); highlightItem(items); }
-    else if (e.key === 'Enter') {
-      if (searchIdx >= 0 && items[searchIdx]) items[searchIdx].click();
-      else if (document.getElementById('sd-search').value.trim()) {
-        selectStock(document.getElementById('sd-search').value.trim().toUpperCase(), '');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      searchIdx = Math.min(searchIdx + 1, items.length - 1);
+      highlightItem(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      searchIdx = Math.max(searchIdx - 1, 0);
+      highlightItem(items);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (searchIdx >= 0 && items[searchIdx]) {
+        items[searchIdx].click();
+      } else if (document.getElementById('sd-search').value.trim()) {
+        diagnoseStock();
       }
-    } else if (e.key === 'Escape') { dd.classList.add('hidden'); }
+    } else if (e.key === 'Escape') {
+      dd.classList.add('hidden');
+    }
   }
 
   function highlightItem(items) {
-    items.forEach((it, i) => it.style.background = i === searchIdx ? 'rgba(255,255,255,0.07)' : '');
+    items.forEach((it, i) => it.style.background = i === searchIdx ? 'rgba(255,255,255,0.1)' : '');
   }
 
-  function selectStock(ticker, name) {
+  function selectStock(ticker, name, exchange = 'NSE') {
     currentTicker = ticker.toUpperCase();
-    document.getElementById('sd-search').value = name ? `${ticker} — ${name}` : ticker;
+    currentExchange = exchange || 'NSE';
+    document.getElementById('sd-search').value = name && name !== ticker ? `${currentTicker} — ${name}` : currentTicker;
     document.getElementById('sd-dropdown').classList.add('hidden');
+    searchIdx = -1;
   }
 
   function quickSelect(ticker) {
     const s = (typeof searchStocksDB === 'function' ? searchStocksDB(ticker) : []).find(x => x.ticker === ticker);
-    selectStock(ticker, s ? s.name : '');
+    selectStock(ticker, s ? s.name : '', s ? s.exchange : 'NSE');
     if (ticker === 'NIFTY_BEES') setMode('fno');
   }
 
   // ── Trigger from sidebar button ──────────────────────────────
   function triggerDiagnose() {
-    if (!currentTicker) { showToast('Please select a stock first.'); return; }
+    if (!currentTicker && !document.getElementById('sd-search').value.trim()) {
+      showToast('Please select a stock first.');
+      return;
+    }
     diagnoseStock();
   }
 
   // ── Main Diagnose ────────────────────────────────────────────
   async function diagnoseStock() {
-    const ticker = currentTicker || document.getElementById('sd-search').value.trim().split('—')[0].trim().toUpperCase();
-    if (!ticker) { showToast('Please select or type a stock ticker.'); return; }
-    currentTicker = ticker;
+    let inputVal = document.getElementById('sd-search').value.trim();
+    if (inputVal.includes('—')) inputVal = inputVal.split('—')[0].trim();
+    if (inputVal.includes('-')) inputVal = inputVal.split('-')[0].trim();
+
+    const ticker = currentTicker || inputVal.toUpperCase();
+    if (!ticker) {
+      showToast('Please select or type a stock ticker (e.g. INOXWIND, RELIANCE).');
+      return;
+    }
+
+    // Hide dropdown while diagnosing
+    document.getElementById('sd-dropdown').classList.add('hidden');
 
     const loading = document.getElementById('sd-loading');
     loading.style.display = 'flex';
@@ -899,10 +1013,15 @@
       const resp = await fetch('/api/stock-doctor/diagnose', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticker, exchange: 'NSE', mode: currentMode })
+        body: JSON.stringify({ ticker, exchange: currentExchange || 'NSE', mode: currentMode })
       });
       const data = await resp.json();
       if (data.status !== 'SUCCESS') throw new Error(data.error || 'Diagnosis failed');
+
+      currentTicker = data.ticker;
+      if (data.companyName) {
+        document.getElementById('sd-search').value = `${data.ticker} — ${data.companyName}`;
+      }
       currentDiagnosis = data;
       renderDiagnosis(data);
       saveToHistory(data);

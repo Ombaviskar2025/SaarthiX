@@ -141,7 +141,17 @@ const STOCKS_DB = [
   { ticker:'TITAN',      name:'Titan Company Ltd.',            exchange:'NSE', sector:'Consumer',      price:4632.00,  change:28.45,   changePct:0.84,  volume:987654,   mktCap:'3.0L Cr',  pe:92.4, high52:3887.00,  low52:3054.35 },
   { ticker:'HDFCLIFE',   name:'HDFC Life Insurance Co.',       exchange:'NSE', sector:'Insurance',     price:564.00,   change:4.80,    changePct:0.67,  volume:2345678,  mktCap:'1.6L Cr',  pe:82.4, high52:791.90,   low52:511.40  },
   { ticker:'SBILIFE',    name:'SBI Life Insurance Co.',        exchange:'NSE', sector:'Insurance',     price:1828.80,  change:8.90,    changePct:0.55,  volume:1234567,  mktCap:'1.6L Cr',  pe:64.2, high52:1921.85,  low52:1199.00 },
-  { ticker:'UPL',        name:'UPL Ltd.',                      exchange:'NSE', sector:'Agro Chem',     price:614.20,   change:-4.20,   changePct:-0.80, volume:3456789,  mktCap:'0.4L Cr',  pe:28.4, high52:660.15,   low52:378.85  }
+  { ticker:'UPL',        name:'UPL Ltd.',                      exchange:'NSE', sector:'Agro Chem',     price:614.20,   change:-4.20,   changePct:-0.80, volume:3456789,  mktCap:'0.4L Cr',  pe:28.4, high52:660.15,   low52:378.85  },
+
+  // High-Growth & Popular Midcaps / Clean Energy
+  { ticker:'INOXWIND',   name:'Inox Wind Limited',             exchange:'NSE', sector:'Clean Energy',  price:66.65,    change:1.45,    changePct:2.22,  volume:34500000, mktCap:'0.87L Cr', pe:42.5, high52:159.30,  low52:62.43   },
+  { ticker:'SUZLON',     name:'Suzlon Energy Ltd.',            exchange:'NSE', sector:'Clean Energy',  price:58.20,    change:1.20,    changePct:2.11,  volume:62000000, mktCap:'0.79L Cr', pe:38.2, high52:86.00,   low52:37.50   },
+  { ticker:'ZOMATO',     name:'Zomato Limited',                exchange:'NSE', sector:'Internet/Tech', price:245.80,   change:4.50,    changePct:1.86,  volume:45000000, mktCap:'2.18L Cr', pe:115.0,high52:298.00,  low52:150.00  },
+  { ticker:'IREDA',      name:'Indian Renewable Energy Dev',   exchange:'NSE', sector:'Finance/Energy',price:188.50,   change:3.80,    changePct:2.06,  volume:28000000, mktCap:'0.51L Cr', pe:35.8, high52:310.00,  low52:135.00  },
+  { ticker:'CDSL',       name:'Central Depository Services Ltd',exchange:'NSE',sector:'Finance/Market',price:1520.00,  change:22.50,   changePct:1.50,  volume:4200000,  mktCap:'0.32L Cr', pe:52.0, high52:1900.00,  low52:950.00  },
+  { ticker:'PAYTM',      name:'One97 Communications Ltd',      exchange:'NSE', sector:'Fintech',       price:810.00,   change:15.00,   changePct:1.89,  volume:12000000, mktCap:'0.52L Cr', pe:-45.0,high52:1050.00,  low52:310.00  },
+  { ticker:'TATAPOWER',  name:'Tata Power Co. Ltd.',           exchange:'NSE', sector:'Power',         price:412.50,   change:5.20,    changePct:1.28,  volume:16000000, mktCap:'1.32L Cr', pe:32.4, high52:494.85,  low52:325.00  },
+  { ticker:'POLICYBZR',  name:'PB Fintech Limited',            exchange:'NSE', sector:'Fintech',       price:1720.00,  change:28.00,   changePct:1.65,  volume:3100000,  mktCap:'0.78L Cr', pe:85.0, high52:1950.00,  low52:980.00  }
 ];
 
 // Search helper across all stocks with priority sorting (exact ticker matches first)
