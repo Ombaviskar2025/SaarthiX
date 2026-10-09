@@ -838,18 +838,20 @@ function runPortfolioDiagnosis(holdingsList = null) {
   const diagnosedHoldings = [];
 
   holdings.forEach(h => {
-    const stockInfo = (window.LIVE_STOCKS || STOCKS_DB).find(s => s.ticker === h.ticker) || {
+    const buyP = h.price !== undefined ? h.price : (h.buyPrice !== undefined ? h.buyPrice : 100);
+    const dbMatch = (window.LIVE_STOCKS || (typeof STOCKS_DB !== 'undefined' ? STOCKS_DB : [])).find(s => s.ticker === h.ticker);
+    const stockInfo = dbMatch || {
       ticker: h.ticker,
-      name: h.ticker,
-      sector: 'Diversified',
-      price: h.buyPrice || 100,
-      changePct: 0,
-      pe: 25,
-      high52: (h.buyPrice || 100) * 1.2,
-      low52: (h.buyPrice || 100) * 0.8
+      name: h.name || h.ticker,
+      sector: h.sector || 'Diversified',
+      price: h.ltp || buyP,
+      changePct: h.changePct || 0,
+      pe: h.pe || 25,
+      high52: h.high52 || (buyP * 1.2),
+      low52: h.low52 || (buyP * 0.8)
     };
 
-    const currentPrice = stockInfo.price || h.buyPrice;
+    const currentPrice = h.ltp || stockInfo.price || buyP;
     const val = currentPrice * h.qty;
     totalPortfolioValue += val;
 
@@ -858,8 +860,8 @@ function runPortfolioDiagnosis(holdingsList = null) {
       ...h,
       ...diag,
       currentValue: val,
-      gainLoss: (currentPrice - h.buyPrice) * h.qty,
-      gainLossPct: ((currentPrice - h.buyPrice) / h.buyPrice) * 100
+      gainLoss: (currentPrice - buyP) * h.qty,
+      gainLossPct: buyP > 0 ? ((currentPrice - buyP) / buyP) * 100 : 0
     });
   });
 

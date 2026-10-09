@@ -83,22 +83,34 @@ Using the user's actual holding parameters (`symbol`, `exchange`, `qty`, `avgBuy
 - **Live Averaging Calculator**: Dynamically computes the new average buy price, total position size, and required capital for extra quantities.
 - **Budget 2024 Capital Gains Tax**: Accurately computes STCG (20%) or LTCG (12.5% above ₹1.25L exemption threshold).
 
-### 3. Deploying to Vercel
+### 3. Serverless API Endpoints (/api)
+
+All external market endpoints are proxied through Vercel Serverless Functions in `/api` to avoid browser CORS blocks, protect API credentials, and provide in-memory edge caching:
+
+| Endpoint | Method | Description | Cache TTL |
+|---|---|---|---|
+| `/api/quote?symbols=A,B` | GET | Real-time LTP, Day High/Low, 52W High/Low, Prev Close, Volume, Market State | 15–30s |
+| `/api/candles?symbol=&range=&interval=` | GET | Historical 1M/6M/1Y/2Y daily & weekly OHLCV candlestick records | 10 min |
+| `/api/indices` | GET | Live SENSEX, NIFTY 50, Bank Nifty, and IST trading hours status | 20s |
+| `/api/fundamentals?symbol=` | GET | Sector, Industry, P/E, P/B, EPS, ROE, Debt/Equity, Beta | 24 hours |
+| `/api/news?query=` | GET | Live Google News India RSS headlines with finance keyword sentiment analysis | 10 min |
+| `/api/mf/search` & `/api/mf/nav` | GET | AMFI Mutual Fund search & historical NAV with 1Y/3Y/5Y CAGR returns | 1 hour |
+| `/api/ai-analysis` | POST | Claude 3 / Quantitative AI institutional thesis without price hallucinations | Real-time |
+
+### 4. Deploying to Vercel
 
 The project is pre-configured for seamless deployment to Vercel via `vercel.json`:
 
 1. **Push to GitHub**:
    ```bash
    git add .
-   git commit -m "feat: Add Stock Signal Studio with Lightweight Charts and quant engine"
+   git commit -m "feat: Add institutional real-time market proxy APIs and quant portfolio engine"
    git push origin main
    ```
 2. **Import into Vercel**:
    - Link your GitHub repository in the [Vercel Dashboard](https://vercel.com).
    - Set Framework Preset to **Other** (Root directory `./`).
-3. **Serverless Functions**:
-   - `/api/history.js` executes as a serverless Node.js function on Vercel, proxying historical data from Yahoo Finance with 5-minute caching (`Cache-Control: s-maxage=300`).
-   - All client static files and scripts in `/js` (`indicators.js`, `signal.js`, `position.js`, `charts.js`, `backtest.js`) are served directly.
-4. **Live Verification**:
-   - Visit `https://your-deployment.vercel.app/portfolio.html`. INOXWIND and all user positions will render live interactive charts, overlays, signals, and backtest results.
+   - Add optional API keys in **Project Settings → Environment Variables** (`TWELVEDATA_API_KEY`, `ANTHROPIC_API_KEY`, etc.).
+3. **Live Verification**:
+   - Visit `https://your-deployment.vercel.app/portfolio.html`. All positions render live interactive charts, overlays, signals, and tax optimization metrics.
 

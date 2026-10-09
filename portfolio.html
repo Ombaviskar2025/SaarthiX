@@ -96,8 +96,8 @@
     button.bg-white\\/\\[0\\.04\\]:hover, button.bg-white\\/5:hover { background: #E5E7EB !important; }
     .bg-primary-container { background: #EEF2FF !important; border: 1px solid #E0E7FF !important; }
     .text-on-primary-container { color: var(--c-primary) !important; }
-    .compliance-pill { background: #EEF2FF !important; border-color: #E0E7FF !important; color: var(--c-primary) !important; }
-    #deck-pnl-badge { background: #EEF2FF !important; color: var(--c-primary) !important; border-color: transparent !important; }
+    .compliance-pill { background: rgba(77, 142, 255, 0.12) !important; border: 1px solid rgba(77, 142, 255, 0.28) !important; color: #adc6ff !important; }
+    #deck-pnl-badge { background: rgba(78, 222, 163, 0.12) !important; color: #4edea3 !important; border-color: rgba(78, 222, 163, 0.25) !important; }
     
     /* Cards & Holding Decks */
     .holding-card { background: var(--c-card) !important; border: 1px solid var(--c-border) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; color: var(--c-text) !important; }
@@ -249,16 +249,22 @@
         <div class="flex items-center gap-3 font-mono text-xs border-r border-white/10 pr-3">
           <span class="flex items-center gap-1">
             <span class="text-on-surface-variant/60 text-[10px]">SENSEX</span>
-            <span id="hdr-sensex" class="text-secondary font-bold">71,909.70 ↗</span>
+            <span id="hdr-sensex" class="text-secondary font-bold">72,472.33 ↗</span>
           </span>
           <span class="flex items-center gap-1">
             <span class="text-on-surface-variant/60 text-[10px]">NIFTY</span>
-            <span id="hdr-nifty" class="text-secondary font-bold">22,421.95 ↗</span>
+            <span id="hdr-nifty" class="text-secondary font-bold">22,520.45 ↗</span>
           </span>
         </div>
 
+        <!-- Live Market Status Pill -->
+        <div id="hdr-market-status-pill" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/15 border border-secondary/30 text-secondary text-xs font-mono font-medium">
+          <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+          <span id="hdr-market-status-text">NSE/BSE LIVE</span>
+        </div>
+
         <!-- Compliance Pill -->
-        <button onclick="window.openComplianceModal ? window.openComplianceModal() : alert('SaarthiX adheres to SEBI RA principles. Educational simulation.')" class="compliance-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs hover:bg-primary/20 transition-all">
+        <button onclick="window.openComplianceModal ? window.openComplianceModal() : alert('SaarthiX adheres to SEBI RA principles. Educational simulation.')" class="compliance-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs hover:opacity-90 transition-all">
           <span class="material-symbols-outlined text-[14px]">gavel</span>
           <span>Compliance</span>
         </button>
@@ -479,14 +485,14 @@
             <div class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1" id="pie-legend"></div>
           </div>
 
-          <!-- Tax Estimate Cards (FY26 Indian Tax Rules) -->
+          <!-- Tax Estimate Cards (Current Indian Tax Rules: Budget 2024 / FY 2024-25 & FY 2025-26) -->
           <div class="lg:col-span-2 glass-panel rounded-2xl p-6 flex flex-col justify-between gap-4">
             <div>
               <h4 class="font-bold text-white text-base mb-1 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-[20px]">receipt_long</span>
-                <span>Tax Optimization Estimate (India FY26)</span>
+                <span>Tax Optimization Estimate (India FY 2024-25 / FY 2025-26)</span>
               </h4>
-              <p class="text-xs text-on-surface-variant">Simulated under latest budget rules: STCG @ 20%, LTCG @ 12.5% above ₹1.25 Lakh exemption limit.</p>
+              <p class="text-xs text-on-surface-variant">Evaluated per-holding based on actual purchase date: STCG (&lt;12 months) @ flat 20% (Sec 111A); LTCG (≥12 months) @ 12.5% (Sec 112A) on gains above ₹1.25 Lakh exemption threshold (plus 4% applicable cess).</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -519,12 +525,13 @@
                 <tr class="border-b border-white/10 font-mono text-on-surface-variant uppercase">
                   <th class="pb-3">Stock</th>
                   <th class="pb-3">Exchange</th>
+                  <th class="pb-3">Buy Date</th>
                   <th class="pb-3 text-right">Qty</th>
                   <th class="pb-3 text-right">Avg Buy Price</th>
                   <th class="pb-3 text-right">LTP (₹)</th>
                   <th class="pb-3 text-right">Current Value</th>
                   <th class="pb-3 text-right">P&amp;L (₹ / %)</th>
-                  <th class="pb-3 text-right">Weight</th>
+                  <th class="pb-3 text-right">Weight / Signal</th>
                 </tr>
               </thead>
               <tbody id="holdings-body" class="divide-y divide-white/5 font-mono"></tbody>
@@ -933,6 +940,18 @@
             </div>
           </div>
 
+          <!-- Purchase / Buy Date -->
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <label style="font-size:0.73rem;font-weight:600;color:rgba(180,195,230,0.65);letter-spacing:0.04em;text-transform:uppercase;">Buy Date (For STCG / LTCG Taxation)</label>
+            <div style="position:relative;">
+              <span class="material-symbols-outlined" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:rgba(77,142,255,0.65);font-size:16px;pointer-events:none;">calendar_today</span>
+              <input id="modal-date-input" type="date"
+                style="width:100%;background:rgba(9,13,22,0.80);border:1px solid rgba(255,255,255,0.09);border-radius:12px;color:#dfe2ef;font-size:0.88rem;padding:11px 12px 11px 34px;font-family:inherit;transition:border-color 0.2s,box-shadow 0.2s;box-sizing:border-box;"
+                onfocus="this.style.borderColor='rgba(77,142,255,0.55)';this.style.boxShadow='0 0 0 3px rgba(77,142,255,0.12)';"
+                onblur="this.style.borderColor='rgba(255,255,255,0.09)';this.style.boxShadow='none';"/>
+            </div>
+          </div>
+
           <!-- Live Estimated Value pill -->
           <div id="modal-estimate-bar" style="background:linear-gradient(135deg,rgba(16,201,144,0.08),rgba(77,142,255,0.08));border:1px solid rgba(16,201,144,0.20);border-radius:12px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
             <div style="display:flex;align-items:center;gap:8px;">
@@ -1054,6 +1073,7 @@
         name: 'Inox Wind Limited',
         sector: 'CLEAN ENERGY',
         exchange: 'NSE',
+        buyDate: '2024-05-10',
         qty: 10,
         price: 50.00,
         ltp: 66.65,
@@ -1065,6 +1085,7 @@
         name: 'Zensar Technologies Ltd',
         sector: 'IT SERVICES',
         exchange: 'NSE',
+        buyDate: '2023-02-14',
         qty: 150,
         price: 200.00,
         ltp: 810.40,
@@ -1076,6 +1097,7 @@
         name: 'Tata Motors Limited',
         sector: 'AUTOMOBILE',
         exchange: 'NSE',
+        buyDate: '2023-08-20',
         qty: 75,
         price: 620.50,
         ltp: 985.00,
@@ -1087,6 +1109,7 @@
         name: 'HDFC Bank Ltd',
         sector: 'PRIVATE BANK',
         exchange: 'NSE',
+        buyDate: '2024-06-15',
         qty: 50,
         price: 1420.00,
         ltp: 1640.00,
@@ -1128,6 +1151,7 @@
               name: h.name || h.ticker || 'Company',
               sector: h.sector || 'EQUITIES',
               exchange: h.exchange || 'NSE',
+              buyDate: h.buyDate || '2024-01-15',
               qty: parseFloat(h.qty) || 1,
               price: parseFloat(h.price) || 100,
               ltp: parseFloat(h.ltp) || parseFloat(h.price) || 100,
@@ -1140,6 +1164,7 @@
                 name: 'Inox Wind Limited',
                 sector: 'CLEAN ENERGY',
                 exchange: 'NSE',
+                buyDate: '2024-05-10',
                 qty: 10,
                 price: 50.00,
                 ltp: 66.65,
@@ -1210,6 +1235,9 @@
                   <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-secondary/10 text-secondary border border-secondary/20 flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
                     <span>${h.exchange || 'NSE'} Auto</span>
+                  </span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${(h.buyDate && ((Date.now() - new Date(h.buyDate).getTime()) / 86400000) >= 365) ? 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20' : 'bg-amber-400/10 text-amber-300 border-amber-400/20'}">
+                    ${h.buyDate || '—'} · ${(h.buyDate && ((Date.now() - new Date(h.buyDate).getTime()) / 86400000) >= 365) ? 'LTCG' : 'STCG'}
                   </span>
                   <span id="deck-sig-badge-${h.ticker}" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/5 text-white/50 border border-white/10">ANALYZING...</span>
                   <span class="text-xs font-mono font-bold text-white flex items-center gap-1">
@@ -1502,20 +1530,23 @@
         existing.qty += 10;
       } else {
         holdingIdCounter++;
+        const todayStr = new Date().toISOString().split('T')[0];
         currentHoldings.push({
           id: holdingIdCounter,
           ticker,
           name,
           sector,
           exchange: 'NSE',
+          buyDate: todayStr,
           qty: 10,
           price: price,
-          ltp: price * (1 + (Math.random() * 0.04 - 0.02)),
-          changePct: parseFloat((Math.random() * 3 - 0.5).toFixed(2))
+          ltp: price,
+          changePct: 0.0
         });
       }
       saveHoldings();
       renderHoldingsDeck();
+      refreshAllHoldingsPrices();
     }
 
     // ── Universal Add Stock Modal & Live Search Autocomplete ──────
@@ -1640,11 +1671,12 @@
       const sector = document.getElementById('modal-sector-input')?.value || 'EQUITIES';
       const qty = parseFloat(document.getElementById('modal-qty-input')?.value) || 10;
       const price = parseFloat(document.getElementById('modal-price-input')?.value) || 100;
+      const buyDate = document.getElementById('modal-date-input')?.value || new Date().toISOString().split('T')[0];
 
       // Find company name if exists in STOCKS_DB
       const dbStock = (window.STOCKS_DB || []).find(s => s.ticker === ticker);
       const name = dbStock ? dbStock.name : ticker;
-      const ltp = dbStock ? dbStock.price : (price * 1.02);
+      const ltp = dbStock ? dbStock.price : price;
 
       holdingIdCounter++;
       currentHoldings.push({
@@ -1653,15 +1685,17 @@
         name,
         sector: sector.toUpperCase(),
         exchange: ex,
+        buyDate,
         qty,
         price,
         ltp,
-        changePct: dbStock ? dbStock.changePct : 1.25
+        changePct: dbStock ? dbStock.changePct : 0.0
       });
 
       saveHoldings();
       renderHoldingsDeck();
       closeAddStockModal();
+      refreshAllHoldingsPrices();
     }
 
     // ── Smart Quick Paste ─────────────────────────────────────────
@@ -1790,22 +1824,45 @@
       const tickers = currentHoldings.map(h => h.ticker).join(',');
 
       try {
-        const res = await fetch(`/api/ltp?symbols=${encodeURIComponent(tickers)}`);
+        const res = await fetch(`/api/quote?symbols=${encodeURIComponent(tickers)}`);
         if (res.ok) {
           const data = await res.json();
-          if (data && data.prices) {
+          if (data && data.quotes) {
             currentHoldings.forEach(h => {
-              if (data.prices[h.ticker]) {
-                h.ltp = data.prices[h.ticker].price;
-                h.changePct = data.prices[h.ticker].changePct;
+              const q = data.quotes[h.ticker];
+              if (q && q.ltp) {
+                h.ltp = q.ltp;
+                h.changePct = q.changePct;
+                if (q.dayHigh) h.dayHigh = q.dayHigh;
+                if (q.dayLow) h.dayLow = q.dayLow;
+                if (q.fiftyTwoWeekHigh) h.high52 = q.fiftyTwoWeekHigh;
+                if (q.fiftyTwoWeekLow) h.low52 = q.fiftyTwoWeekLow;
               }
             });
             saveHoldings();
             renderHoldingsDeck();
+            recalcOverviewMetrics();
+          }
+        } else {
+          // Fallback to legacy LTP
+          const ltpRes = await fetch(`/api/ltp?symbols=${encodeURIComponent(tickers)}`);
+          if (ltpRes.ok) {
+            const data = await ltpRes.json();
+            if (data && data.prices) {
+              currentHoldings.forEach(h => {
+                if (data.prices[h.ticker]) {
+                  h.ltp = data.prices[h.ticker].price;
+                  h.changePct = data.prices[h.ticker].changePct;
+                }
+              });
+              saveHoldings();
+              renderHoldingsDeck();
+              recalcOverviewMetrics();
+            }
           }
         }
       } catch (e) {
-        console.warn('LTP sync failed:', e.message);
+        console.warn('Real-time quote sync failed:', e.message);
       }
       
       const stamp = document.getElementById('header-last-refreshed');
@@ -1813,6 +1870,29 @@
         const ist = new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
         stamp.textContent = `Last refreshed: ${ist} IST`;
       }
+    }
+
+    async function syncHoldingsFundamentals() {
+      for (const h of currentHoldings) {
+        if (!h.fundamentalsLoaded) {
+          try {
+            const res = await fetch(`/api/fundamentals?symbol=${encodeURIComponent(h.ticker)}`);
+            if (res.ok) {
+              const fund = await res.json();
+              if (fund.sector && fund.sector !== 'Diversified' && fund.sector !== 'EQUITIES') {
+                h.sector = fund.sector.toUpperCase();
+              }
+              if (fund.beta) h.beta = fund.beta;
+              if (fund.pe) h.pe = fund.pe;
+              h.fundamentalsLoaded = true;
+            }
+          } catch (e) {
+            // quiet fallback
+          }
+        }
+      }
+      saveHoldings();
+      recalcOverviewMetrics();
     }
 
     // ── Deep Quantitative Analysis Execution ──────────────────────
@@ -1824,10 +1904,17 @@
 
       document.getElementById('loading-overlay').style.display = 'flex';
       try {
-        const res = await fetch('/api/ai-insights', {
+        const res = await fetch('/api/ai-analysis', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ holdings: currentHoldings })
+          body: JSON.stringify({
+            symbol: studioState.selectedTicker || currentHoldings[0].ticker,
+            currentPrice: currentHoldings[0].ltp || currentHoldings[0].price,
+            indicators: studioState.indicators,
+            signal: studioState.signal,
+            position: currentHoldings[0],
+            allHoldings: currentHoldings
+          })
         });
         const data = await res.json();
 
@@ -1853,7 +1940,12 @@
     function renderResultsAnalysis(holdings, aiData) {
       let totalInvested = 0;
       let totalValue = 0;
+      let totalSTCGGains = 0;
+      let totalSTCGLosses = 0;
+      let totalLTCGGains = 0;
+      let totalLTCGLosses = 0;
 
+      const nowTime = Date.now();
       const enriched = holdings.map((h, i) => {
         const cost = h.qty * h.price;
         const val = h.qty * (h.ltp || h.price);
@@ -1861,19 +1953,37 @@
         const pnlPct = cost > 0 ? ((pnl / cost) * 100).toFixed(2) : '0.00';
         totalInvested += cost;
         totalValue += val;
-        return { ...h, cost, val, pnl, pnlPct };
+
+        const buyTs = h.buyDate ? new Date(h.buyDate).getTime() : (nowTime - 180 * 86400000);
+        const daysHeld = Math.max(0, Math.floor((nowTime - buyTs) / 86400000));
+        const isLTCG = daysHeld >= 365;
+
+        if (isLTCG) {
+          if (pnl > 0) totalLTCGGains += pnl;
+          else totalLTCGLosses += Math.abs(pnl);
+        } else {
+          if (pnl > 0) totalSTCGGains += pnl;
+          else totalSTCGLosses += Math.abs(pnl);
+        }
+
+        return { ...h, cost, val, pnl, pnlPct, daysHeld, isLTCG };
       });
 
-      const totalPnl = totalValue - totalInvested;
-      const gainsPnl = enriched.filter(h => h.pnl > 0).reduce((s, h) => s + h.pnl, 0);
-      const stcg = gainsPnl * 0.20;
-      const ltcg = Math.max(0, (gainsPnl - 125000)) * 0.125;
+      // Union Budget 2024 / FY 2024-25 & FY 2025-26 Indian Tax Code:
+      // STCG: 20% flat under Section 111A (losses can offset STCG gains)
+      // LTCG: 12.5% under Section 112A on aggregate net gains above ₹1,25,000 exemption limit
+      const netSTCG = Math.max(0, totalSTCGGains - totalSTCGLosses);
+      const stcgTax = netSTCG * 0.20;
 
-      // Tax values
+      const netLTCG = Math.max(0, totalLTCGGains - totalLTCGLosses);
+      const taxableLTCG = Math.max(0, netLTCG - 125000);
+      const ltcgTax = taxableLTCG * 0.125;
+
+      // Tax values in UI
       const stcgEl = document.getElementById('tax-stcg-amount');
-      if (stcgEl) stcgEl.textContent = fmtINR(stcg);
+      if (stcgEl) stcgEl.textContent = fmtINR(stcgTax);
       const ltcgEl = document.getElementById('tax-ltcg-amount');
-      if (ltcgEl) ltcgEl.textContent = fmtINR(ltcg);
+      if (ltcgEl) ltcgEl.textContent = fmtINR(ltcgTax);
 
       // Pie chart
       const canvas = document.getElementById('pie-canvas');
@@ -1918,17 +2028,26 @@
         }
       }
 
-      // Detailed Table
+      // Detailed Table with Buy Date & Tenure Pill
       const tb = document.getElementById('holdings-body');
       if (tb) {
         tb.innerHTML = enriched.map(h => {
           const isGain = h.pnl >= 0;
           const sign = isGain ? '+' : '';
           const w = totalValue > 0 ? ((h.val / totalValue) * 100).toFixed(1) : '0.0';
+          const tenureTag = h.isLTCG ? 'LTCG (≥12M)' : 'STCG (<12M)';
+          const tenureCls = h.isLTCG ? 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20' : 'bg-amber-400/10 text-amber-300 border-amber-400/20';
+
           return `
             <tr class="hover:bg-white/[0.02] transition-colors">
               <td class="py-3 font-bold text-white">${h.ticker} <span class="text-white/40 text-[10px] font-normal">(${h.name})</span></td>
               <td class="py-3 text-on-surface-variant font-mono">${h.exchange}</td>
+              <td class="py-3 text-on-surface-variant font-mono text-[11px]">
+                <div class="flex items-center gap-1.5">
+                  <span>${h.buyDate || '—'}</span>
+                  <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border ${tenureCls}">${tenureTag}</span>
+                </div>
+              </td>
               <td class="py-3 text-right text-white">${h.qty}</td>
               <td class="py-3 text-right text-white">₹${fmtPrice(h.price)}</td>
               <td class="py-3 text-right text-white">₹${fmtPrice(h.ltp)}</td>
@@ -1945,33 +2064,48 @@
         }).join('');
       }
 
-      // Insights
+      // Actionable Insights: Tax-Loss Harvesting + Sharpe & Beta
       const insightsList = document.getElementById('ai-insights-list');
       if (insightsList) {
+        let harvestText = '';
+        if (totalSTCGLosses > 0) {
+          const lossTickers = enriched.filter(h => !h.isLTCG && h.pnl < 0).map(h => h.ticker).join(', ');
+          const potentialSavings = totalSTCGLosses * 0.20;
+          harvestText = `You have ${fmtINR(totalSTCGLosses)} in harvestable short-term losses across ${lossTickers}. Realizing these before financial quarter-end can offset taxable STCG gains, saving up to ${fmtINR(potentialSavings)} in direct capital gains tax liability under Section 111A.`;
+        } else {
+          harvestText = `All your active holdings are in positive territory (${fmtINR(Math.max(0, totalValue - totalInvested))} net gain). No loss positions require tax-loss harvesting offsets for the current quarter.`;
+        }
+
         const secInfo = (typeof PositionAdvisor !== 'undefined' && PositionAdvisor.getPortfolioSectorInsight)
           ? PositionAdvisor.getPortfolioSectorInsight(enriched)
           : { topSector: 'EQUITIES', topSectorCount: enriched.length, topSectorPct: 100, itCount: 0 };
 
         const sectorText = secInfo.itCount > 0
           ? `Your IT allocation (${secInfo.itCount} positions) benefits from dollar depreciation and software demand tailwinds.`
-          : `Your top allocation in ${secInfo.topSector} (${secInfo.topSectorCount} positions, ${secInfo.topSectorPct}% of portfolio) drives core performance with balanced risk.`;
+          : `Your top allocation in ${secInfo.topSector} (${secInfo.topSectorCount} positions, ${secInfo.topSectorPct}% of portfolio) drives core compounding performance with defensive risk posture.`;
 
         insightsList.innerHTML = `
           <div class="flex items-start gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/10 text-xs">
             <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
             <div>
               <strong class="text-white">Active Tax Loss Harvesting Window:</strong>
-              <p class="text-on-surface-variant/80 mt-0.5">Offset short-term gains against available unabsorbed capital losses before the financial quarter close.</p>
+              <p class="text-on-surface-variant/80 mt-0.5 leading-relaxed">${harvestText}</p>
             </div>
           </div>
           <div class="flex items-start gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/10 text-xs">
             <span class="material-symbols-outlined text-secondary text-[18px]">insights</span>
             <div>
               <strong class="text-white">Sharpe &amp; Beta Alignment:</strong>
-              <p class="text-on-surface-variant/80 mt-0.5">${sectorText}</p>
+              <p class="text-on-surface-variant/80 mt-0.5 leading-relaxed">${sectorText}</p>
             </div>
           </div>
         `;
+      }
+
+      // Automatically run & render Portfolio Doctor UI
+      if (typeof runPortfolioDiagnosis === 'function') {
+        const diag = runPortfolioDiagnosis(currentHoldings);
+        renderPortfolioDoctorUI(diag);
       }
 
       const resSec = document.getElementById('results-section');
@@ -2013,13 +2147,16 @@
       const weakestList = document.getElementById('weakest-holdings-list');
       if (weakestList && diag.weakestHoldings) {
         weakestList.innerHTML = diag.weakestHoldings.map((wh, idx) => `
-          <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between text-xs font-mono">
-            <div class="flex items-center gap-2">
-              <span class="w-5 h-5 rounded-full bg-error/20 text-error font-bold flex items-center justify-center text-[10px]">#${idx+1}</span>
-              <span class="font-bold text-white">${wh.ticker}</span>
-              <span class="text-on-surface-variant text-[11px]">(${wh.verdict})</span>
+          <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col gap-1.5 text-xs font-mono">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-error/20 text-error font-bold flex items-center justify-center text-[10px]">#${idx+1}</span>
+                <span class="font-bold text-white">${wh.ticker}</span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${wh.overallScore < 50 ? 'bg-error/15 text-error border-error/25' : 'bg-amber-400/15 text-amber-300 border-amber-400/25'}">(${wh.verdict})</span>
+              </div>
+              <span class="text-on-surface-variant font-bold">${wh.overallScore}/100</span>
             </div>
-            <span class="text-on-surface-variant font-bold">${wh.overallScore}/100</span>
+            <p class="text-[11px] text-on-surface-variant/80 font-sans leading-relaxed">${wh.reason || 'Underperforming relative to index beta; monitor key moving average support.'}</p>
           </div>
         `).join('');
       }
@@ -2188,7 +2325,10 @@
 
         if (!data) {
           const ltpParam = holding.ltp || holding.price || 0;
-          const res = await fetch(`/api/history?symbol=${encodeURIComponent(ticker)}&exchange=${encodeURIComponent(holding.exchange || 'NSE')}&interval=${studioState.interval}&range=2y&ltp=${encodeURIComponent(ltpParam)}`);
+          let res = await fetch(`/api/candles?symbol=${encodeURIComponent(ticker)}&range=${encodeURIComponent(studioState.range)}&interval=${encodeURIComponent(studioState.interval)}`);
+          if (!res.ok) {
+            res = await fetch(`/api/history?symbol=${encodeURIComponent(ticker)}&exchange=${encodeURIComponent(holding.exchange || 'NSE')}&interval=${studioState.interval}&range=2y&ltp=${encodeURIComponent(ltpParam)}`);
+          }
           if (!res.ok) {
             throw new Error(`Data feed HTTP ${res.status}`);
           }
@@ -2471,7 +2611,10 @@
           const cacheKey = `${h.ticker}_${h.exchange || 'NSE'}_1d`;
           let data = studioState.cache[cacheKey];
           if (!data) {
-            const res = await fetch(`/api/history?symbol=${encodeURIComponent(h.ticker)}&exchange=${encodeURIComponent(h.exchange || 'NSE')}&interval=1d&range=60d`);
+            let res = await fetch(`/api/candles?symbol=${encodeURIComponent(h.ticker)}&range=60d&interval=1d`);
+            if (!res.ok) {
+              res = await fetch(`/api/history?symbol=${encodeURIComponent(h.ticker)}&exchange=${encodeURIComponent(h.exchange || 'NSE')}&interval=1d&range=60d`);
+            }
             if (res.ok) {
               data = await res.json();
               studioState.cache[cacheKey] = data;
@@ -2513,12 +2656,43 @@
       el.textContent = ist + ' IST';
     }
 
-    function updateHeaderIndices() {
-      if (window.LIVE_INDICES) {
-        const s = LIVE_INDICES.sensex, n = LIVE_INDICES.nifty50;
-        const se = document.getElementById('hdr-sensex'), ne = document.getElementById('hdr-nifty');
-        if (se && s) se.textContent = `${s.value.toLocaleString('en-IN', { minimumFractionDigits: 2 })} ↗`;
-        if (ne && n) ne.textContent = `${n.value.toLocaleString('en-IN', { minimumFractionDigits: 2 })} ↗`;
+    async function syncLiveMarketData() {
+      try {
+        const res = await fetch('/api/indices');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.indices) {
+            const s = data.indices.sensex;
+            const n = data.indices.nifty50;
+            const se = document.getElementById('hdr-sensex');
+            const ne = document.getElementById('hdr-nifty');
+            if (se && s) {
+              const sign = s.change >= 0 ? '↗' : '↘';
+              se.className = `font-bold ${s.change >= 0 ? 'text-secondary' : 'text-error'}`;
+              se.textContent = `${Number(s.value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${sign}`;
+            }
+            if (ne && n) {
+              const sign = n.change >= 0 ? '↗' : '↘';
+              ne.className = `font-bold ${n.change >= 0 ? 'text-secondary' : 'text-error'}`;
+              ne.textContent = `${Number(n.value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${sign}`;
+            }
+          }
+          if (data && data.marketStatus) {
+            const pill = document.getElementById('hdr-market-status-pill');
+            const txt = document.getElementById('hdr-market-status-text');
+            if (pill && txt) {
+              if (data.marketStatus.isOpen) {
+                pill.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/15 border border-secondary/30 text-secondary text-xs font-mono font-medium';
+                txt.textContent = '● NSE/BSE LIVE';
+              } else {
+                pill.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/70 text-xs font-mono font-medium';
+                txt.textContent = '● MARKET CLOSED';
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Indices sync error:', e.message);
       }
     }
 
@@ -2538,15 +2712,27 @@
       initStockSignalStudio();
       updateClock();
       setInterval(updateClock, 1000);
-      updateHeaderIndices();
 
       if (window.SaarthiI18n) {
         window.SaarthiI18n.renderLanguageSelector('portfolio-lang-container');
         window.SaarthiI18n.applyTranslations();
       }
 
-      // Check live quotes after 1 second
+      // Initial market sync & quotes
+      syncLiveMarketData();
       setTimeout(refreshAllHoldingsPrices, 800);
+      setTimeout(syncHoldingsFundamentals, 1600);
+
+      // Adaptive periodic polling: 20s during IST trading hours (Mon-Fri 09:15-15:30), 60s outside
+      const now = new Date();
+      const istHours = (now.getUTCHours() + 5.5) % 24;
+      const isMarketHours = istHours >= 9.25 && istHours <= 15.5 && now.getUTCDay() >= 1 && now.getUTCDay() <= 5;
+      const pollInterval = isMarketHours ? 20000 : 60000;
+
+      setInterval(() => {
+        syncLiveMarketData();
+        refreshAllHoldingsPrices();
+      }, pollInterval);
     });
   </script>
 </body>

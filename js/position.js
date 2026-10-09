@@ -17,6 +17,7 @@
    * Compute comprehensive position-aware action & metrics
    * @param {Object} holding { qty, price, ltp, ticker, exchange }
    * @param {Object} signalData result of SignalEngine.evaluateSignal
+   */
   function computePositionAdvice(holding, arg2, arg3, arg4) {
     // Gracefully handle both (holding, signalData, technicalData) and (holding, candles, technicalData, signalData)
     let signalData, technicalData;
@@ -160,9 +161,19 @@
     // ─────────────────────────────────────────────────────────────
     // STCG (held <12 months): flat 20%
     // LTCG (held >=12 months): 12.5% on gains exceeding Rs 1.25 Lakh
-    const isSTCG = true; // Conservative default: assume holding is in current financial year
+    let isSTCG = true;
+    let daysHeld = 180;
+    if (holding?.buyDate) {
+      try {
+        const buyTs = new Date(holding.buyDate).getTime();
+        daysHeld = Math.max(0, Math.floor((Date.now() - buyTs) / (1000 * 3600 * 24)));
+        isSTCG = daysHeld < 365;
+      } catch (e) {
+        isSTCG = true;
+      }
+    }
     let estimatedTax = 0;
-    let taxLabel = 'STCG (20%)';
+    let taxLabel = isSTCG ? 'STCG @ 20%' : 'LTCG @ 12.5%';
     let taxNote = '';
 
     if (unrealisedPnl > 0) {

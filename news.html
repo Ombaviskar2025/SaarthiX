@@ -298,17 +298,39 @@
       // 2. Show loading skeletons
       showNewsSkeletons();
 
-      // 3. Fetch live RapidAPI news from backend
+      // 3. Fetch live real-time RSS / Google News from backend
       try {
-        const response = await fetch('/api/market-news');
-        const data = await response.json();
-        if (data.status === 'SUCCESS' && Array.isArray(data.payload)) {
-          localNews = data.payload;
-        } else {
+        const response = await fetch('/api/news');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === 'SUCCESS' && Array.isArray(data.articles) && data.articles.length > 0) {
+            localNews = data.articles.map((a, idx) => ({
+              id: idx + 1,
+              headline: a.title,
+              summary: a.snippet || a.title,
+              category: a.source || 'NSE/BSE',
+              sentiment: a.sentiment ? (a.sentiment.charAt(0).toUpperCase() + a.sentiment.slice(1)) : 'Neutral',
+              time: a.publishedAgo || 'Recent',
+              tags: [a.source || 'Markets'],
+              ticker: a.symbol || null,
+              url: a.link || '#'
+            }));
+          }
+        }
+        if (!localNews || localNews.length === 0) {
+          const res2 = await fetch('/api/market-news');
+          if (res2.ok) {
+            const d2 = await res2.json();
+            if (d2.status === 'SUCCESS' && Array.isArray(d2.payload) && d2.payload.length > 0) {
+              localNews = d2.payload;
+            }
+          }
+        }
+        if (!localNews || localNews.length === 0) {
           loadMockNews();
         }
       } catch (err) {
-        console.error('Failed to fetch live news, falling back to static database:', err);
+        console.warn('News API fallback:', err.message);
         loadMockNews();
       }
 
