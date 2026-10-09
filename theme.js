@@ -125,12 +125,94 @@
     }
 
     updateToggleButtons(document.documentElement.getAttribute('data-theme') || initialTheme);
+    initSxUserAccount();
   }
 
+  // ── Unified User Account Management (Syncs sneha across all pages) ──
+  function initSxUserAccount() {
+    var rawName = '';
+    var rawEmail = '';
+    try {
+      rawName = localStorage.getItem('sx_user_name') || '';
+      rawEmail = localStorage.getItem('sx_user_email') || '';
+    } catch (e) {}
+
+    // Default fallback to 'Sneha Hosadodde' matching account from login
+    var fullName = rawName.trim() || 'Sneha Hosadodde';
+    var firstName = fullName.split(' ')[0] || 'Sneha';
+    var email = rawEmail.trim() || (firstName.toLowerCase() + '@gmail.com');
+
+    // Ensure it is stored consistently so every page shares it
+    try {
+      if (!rawName) localStorage.setItem('sx_user_name', fullName);
+      if (!rawEmail) localStorage.setItem('sx_user_email', email);
+    } catch (e) {}
+
+    var avatarUrl = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fullName) + '&background=4d8eff&color=fff&bold=true';
+
+    // 1. Update all avatar images
+    var avatarImgs = document.querySelectorAll('#user-avatar-img, .sx-user-avatar-img');
+    avatarImgs.forEach(function (img) {
+      img.src = avatarUrl;
+      img.alt = fullName;
+    });
+
+    // 2. Update user name badges in header
+    var avatarNames = document.querySelectorAll('#user-avatar-name, .sx-user-avatar-name');
+    avatarNames.forEach(function (el) {
+      el.textContent = firstName;
+    });
+
+    // 3. Update dropdown menu details
+    var menuUsernames = document.querySelectorAll('#dash-menu-username, .sx-menu-username');
+    menuUsernames.forEach(function (el) {
+      el.textContent = fullName;
+    });
+
+    var menuEmails = document.querySelectorAll('#dash-menu-email, .sx-menu-email');
+    menuEmails.forEach(function (el) {
+      el.textContent = email;
+    });
+  }
+
+  window.initSxUserAccount = initSxUserAccount;
+
+  window.toggleSxUserMenu = function (e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    var menu = document.getElementById('dash-user-menu');
+    if (menu) menu.classList.toggle('hidden');
+    var notif = document.getElementById('dash-notif-menu');
+    if (notif) notif.classList.add('hidden');
+  };
+  window.toggleDashUserMenu = window.toggleSxUserMenu;
+
+  window.logoutSxUser = function (e) {
+    if (e && e.preventDefault) e.preventDefault();
+    try {
+      localStorage.removeItem('sx_logged_in_phone');
+    } catch (err) {}
+    window.location.href = 'login.html';
+  };
+
+  // Close user dropdown menu when clicking anywhere outside
+  document.addEventListener('click', function (e) {
+    var userContainer = document.getElementById('dash-user-container');
+    var userMenu = document.getElementById('dash-user-menu');
+    if (userMenu && !userMenu.classList.contains('hidden')) {
+      if (userContainer && !userContainer.contains(e.target)) {
+        userMenu.classList.add('hidden');
+      }
+    }
+  });
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initToggleInDOM);
+    document.addEventListener('DOMContentLoaded', function () {
+      initToggleInDOM();
+      initSxUserAccount();
+    });
   } else {
     initToggleInDOM();
+    initSxUserAccount();
   }
 
   // Keyboard shortcut: Ctrl + Shift + D or Cmd + Shift + D
