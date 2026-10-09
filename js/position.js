@@ -17,14 +17,23 @@
    * Compute comprehensive position-aware action & metrics
    * @param {Object} holding { qty, price, ltp, ticker, exchange }
    * @param {Object} signalData result of SignalEngine.evaluateSignal
-   * @param {Object} technicalData result of IndicatorEngine.computeAllIndicators
-   * @returns {Object} Position Advice Package
-   */
-  function computePositionAdvice(holding, signalData, technicalData) {
-    const qty = parseFloat(holding.qty) || 1;
-    const avgPrice = parseFloat(holding.price) || 100;
-    const ltp = parseFloat(holding.ltp) || avgPrice;
-    const ticker = holding.ticker || 'STOCK';
+  function computePositionAdvice(holding, arg2, arg3, arg4) {
+    // Gracefully handle both (holding, signalData, technicalData) and (holding, candles, technicalData, signalData)
+    let signalData, technicalData;
+    if (arg4 !== undefined) {
+      // 4-arg signature: (holding, candles, technicalData, signalReport)
+      technicalData = arg3;
+      signalData = arg4;
+    } else {
+      // 3-arg signature: (holding, signalData, technicalData)
+      signalData = arg2;
+      technicalData = arg3;
+    }
+
+    const qty = parseFloat(holding?.qty) || 1;
+    const avgPrice = parseFloat(holding?.price) || 100;
+    const ltp = parseFloat(holding?.ltp) || avgPrice;
+    const ticker = holding?.ticker || 'STOCK';
 
     const cost = qty * avgPrice;
     const val = qty * ltp;
@@ -35,14 +44,14 @@
 
     // Technical Context
     const last = arr => (arr && arr.length ? arr[arr.length - 1] : null);
-    const indicators = technicalData?.indicators || {};
+    const indicators = technicalData?.indicators || (technicalData && !technicalData.candles ? technicalData : {});
     const atr = last(indicators.atr) || (ltp * 0.025);
     const ema21 = last(indicators.ema21) || ltp * 0.98;
     const ema50 = last(indicators.ema50) || ltp * 0.95;
     const ema200 = last(indicators.ema200) || ltp * 0.90;
-    const rsi = last(indicators.rsi) !== null ? last(indicators.rsi) : 50;
-    const supertrendDir = indicators.supertrend && last(indicators.supertrend.direction) !== null ? last(indicators.supertrend.direction) : 1;
-    const supertrendLine = indicators.supertrend && last(indicators.supertrend.supertrend) !== null ? last(indicators.supertrend.supertrend) : ltp * 0.94;
+    const rsi = last(indicators.rsi) !== null && last(indicators.rsi) !== undefined ? last(indicators.rsi) : 50;
+    const supertrendDir = indicators.supertrend && last(indicators.supertrend.direction) !== null && last(indicators.supertrend.direction) !== undefined ? last(indicators.supertrend.direction) : 1;
+    const supertrendLine = indicators.supertrend && last(indicators.supertrend.supertrend) !== null && last(indicators.supertrend.supertrend) !== undefined ? last(indicators.supertrend.supertrend) : ltp * 0.94;
 
     const supports = indicators.supportResistance?.supports || [parseFloat((ltp * 0.94).toFixed(2))];
     const resistances = indicators.supportResistance?.resistances || [parseFloat((ltp * 1.08).toFixed(2))];

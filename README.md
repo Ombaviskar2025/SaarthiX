@@ -6,32 +6,47 @@ SaarthiX now features integration with **Groww's Live Stock Data API** for real-
 
 ## ⚙️ Configuration & Environment Setup
 
-To run with live data, create a `.env` file in the root directory (based on `.env.example`) and configure the following variables:
+To run with full multi-user authentication and live market data, create a `.env` file in the root directory (based on `.env.example`):
 
 ```ini
+# MongoDB Atlas connection string
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/saarthix?retryWrites=true&w=majority
+
+# Secret key for JWT auth sessions (min 32 characters)
+JWT_SECRET=your-super-secret-jwt-key-change-in-production-min-32-chars
+
+# Groww Access Token (for live Indian market data)
 GROWW_ACCESS_TOKEN=your_bearer_token_here
+
 PORT=3000
 POLL_INTERVAL_MS=7000
 ```
+
+### 🗄️ Setting Up MongoDB Atlas
+1. Sign up for a free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
+2. Create a free shared M0 cluster.
+3. Under **Database Access**, create a database user with read & write privileges.
+4. Under **Network Access**, add IP address `0.0.0.0/0` (allow access from anywhere) so Vercel serverless functions can connect.
+5. In your cluster view, click **Connect** → **Drivers** (Node.js) and copy the connection string into your `.env` as `MONGODB_URI`.
 
 ### 🗝️ Obtaining the `GROWW_ACCESS_TOKEN`
 1. Log in to your Groww web portal account in Chrome/Firefox.
 2. Open Chrome Developer Tools (`F12`), select the **Network** tab, and filter by Fetch/XHR.
 3. Reload or navigate the Groww dashboard, locate any request to `api.groww.in`.
-4. Under request headers, look for the `Authorization` header.
-5. Copy the JWT token part (everything after `Bearer `) and paste it into `.env` as the `GROWW_ACCESS_TOKEN`.
+4. Under request headers, look for the **Authorization** header.
+5. Copy the JWT token part (everything after `Bearer `) and paste it into `.env` as `GROWW_ACCESS_TOKEN`.
 
 > [!WARNING]  
-> **Daily Token Expiration:** Groww API access tokens expire daily at **6:00 AM IST**. You must extract a new token and update your `.env` file daily. 
+> **Daily Token Expiration:** Groww API access tokens expire daily at **6:00 AM IST**. You must extract a new token and update your `.env` file daily.
 
 ---
 
 ## 🏃 Running the Application
 
-This project runs on a single Express port (Port 3000) which serves both the frontend static site and acts as a secure backend API proxy to bypass CORS issues and keep your `GROWW_ACCESS_TOKEN` secret.
+This project runs on a single Express port (Port 3000) which serves both the frontend static site and acts as a secure backend API proxy with real MongoDB authentication.
 
 ### Steps:
-1. Ensure dependencies are installed (Express, CORS, Dotenv):
+1. Ensure dependencies are installed:
    ```bash
    npm install
    ```
@@ -41,6 +56,16 @@ This project runs on a single Express port (Port 3000) which serves both the fro
    ```
 3. Open your browser and navigate to:
    [http://localhost:3000/login.html](http://localhost:3000/login.html)
+
+---
+
+## 🔐 Authentication & Multi-User Architecture
+
+1. **Database-backed Auth:** Passwords are encrypted using `bcryptjs` (10 salt rounds). Phone numbers and email addresses are uniquely indexed in MongoDB.
+2. **Session Security:** Issues `httpOnly`, `sameSite=lax` JWT session cookies (`sx_auth_token`, 7-day expiration). Passwords and tokens are never exposed to the client or written into localStorage.
+3. **Protected Client Routes:** Private views (`dashboard.html`, `portfolio.html`, `market-watch.html`, `mutual-funds.html`, `stock-doctor.html`, `news.html`, `ai-insights.html`) verify the active session with `/api/auth/me`. If unauthenticated or expired, users are cleanly redirected to `login.html`.
+4. **Per-User Isolated Data:** Portfolio holdings, watchlist selections, and mutual fund models are tied to each user's unique MongoDB `userId`. Users only ever access and modify their own data.
+5. **Vercel Serverless Ready:** Uses a cached Mongoose connection (`global.mongoose`) in `lib/db.js` so serverless functions reuse database connections efficiently without socket leakage.
 
 ---
 

@@ -225,7 +225,7 @@
         <span class="material-symbols-outlined text-[20px]">help</span>
         <span class="text-[9px] font-medium leading-tight">Support &amp; Helpdesk</span>
       </a>
-      <a href="login.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Log Out">
+      <a href="javascript:void(0)" onclick="window.handleLogout(event)" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Log Out">
         <span class="material-symbols-outlined text-[20px]">logout</span>
         <span class="text-[9px] font-medium leading-tight">Log Out</span>
       </a>
@@ -284,7 +284,7 @@
             <a href="support.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-on-surface hover:bg-white/10 transition-colors">
               <span class="material-symbols-outlined text-[16px] text-on-surface-variant">help</span> Help & Support
             </a>
-            <a href="login.html" onclick="logoutSxUser(event)" class="flex items-center gap-2 px-3 py-2 rounded-lg text-error hover:bg-error/10 transition-colors mt-1 border-t border-white/5">
+            <a href="javascript:void(0)" onclick="window.handleLogout(event)" class="flex items-center gap-2 px-3 py-2 rounded-lg text-error hover:bg-error/10 transition-colors mt-1 border-t border-white/5">
               <span class="material-symbols-outlined text-[16px]">logout</span> Log Out
             </a>
           </div>
@@ -1115,15 +1115,16 @@
       return Number(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // Load saved holdings from localStorage if available
-    function loadInitialHoldings() {
-      const saved = localStorage.getItem('saarthix_holdings');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            currentHoldings = parsed.map((h, i) => ({
-              id: h.id || (i + 1),
+    // Load saved holdings from MongoDB per-user API
+    async function loadInitialHoldings() {
+      try {
+        const res = await fetch('/api/user/holdings', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.holdings) && data.holdings.length > 0) {
+            currentHoldings = data.holdings.map((h, i) => ({
+              id: h.id || h._id || (i + 1),
+              _id: h._id || h.id,
               ticker: (h.ticker || 'STOCK').toUpperCase(),
               name: h.name || h.ticker || 'Company',
               sector: h.sector || 'EQUITIES',
@@ -1131,30 +1132,31 @@
               qty: parseFloat(h.qty) || 1,
               price: parseFloat(h.price) || 100,
               ltp: parseFloat(h.ltp) || parseFloat(h.price) || 100,
-              changePct: parseFloat(h.changePct) || 1.2
+              changePct: parseFloat(h.changePct) || 0
             }));
-            if (!currentHoldings.some(h => h.ticker === 'INOXWIND')) {
-              currentHoldings.unshift({
-                id: 99,
-                ticker: 'INOXWIND',
-                name: 'Inox Wind Limited',
-                sector: 'CLEAN ENERGY',
-                exchange: 'NSE',
-                qty: 10,
-                price: 50.00,
-                ltp: 66.65,
-                changePct: 2.22
-              });
-            }
+            renderHoldingsDeck();
+            recalcOverviewMetrics();
+            return;
           }
-        } catch (e) {
-          console.warn('Error reading saved holdings:', e);
         }
+      } catch (e) {
+        console.warn('Failed to fetch user holdings from MongoDB:', e);
       }
+      renderHoldingsDeck();
+      recalcOverviewMetrics();
     }
 
-    function saveHoldings() {
-      localStorage.setItem('saarthix_holdings', JSON.stringify(currentHoldings));
+    async function saveHoldings() {
+      try {
+        await fetch('/api/user/holdings/sync', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ holdings: currentHoldings })
+        });
+      } catch (e) {
+        console.warn('Failed to sync holdings to MongoDB:', e);
+      }
     }
 
     // ── Render Holdings Deck ──────────────────────────────────────
@@ -2140,8 +2142,11 @@
       if (typeof PositionAdvisor !== 'undefined' && PositionAdvisor.calculateAveraging) {
         const sim = PositionAdvisor.calculateAveraging(holding.qty, holding.price, ltp, extraQty);
         tagEl.textContent = `New Avg ₹${sim.newAvgPrice.toFixed(2)}`;
+        const delta = sim.priceDiff ?? 0;
+        const deltaPct = sim.priceDiffPct ?? 0;
+        const capital = sim.additionalCapitalNeeded ?? (extraQty * ltp);
         resultEl.innerHTML = `
-          New Total: <strong>${sim.newQty} shares</strong> · Capital: <strong>₹${fmtPrice(sim.requiredCapital)}</strong> · Delta: <span class="${sim.avgDelta >= 0 ? 'text-secondary' : 'text-error'} font-bold">${sim.avgDelta >= 0 ? '+' : ''}₹${sim.avgDelta.toFixed(2)} (${sim.avgDeltaPct >= 0 ? '+' : ''}${sim.avgDeltaPct.toFixed(1)}%)</span>
+          New Total: <strong>${sim.newQty} shares</strong> · Capital: <strong>₹${fmtPrice(capital)}</strong> · Delta: <span class="${delta <= 0 ? 'text-secondary' : 'text-error'} font-bold">${delta >= 0 ? '+' : ''}₹${delta.toFixed(2)} (${deltaPct >= 0 ? '+' : ''}${deltaPct.toFixed(1)}%)</span>
         `;
       }
     }
@@ -2182,7 +2187,8 @@
         let data = studioState.cache[cacheKey];
 
         if (!data) {
-          const res = await fetch(`/api/history?symbol=${encodeURIComponent(ticker)}&exchange=${encodeURIComponent(holding.exchange || 'NSE')}&interval=${studioState.interval}&range=2y`);
+          const ltpParam = holding.ltp || holding.price || 0;
+          const res = await fetch(`/api/history?symbol=${encodeURIComponent(ticker)}&exchange=${encodeURIComponent(holding.exchange || 'NSE')}&interval=${studioState.interval}&range=2y&ltp=${encodeURIComponent(ltpParam)}`);
           if (!res.ok) {
             throw new Error(`Data feed HTTP ${res.status}`);
           }
@@ -2200,7 +2206,8 @@
         // Compute quant package
         const technicalData = IndicatorEngine.computeAllIndicators(candles);
         const signalReport = SignalEngine.evaluateSignal(candles, technicalData);
-        const positionAdvice = PositionAdvisor.computePositionAdvice(holding, candles, technicalData.indicators, signalReport);
+        // Correct signature: computePositionAdvice(holding, signalReport, technicalData)
+        const positionAdvice = PositionAdvisor.computePositionAdvice(holding, signalReport, technicalData);
         const backtestResult = BacktestEngine.runStrategyBacktest(candles, technicalData.indicators);
 
         studioState.indicators = technicalData.indicators;
@@ -2229,6 +2236,13 @@
     }
 
     function renderStudioUI(holding, candles, technicalData, signal, advice, backtest) {
+      const loadingEl = document.getElementById('studio-loading');
+      const errorEl = document.getElementById('studio-error');
+      const contentEl = document.getElementById('studio-content');
+      if (loadingEl) loadingEl.classList.add('hidden');
+      if (errorEl) errorEl.classList.add('hidden');
+      if (contentEl) contentEl.classList.remove('hidden');
+
       // 1. Render lightweight chart & sub-panes & gauge
       if (typeof SignalStudioChart !== 'undefined') {
         SignalStudioChart.renderSignalStudio('studio-main-chart', {

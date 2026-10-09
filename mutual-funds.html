@@ -175,7 +175,7 @@
         <span class="material-symbols-outlined text-[20px]">help</span>
         <span class="text-[9px] font-medium leading-tight">Support &amp; Helpdesk</span>
       </a>
-      <a href="login.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Log Out">
+      <a href="login.html" onclick="window.handleLogout(event)" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Log Out">
         <span class="material-symbols-outlined text-[20px]">logout</span>
         <span class="text-[9px] font-medium leading-tight">Log Out</span>
       </a>
@@ -236,7 +236,7 @@
               <a href="support.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-on-surface hover:bg-white/10 transition-colors">
                 <span class="material-symbols-outlined text-[16px] text-on-surface-variant">help</span> Help & Support
               </a>
-              <a href="login.html" onclick="logoutSxUser(event)" class="flex items-center gap-2 px-3 py-2 rounded-lg text-error hover:bg-error/10 transition-colors mt-1 border-t border-white/5">
+              <a href="login.html" onclick="window.handleLogout(event)" class="flex items-center gap-2 px-3 py-2 rounded-lg text-error hover:bg-error/10 transition-colors mt-1 border-t border-white/5">
                 <span class="material-symbols-outlined text-[16px]">logout</span> Log Out
               </a>
             </div>
@@ -833,8 +833,8 @@
         setSafeText('user-risk-profile-label', userRiskProfile);
       }
 
-      const saved = localStorage.getItem('saarthix_mf_holdings');
       let initialList = DEFAULT_MF_HOLDINGS;
+      const saved = localStorage.getItem('saarthix_mf_holdings');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -843,12 +843,37 @@
           console.warn('Corrupt saved MF holdings:', e);
         }
       }
+
+      // Fetch from API if logged in
+      fetch('/api/user/mutual-funds', { credentials: 'include' })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data && data.success) {
+            if (Array.isArray(data.holdings) && data.holdings.length > 0) {
+              initialList = data.holdings;
+              localStorage.setItem('saarthix_mf_holdings', JSON.stringify(initialList));
+            }
+            if (data.riskProfile) {
+              userRiskProfile = data.riskProfile;
+              localStorage.setItem('saarthix_user_risk_profile', userRiskProfile);
+              setSafeText('user-risk-profile-label', userRiskProfile);
+            }
+          }
+          renderInputList(initialList);
+        })
+        .catch(err => {
+          console.warn('Could not load MF data from API:', err);
+          renderInputList(initialList);
+        });
+    });
+
+    function renderInputList(list) {
       const container = document.getElementById('mf-inputs-container');
       if (container) {
         container.innerHTML = '';
-        initialList.forEach(h => addMfRow(h));
+        list.forEach(h => addMfRow(h));
       }
-    });
+    }
 
     function updateClock() {
       const now = new Date();
@@ -1062,6 +1087,14 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
       try {
         localStorage.setItem('saarthix_mf_holdings', JSON.stringify(holdings));
       } catch (e) {}
+
+      // Sync holdings to backend
+      fetch('/api/user/mutual-funds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ holdings, riskProfile: userRiskProfile })
+      }).catch(e => console.warn('Sync holdings to server failed:', e));
 
       const overlay = document.getElementById('loading-overlay');
       if (overlay) overlay.style.display = 'flex';
@@ -1492,6 +1525,14 @@ ICICI Prudential Corporate Bond,ICICI Prudential,Debt,1000,10,28.4,Lumpsum,2024-
       try {
         localStorage.setItem('saarthix_user_risk_profile', userRiskProfile);
       } catch (err) {}
+
+      // Sync risk profile to backend
+      fetch('/api/user/mutual-funds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ riskProfile: userRiskProfile })
+      }).catch(e => console.warn('Sync risk profile failed:', e));
 
       setSafeText('user-risk-profile-label', userRiskProfile);
       closeRiskQuizModal();

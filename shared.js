@@ -612,7 +612,7 @@ function renderCanonicalSidebar(activePageId) {
         <span class="material-symbols-outlined text-[20px]">help</span>
         <span class="text-[9px] font-medium leading-tight">Support &amp; Helpdesk</span>
       </a>
-      <a href="login.html" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Log Out">
+      <a href="javascript:void(0)" onclick="window.handleLogout(event)" class="sx-bottom-link flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[#7a88a8] hover:text-white hover:bg-white/5 transition-colors w-[66px] text-center" title="Log Out">
         <span class="material-symbols-outlined text-[20px]">logout</span>
         <span class="text-[9px] font-medium leading-tight">Log Out</span>
       </a>
@@ -1167,4 +1167,112 @@ window.getTopGainers = getTopGainers;
 window.getTopLosers = getTopLosers;
 window.getSectorSummary = getSectorSummary;
 window.isMarketOpen = isMarketOpen;
+
+// ── 9. Centralized Authentication Guard & User Session ────────
+let currentUser = null;
+
+async function checkAuth(options = { redirectOnFail: true }) {
+  try {
+    const res = await fetch('/api/auth/me', {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!res.ok || res.status === 401) {
+      if (options.redirectOnFail) {
+        window.location.href = 'login.html';
+      }
+      return null;
+    }
+
+    const data = await res.json();
+    if (data.status === 'SUCCESS' && data.user) {
+      currentUser = data.user;
+      window.currentUser = currentUser;
+      updateUserUI(currentUser);
+      return currentUser;
+    } else {
+      if (options.redirectOnFail) {
+        window.location.href = 'login.html';
+      }
+      return null;
+    }
+  } catch (err) {
+    console.warn('[Auth Guard] Session check failed:', err.message);
+    if (options.redirectOnFail) {
+      window.location.href = 'login.html';
+    }
+    return null;
+  }
+}
+
+async function handleLogout(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  try {
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+  } catch (err) {
+    console.warn('Logout network notice:', err.message);
+  }
+  try {
+    localStorage.removeItem('sx_logged_in_phone');
+    localStorage.removeItem('sx_user_name');
+    localStorage.removeItem('sx_user_email');
+    localStorage.removeItem('sx_phone_key');
+    localStorage.removeItem('sx_pwd_hash');
+  } catch (e) {}
+  window.location.href = 'login.html';
+}
+
+function updateUserUI(user) {
+  if (!user) return;
+  const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
+  const firstName = user.firstName || fullName.split(' ')[0] || 'User';
+  const email = user.email || '';
+  const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=4d8eff&color=fff&bold=true`;
+
+  document.querySelectorAll('#user-avatar-img, .sx-user-avatar-img').forEach(el => {
+    el.src = avatarUrl;
+    el.alt = fullName;
+  });
+
+  document.querySelectorAll('#user-avatar-name, .sx-user-avatar-name').forEach(el => {
+    el.textContent = firstName;
+  });
+
+  document.querySelectorAll('#dash-menu-username, .sx-menu-username').forEach(el => {
+    el.textContent = fullName;
+  });
+
+  document.querySelectorAll('#dash-menu-email, .sx-menu-email').forEach(el => {
+    el.textContent = email;
+  });
+}
+
+window.checkAuth = checkAuth;
+window.handleLogout = handleLogout;
+window.logoutSxUser = handleLogout;
+window.updateUserUI = updateUserUI;
+
+// Auto-run auth check on page load for protected pages
+(function initGlobalAuthGuard() {
+  if (typeof window === 'undefined') return;
+  const path = (window.location.pathname || '').toLowerCase();
+  const isLoginPage = path.endsWith('login.html') || path === '/' || path.endsWith('/login');
+  const isSupportPage = path.endsWith('support.html');
+
+  if (isLoginPage) return;
+
+  const redirectOnFail = !isSupportPage;
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuth({ redirectOnFail });
+    });
+  } else {
+    checkAuth({ redirectOnFail });
+  }
+})();
 
